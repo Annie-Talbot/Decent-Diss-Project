@@ -58,10 +58,12 @@ function SideBarItem({icon, label, color, state}, app) {
             },
             })}
             onClick={() => {
-                app.setState(prevState => (
-                    {...prevState, 
-                    currPage: state,
-                }))
+                if (app.state.loggedIn != false) {
+                    app.setState(prevState => (
+                        {...prevState, 
+                        currPage: state,
+                    }))
+                }
             }}
         >
             <Group>

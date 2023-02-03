@@ -2,6 +2,7 @@ import React from 'react';
 import { LoadingOverlay, SimpleGrid} from '@mantine/core';
 import Post from '../Post';
 import fetchPosts from '../../SOLID/PostFetcher';
+import { POSTS_DIR } from '../../SOLID/Utils';
 
 /**
  * The Home page of the application. This displays the logged 
@@ -10,6 +11,7 @@ import fetchPosts from '../../SOLID/PostFetcher';
 class Home extends React.Component {
     constructor(props) {
         super(props);
+
         this.app = props.app;
 
         this.state = {
@@ -19,7 +21,7 @@ class Home extends React.Component {
     }
 
     async componentDidMount() {
-        let postList = await fetchPosts("http://localhost:3000/testpod1/social/posts/");
+        let postList = await fetchPosts(this.app.podRootDir + POSTS_DIR);
 
         this.setState(prevState => (
             {...prevState, 

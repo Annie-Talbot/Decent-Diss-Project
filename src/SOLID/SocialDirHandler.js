@@ -1,6 +1,7 @@
 import { fetch } from '@inrupt/solid-client-authn-browser'
-import { buildThing, getThing, createSolidDataset, createThing, FetchError, getSolidDataset, saveSolidDatasetAt, setThing, getSolidDatasetWithAcl } from '@inrupt/solid-client';
+import { buildThing, getThing, createSolidDataset, createThing, FetchError, getSolidDataset, saveSolidDatasetAt, setThing, getSolidDatasetWithAcl, deleteSolidDataset } from '@inrupt/solid-client';
 import { FOAF, SCHEMA_INRUPT } from '@inrupt/vocab-common-rdf';
+import { POSTS_DIR, PROFILE_THING, SOCIAL_DATASET, SOCIAL_ROOT } from './Utils';
 
 /**
  * A function to check if there is a Dataset at the given URL.
@@ -37,12 +38,16 @@ async function datasetExists(datasetUrl) {
  */
 async function thingExists(dataset, thingUrl) {
     try {
-        await getThing(
+        const thing = await getThing(
             dataset,
             thingUrl, 
             { fetch: fetch }
         )
-        return true;
+        if (thing) {
+            return true
+         } else {
+            return false;
+         } 
     } catch (error) {
         if (error instanceof FetchError) {
             if (error.statusCode == 404) {
@@ -99,38 +104,53 @@ async function createSampleProfile(socialDataset, datasetUrl) {
 
 /**
  * A function to be called when a user is logging into a social application.
- * It sets up a working directory to sotre all social media related data, 
- * a posts directory to store post data, a central social dataset and a 
- * profile Thing. If any of these already exists, it does not replace them.
+ * It checks whether the social directory is set up correctly and returns an
+ * error if not.
+ * @param {string} podRootUrl The URL of the root directory in the pod 
+ *              e.g. http://pod-provider.com/mypodname/
+ * @returns [bool, string] [valid, error] valid is True if the directory is set up correctly
+ *                                        error explains the issue with the directory 
+ *                                        in the case that valid is false
+ */
+export async function validateSocialDir(podRootUrl) {
+    // check if social directory exists
+    if (!await datasetExists(podRootUrl + SOCIAL_ROOT)) {
+        return [false, "No " + SOCIAL_ROOT + " directory found."]
+    }
+    // check if the posts directory exists
+    if (! await datasetExists(podRootUrl + POSTS_DIR)) {
+        return [false, "No " + POSTS_DIR + " directory found."]
+    }
+    // check if the social dataset exists
+    if (! await datasetExists(podRootUrl + SOCIAL_DATASET)) {
+        return [false, "No " + SOCIAL_DATASET + " dataset found."]
+    }
+    // check if the profile Thing exists
+    let socialDatset = await getSolidDataset(podRootUrl + SOCIAL_DATASET, 
+                                                { fetch: fetch });
+    if (! await thingExists(socialDatset, podRootUrl + PROFILE_THING)) {
+        return [false, "No profile found at " + PROFILE_THING + "."]
+    }
+
+    return [true, null];
+}
+
+
+/**
+ * Creates a valid social directory with all the required element 
+ * in a user's pod.
  * @param {string} podRootUrl The URL of the root directory in the pod 
  *              e.g. http://pod-provider.com/mypodname/
  */
-export default async function findOrCreateSocialSpace(podRootUrl) {
-    if (! await datasetExists(podRootUrl + "social/")) {
-        console.log("No social directory found, creating social directory.")
-        // Social directory does not exist, create it and all subdirectories
-        await createEmptyDataset(podRootUrl + "social/");
-        await createEmptyDataset(podRootUrl + "social/posts/");
-        let socialDataset = await createEmptyDataset(podRootUrl + "social/social");
-        await createSampleProfile(socialDataset, podRootUrl + "social/social");
-        return;
+export async function createSocialDirectory(podRootUrl) {
+    if (await datasetExists(podRootUrl + "social/")) {
+        await deleteSolidDataset(
+            podRootUrl + "social/",
+            { fetch: fetch }
+        );
     }
-    // social directory exists
-    
-    if (! await datasetExists(podRootUrl + "social/posts/")) {
-        await createEmptyDataset(podRootUrl + "social/posts/");
-    }
-    if (! await datasetExists(podRootUrl + "social/social")) {
-        await createEmptyDataset(podRootUrl + "social/social");
-    }
-    
-    let socialDatset = await getSolidDataset(podRootUrl + "social/social", 
-                                                { fetch: fetch });
-    if (! await thingExists(socialDatset, podRootUrl + "social/social#profile")) {
-        await createSampleProfile(socialDatset, podRootUrl + "social/social");
-    }
-    if (! await thingExists(socialDatset, podRootUrl + "social/social#links")) {
-        await createSampleProfile(socialDatset, podRootUrl + "social/social");
-    }
-    return;
+    await createEmptyDataset(podRootUrl + "social/");
+    await createEmptyDataset(podRootUrl + "social/posts/");
+    let socialDataset = await createEmptyDataset(podRootUrl + "social/social");
+    await createSampleProfile(socialDataset, podRootUrl + "social/social");
 }
