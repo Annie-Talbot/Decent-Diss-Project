@@ -1,6 +1,7 @@
 import { fetch } from '@inrupt/solid-client-authn-browser'
-import { buildThing, getThing, createSolidDataset, createThing, FetchError, getSolidDataset, saveSolidDatasetAt, setThing, getSolidDatasetWithAcl } from '@inrupt/solid-client';
+import { buildThing, getThing, createSolidDataset, createThing, FetchError, getSolidDataset, saveSolidDatasetAt, setThing, getSolidDatasetWithAcl, deleteSolidDataset } from '@inrupt/solid-client';
 import { FOAF, SCHEMA_INRUPT } from '@inrupt/vocab-common-rdf';
+import { POSTS_DIR, PROFILE_THING, SOCIAL_DATASET, SOCIAL_ROOT } from './Utils';
 
 /**
  * A function to check if there is a Dataset at the given URL.
@@ -37,12 +38,16 @@ async function datasetExists(datasetUrl) {
  */
 async function thingExists(dataset, thingUrl) {
     try {
-        await getThing(
+        const thing = await getThing(
             dataset,
             thingUrl, 
             { fetch: fetch }
         )
-        return true;
+        if (thing) {
+            return true
+         } else {
+            return false;
+         } 
     } catch (error) {
         if (error instanceof FetchError) {
             if (error.statusCode == 404) {
@@ -133,4 +138,43 @@ export default async function findOrCreateSocialSpace(podRootUrl) {
         await createSampleProfile(socialDatset, podRootUrl + "social/social");
     }
     return;
+}
+
+
+export async function validateSocialDir(podRootUrl) {
+    // check if social directory exists
+    if (!await datasetExists(podRootUrl + SOCIAL_ROOT)) {
+        return [false, "No " + SOCIAL_ROOT + " directory found."]
+    }
+    // check if the posts directory exists
+    if (! await datasetExists(podRootUrl + POSTS_DIR)) {
+        return [false, "No " + POSTS_DIR + " directory found."]
+    }
+    // check if the social dataset exists
+    if (! await datasetExists(podRootUrl + SOCIAL_DATASET)) {
+        return [false, "No " + SOCIAL_DATASET + " dataset found."]
+    }
+    // check if the profile Thing exists
+    let socialDatset = await getSolidDataset(podRootUrl + SOCIAL_DATASET, 
+                                                { fetch: fetch });
+    if (! await thingExists(socialDatset, podRootUrl + PROFILE_THING)) {
+        return [false, "No profile found at " + PROFILE_THING + "."]
+    }
+
+    return [true, null];
+}
+
+
+
+export async function createSocialDirectory(podRootUrl) {
+    if (await datasetExists(podRootUrl + "social/")) {
+        await deleteSolidDataset(
+            podRootUrl + "social/",
+            { fetch: fetch }
+        );
+    }
+    await createEmptyDataset(podRootUrl + "social/");
+    await createEmptyDataset(podRootUrl + "social/posts/");
+    let socialDataset = await createEmptyDataset(podRootUrl + "social/social");
+    await createSampleProfile(socialDataset, podRootUrl + "social/social");
 }
