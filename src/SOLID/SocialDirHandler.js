@@ -104,43 +104,14 @@ async function createSampleProfile(socialDataset, datasetUrl) {
 
 /**
  * A function to be called when a user is logging into a social application.
- * It sets up a working directory to sotre all social media related data, 
- * a posts directory to store post data, a central social dataset and a 
- * profile Thing. If any of these already exists, it does not replace them.
+ * It checks whether the social directory is set up correctly and returns an
+ * error if not.
  * @param {string} podRootUrl The URL of the root directory in the pod 
  *              e.g. http://pod-provider.com/mypodname/
+ * @returns [bool, string] [valid, error] valid is True if the directory is set up correctly
+ *                                        error explains the issue with the directory 
+ *                                        in the case that valid is false
  */
-export default async function findOrCreateSocialSpace(podRootUrl) {
-    if (! await datasetExists(podRootUrl + "social/")) {
-        console.log("No social directory found, creating social directory.")
-        // Social directory does not exist, create it and all subdirectories
-        await createEmptyDataset(podRootUrl + "social/");
-        await createEmptyDataset(podRootUrl + "social/posts/");
-        let socialDataset = await createEmptyDataset(podRootUrl + "social/social");
-        await createSampleProfile(socialDataset, podRootUrl + "social/social");
-        return;
-    }
-    // social directory exists
-    
-    if (! await datasetExists(podRootUrl + "social/posts/")) {
-        await createEmptyDataset(podRootUrl + "social/posts/");
-    }
-    if (! await datasetExists(podRootUrl + "social/social")) {
-        await createEmptyDataset(podRootUrl + "social/social");
-    }
-    
-    let socialDatset = await getSolidDataset(podRootUrl + "social/social", 
-                                                { fetch: fetch });
-    if (! await thingExists(socialDatset, podRootUrl + "social/social#profile")) {
-        await createSampleProfile(socialDatset, podRootUrl + "social/social");
-    }
-    if (! await thingExists(socialDatset, podRootUrl + "social/social#links")) {
-        await createSampleProfile(socialDatset, podRootUrl + "social/social");
-    }
-    return;
-}
-
-
 export async function validateSocialDir(podRootUrl) {
     // check if social directory exists
     if (!await datasetExists(podRootUrl + SOCIAL_ROOT)) {
@@ -165,7 +136,12 @@ export async function validateSocialDir(podRootUrl) {
 }
 
 
-
+/**
+ * Creates a valid social directory with all the required element 
+ * in a user's pod.
+ * @param {string} podRootUrl The URL of the root directory in the pod 
+ *              e.g. http://pod-provider.com/mypodname/
+ */
 export async function createSocialDirectory(podRootUrl) {
     if (await datasetExists(podRootUrl + "social/")) {
         await deleteSolidDataset(
