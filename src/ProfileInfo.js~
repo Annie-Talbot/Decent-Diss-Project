@@ -1,0 +1,56 @@
+import React from 'react';
+import './App.css';
+import {
+	  getSolidDataset,
+	  getThing,
+	  setThing,
+	  getStringNoLocale,
+	  setStringNoLocale,
+	  saveSolidDatasetAt
+} from "@inrupt/solid-client";
+
+class ProfileInfoBtn extends React.Component {
+
+	constructor(props) {
+		super(props);
+		this.state = {
+			name: "Button not pressed"
+		};
+		this.getProfileInfo = this.getProfileInfo.bind(this);
+	}
+
+	
+	async getProfileInfo() {
+		const error = document.getElementById("error").value;
+
+		const web_id = "http://localhost:3000/testpod1/profile/card#me"
+		const profile_document_url = new URL(web_id)
+		profile_document_url.hash = ""
+	
+		let dataset;
+		try {
+			dataset = await getSolidDataset(profile_document_url.href);
+		} catch(error) {
+			error =  `Entered value [${web_id}] does not appear to be a WebID. Error: [${error}]`;
+			return;
+		}
+	
+		const profile = getThing(dataset, web_id);
+		console.log(profile)
+
+		//name = getStringNoLocale(profile, "http://www.w3.org/2006/vcard/ns#fn");
+		this.setState({name: "Poopy pants"});
+	}
+
+	render() {
+	  return (
+		<div>
+		<button onClick={this.getProfileInfo} > I am a profile button </button>
+		<p>{this.state.name}</p>
+  		<p id="error">bah</p>
+  		</div>
+	  );
+  }
+}
+
+export default ProfileInfoBtn;
