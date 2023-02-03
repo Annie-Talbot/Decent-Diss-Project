@@ -6,6 +6,7 @@ import { FOAF, SCHEMA_INRUPT } from '@inrupt/vocab-common-rdf';
  * A function to check if there is a Dataset at the given URL.
  * @param {string} datasetUrl 
  * @returns True if the dataset exists
+ * 
  */
 async function datasetExists(datasetUrl) {
     try {
