@@ -1,7 +1,7 @@
 import React from 'react';
 import { LoadingOverlay, SimpleGrid} from '@mantine/core';
 import Post from '../Post';
-import fetchPosts from '../../SOLID/PostFetcher';
+import { deletePost, fetchPosts } from '../../SOLID/PostHandler';
 import { POSTS_DIR } from '../../SOLID/Utils';
 
 /**
@@ -20,20 +20,23 @@ class Home extends React.Component {
         }
     }
 
-    async componentDidMount() {
-        let postList = await fetchPosts(this.app.podRootDir + POSTS_DIR);
+    async updatePosts() {
+        const postList = await fetchPosts(this.app.podRootDir + POSTS_DIR);
 
         this.setState(prevState => (
             {...prevState, 
             loading: false,
             postList: postList,
-        }))
+        }));
+    }
 
+    async componentDidMount() {
+        this.updatePosts();
     }
 
     render() {
         const postComponents = this.state.postList.map((post) => {
-            return (<Post post={post} />
+            return (<Post post={post} parent={this} />
             )});
         return (
             <div>

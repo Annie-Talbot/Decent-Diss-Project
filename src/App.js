@@ -19,7 +19,7 @@ import { getPodUrlAll } from "@inrupt/solid-client";
  */
 class App extends React.Component {
     constructor(props) {
-        super(props)
+        super(props);
         this.podRootDir = '';
         this.socialDirError = '';
         this.state = {
