@@ -51,7 +51,7 @@ class ProfilePage extends React.Component {
 
     async componentDidMount() {
         // TODO: get profile info here
-        const profile = await getProfile("http://localhost:3000/testpod1/social/social");
+        const profile = await getProfile(this.app.podRootDir);
         console.log(profile);
         this.setState(prevState => (
             {...prevState, 

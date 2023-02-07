@@ -2,6 +2,7 @@ import { getDatetime, getFile, getSolidDataset,
     getStringNoLocale, getThing, getUrl } from "@inrupt/solid-client";
 import { fetch } from '@inrupt/solid-client-authn-browser'
 import { FOAF, SCHEMA_INRUPT } from "@inrupt/vocab-common-rdf";
+import { PROFILE_THING, SOCIAL_DATASET } from "./Utils";
 
 
 async function addName(profileThing, profile) {
@@ -72,17 +73,17 @@ async function addProfilePic(profileThing, profile) {
     }
 }
 
-export default async function getProfile(profileDatasetUrl) {
-    profileDatasetUrl = "http://localhost:3000/testpod1/social/social"
-
+export default async function getProfile(podRootUrl) {
+    console.log(podRootUrl);
+    
     const profileDataset = await getSolidDataset(
-        profileDatasetUrl, 
+        podRootUrl + SOCIAL_DATASET, 
         { fetch: fetch }
     );
 
     const profileThing = await getThing(
         profileDataset, 
-        profileDatasetUrl + "#profile", 
+        podRootUrl + PROFILE_THING, 
         { fetch: fetch }
     );
 

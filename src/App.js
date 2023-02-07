@@ -11,6 +11,7 @@ import { AppTheme } from './Constants/AppTheme';
 import ProfilePage from './Components/Pages/Profile';
 import { validateSocialDir } from './SOLID/SocialDirHandler';
 import { SocialDirErrorPopup } from './Components/SocialDirErrorPopup';
+import { getPodUrlAll } from "@inrupt/solid-client";
 
 /**
  * App Component represents the entire app, it uses it's 
@@ -38,9 +39,12 @@ class App extends React.Component {
             if (getDefaultSession().info.isLoggedIn) {
                 // User has just logged in
                 // Attempt to find root social directory
+                console.log(getDefaultSession().info);
                 const webId = getDefaultSession().info.webId;
-                this.podRootDir = webId.match('(.*)profile/card#me')[1];
+                const rootList = await getPodUrlAll(webId, {fetch: fetch});
+                this.podRootDir = rootList[0];
                 
+                console.log(this.podRootDir);
                 const [valid, error] = await validateSocialDir(this.podRootDir);
                 let nextState = AppStates.Profile
                 if (!valid) {
