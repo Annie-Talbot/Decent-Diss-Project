@@ -2,6 +2,7 @@ import { Card, Text, Image, Badge, Menu, ActionIcon, Stack, Grid } from '@mantin
 import { IconTrash, IconEdit, IconDotsVertical } from '@tabler/icons';
 import { Component } from 'react';
 import { deletePost } from '../SOLID/PostHandler';
+import { createErrorNotification } from './ErrorNotification';
 
 export default class Post extends Component {
     constructor(props) {
@@ -11,7 +12,12 @@ export default class Post extends Component {
     } 
 
     async handleDeletePost(postDir) {
-        await deletePost(postDir);
+        const [success, error] = await deletePost(postDir);
+        if (!success) {
+            console.log(error)
+            createErrorNotification(error);
+            return;
+        }
         this.postContainer.updatePosts();
     }
 

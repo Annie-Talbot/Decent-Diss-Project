@@ -1,7 +1,7 @@
 import { getDatetime, getFile, getSolidDataset, getStringNoLocale, getThing, getUrl } from "@inrupt/solid-client";
 import { fetch } from '@inrupt/solid-client-authn-browser'
 import { FOAF, LDP, SCHEMA_INRUPT, VCARD } from "@inrupt/vocab-common-rdf";
-import { GetPostDatasetUrl, POST_DETAILS, getChildUrlsList, deleteDirectory } from "./Utils";
+import { GetPostDatasetUrl, POST_DETAILS, getChildUrlsList, deleteDirectory, simplifyError } from "./Utils";
 
 
 
@@ -15,10 +15,18 @@ import { GetPostDatasetUrl, POST_DETAILS, getChildUrlsList, deleteDirectory } fr
  */
 async function getPost(postDir, postName) {
     const postDatasetUrl = GetPostDatasetUrl(postDir, postName)
-    const postDataset = await getSolidDataset(
-        postDatasetUrl, 
-        { fetch: fetch }  // fetch function from authenticated session
-    );
+    let postDataset;
+    try {
+        postDataset = await getSolidDataset(
+            postDatasetUrl, 
+            { fetch: fetch }  // fetch function from authenticated session
+        );
+    } catch (error) {
+        return [null, simplifyError(error, "Encountered whilst fetching " +
+                                            "post data for " + postDatasetUrl)];
+    }
+    //TODO: Wrap all of these into functions so that a 404 error does not make post not found.
+
     // Post information is found in the #details Thing at the dataset:
     // details Thing URL: https://provider/podname/social/posts/postname/postname#details
     const postThing = getThing(postDataset, postDatasetUrl + POST_DETAILS, { fetch: fetch });
@@ -38,7 +46,7 @@ async function getPost(postDir, postName) {
         dir: postDir,
         name: postName,
     };
-    return post;
+    return [post, null];
 
 }
 
@@ -52,8 +60,14 @@ async function getPost(postDir, postName) {
  * a seperate post's information.
  */
 export async function fetchPosts(postContainerUrl) {
+    console.log("Fetching posts from " + postContainerUrl);
     let postList = [];
-    const postUrlList = await getChildUrlsList(postContainerUrl);
+    let postUrlList = [];
+    let error;
+    [postUrlList, error] = await getChildUrlsList(postContainerUrl);
+    if (error) {
+        return [[], [error]];
+    }
 
     // regex must be used to extract the name of a post's directory
     // so it can be used to find the solid dataset representing the
@@ -62,11 +76,18 @@ export async function fetchPosts(postContainerUrl) {
     // post dataset URL: https://provider/podname/social/posts/postname/postname
 
     const postRegex = new RegExp(postContainerUrl + '(.*)/');
+    let post;
+    let errorList = [];
     for (const i in postUrlList) {
         const postName = postUrlList[i].match(postRegex)[1];
-        postList.push(await getPost(postUrlList[i], postName));
+        [post, error] = await getPost(postUrlList[i], postName);
+        if (error) {
+            errorList.push(error);
+            continue;
+        }
+        postList.push(post);
     }
-    return postList;
+    return [postList, errorList];
 }
 
 /**
@@ -77,8 +98,5 @@ export async function fetchPosts(postContainerUrl) {
  * @param {string} postDir URL of the post's directory
  */
 export async function deletePost(postDir) {
-    const error = await deleteDirectory(postDir);
-    if (error) {
-        console.log(error);
-    }
+    return await deleteDirectory(postDir);
 }

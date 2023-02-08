@@ -1,5 +1,5 @@
-import { FetchError, deleteSolidDataset, getContainedResourceUrlAll, getSolidDataset, isContainer } from "@inrupt/solid-client";
-
+import { FetchError, deleteFile, deleteSolidDataset, getContainedResourceUrlAll, getSolidDataset, isContainer } from "@inrupt/solid-client";
+import { fetch } from "@inrupt/solid-client-authn-browser";
 
 export const SOCIAL_ROOT = "social/";
 export const POSTS_DIR = "social/posts/";
@@ -11,6 +11,22 @@ export function GetPostDatasetUrl(postDir, postName) {return postDir + postName;
 export const POST_DETAILS = "#details";
 
 
+export function simplifyError(error, context) {
+    if (error instanceof FetchError) {
+        return {
+            code: error.statusCode, 
+            title: error.statusText, 
+            description: context
+        }
+    } else {
+        return {
+            code: -1, 
+            title: "Unknown error: " + error, 
+            description: context,
+        }
+    }
+}
+
 /**
  * Function to find all the sub containers in a container directory.
  * 
@@ -18,79 +34,108 @@ export const POST_DETAILS = "#details";
  * @returns {[string]} A list of string URLs
  */
 export async function getChildUrlsList(containerUrl) {
-    // get all contains in the post folder
-    const childUrls = getContainedResourceUrlAll(
-        await getSolidDataset(
-            containerUrl, 
-            { fetch: fetch }  
-        ), 
-        { fetch: fetch } // fetch function specifies this authenticated session
-    ); 
-    return childUrls;
+    try {
+        const childUrls = await getContainedResourceUrlAll(
+            await getSolidDataset(
+                containerUrl, 
+                { fetch: fetch }  
+            ), 
+            { fetch: fetch } // fetch function specifies this authenticated session
+        ); 
+        return [childUrls, null];
+    } catch(error) {
+        error = simplifyError(error, "Encountered whilst attemping to " + 
+                            "fetch the child URLs of directory" + containerUrl)
+        return [[], error]
+    }
 }
 
-export async function deleteFile(url) {
+async function deleteRawFile(url) {
     try {
         await deleteFile(
           url, 
           { fetch: fetch }
         );
-        return null;
-    } catch (error) {
-        return error;
+        return [true, null];
+    } catch(error) {
+        return [false, simplifyError(
+            error, 
+            "Encountered whilst attempting to delete the file at " + url)
+        ]
     }
 }
 
-export async function deleteDataset(url) {
+async function deleteDataset(url) {
     try {
         await deleteSolidDataset(
           url, 
           { fetch: fetch }
         );
-        return null;
+        return [true, null];
     } catch (error) {
-        return error;
+        return [false, simplifyError(error, 
+            "Encountered whilst attempting to delete the dataset at " + url)
+        ]
     }
 }
 
 export async function deleteDirectory(dirUrl) {
+    let success;
     let isFile = false;
     let isCtnr = false;
-    let childUrls = await getChildUrlsList(dirUrl);
+    let [childUrls, error] = await getChildUrlsList(dirUrl);
+    if (error) {
+        return [false, error];
+    }
+    console.log(childUrls);
     for (let i = 0; i < childUrls.length; i++) {
         try {
-            let res = getSolidDataset(
+            let res = await getSolidDataset(
                 childUrls[i], 
                 {fetch: fetch}
             );
             isCtnr = isContainer(res);
         } catch (error) {
-            if (error instanceof FetchError) {
-                if (error.statusCode == 406) {
-                    isFile = true;
-                }
+            error = simplifyError(error, "Encountered whilst attempting to fetch the " +
+                                        "dataset at " + childUrls[i] + ". During the " +
+                                        "delete directory operation on " + dirUrl +".")
+            if (error.code == 406) {
+                isFile = true;
+            } else {
+                return [false, error]
             }
         }
         if (isFile) {
-            await deleteFile(childUrls[i]);
+            [success, error] = await deleteRawFile(childUrls[i]);
+            if (!success) {
+                return [false, error]
+            }
         } else if (isCtnr) {
-            await deleteDirectory(childUrls[i]);
+            [success, error] = await deleteDirectory(childUrls[i]);
+            if (!success) {
+                return [false, error]
+            }
+        } else {
+            [success, error] = await deleteDataset(childUrls[i]);
+            if (!success) {
+                return [false, error]
+            }
         }
-        await deleteDataset(childUrls[i]);
         isFile = false;
         isCtnr = false;
     }
 
-    if ((await getChildUrlsList(dirUrl)).length > 0) {
-        return "Could not delete a file within the directory, so could not remove this directory";
+    [childUrls, error] = await getChildUrlsList(dirUrl);
+    if (error) {
+        return [false, error];
     }
-    try {
-        await deleteSolidDataset(
-            dirUrl, 
-          { fetch: fetch }
-        );
-        return null;
-    } catch (error) {
-        return error;
+    if (childUrls.length > 0) {
+        return [false, {
+            code: -1,
+            title: "Unknown error",
+            description: "Could not delete a file within " +
+                        "the directory, so could not remove this directory",
+        }]
     }
+    return await deleteDataset(dirUrl);
 }

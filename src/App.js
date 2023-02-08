@@ -12,6 +12,8 @@ import ProfilePage from './Components/Pages/Profile';
 import { validateSocialDir } from './SOLID/SocialDirHandler';
 import { SocialDirErrorPopup } from './Components/SocialDirErrorPopup';
 import { getPodUrlAll } from "@inrupt/solid-client";
+import { ErrorDialog } from './Components/ErrorNotification';
+import { NotificationsProvider } from '@mantine/notifications';
 
 /**
  * App Component represents the entire app, it uses it's 
@@ -96,6 +98,7 @@ class App extends React.Component {
             }))
             content.push(<Login app={this}/>)
         }
+        
                 
         return (
             <MantineProvider
@@ -103,17 +106,19 @@ class App extends React.Component {
             withNormalizeCSS
             theme={AppTheme}
             >
-                <LoadingOverlay visible={this.state.loading} overlayBlur={1}/>
-                <AppShell
-                    padding = "md"
-                    navbar = {<SideBar app={this}/>}
-                    header={
-                        <Header height={60} p="xs">
-                            {<AppHeader app={this} />}
-                        </Header>
-                        }>
-                    {content}
-                </AppShell>
+                <NotificationsProvider>
+                    <LoadingOverlay visible={this.state.loading} overlayBlur={1}/>
+                    <AppShell
+                        padding = "md"
+                        navbar = {<SideBar app={this}/>}
+                        header={
+                            <Header height={60} p="xs">
+                                {<AppHeader app={this} />}
+                            </Header>
+                            }>
+                        {content}
+                    </AppShell>
+                </NotificationsProvider>
           </MantineProvider>
         
         );
