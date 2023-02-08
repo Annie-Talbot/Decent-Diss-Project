@@ -1,7 +1,7 @@
-import { getDatetime, getFile, getSolidDataset, getStringNoLocale, getThing, getUrl } from "@inrupt/solid-client";
+import { buildThing, createSolidDataset, createThing, getDatetime, getFile, getSolidDataset, getSourceUrl, getStringNoLocale, getThing, getUrl, saveFileInContainer, saveSolidDatasetAt, setThing } from "@inrupt/solid-client";
 import { fetch } from '@inrupt/solid-client-authn-browser'
 import { FOAF, LDP, SCHEMA_INRUPT, VCARD } from "@inrupt/vocab-common-rdf";
-import { GetPostDatasetUrl, POST_DETAILS, getChildUrlsList, deleteDirectory, simplifyError } from "./Utils";
+import { GetPostDatasetUrl, POST_DETAILS, getChildUrlsList, deleteDirectory, simplifyError, makeId, createEmptyDataset, DATE_CREATED, TITLE } from "./Utils";
 
 
 
@@ -25,6 +25,7 @@ async function getPost(postDir, postName) {
         return [null, simplifyError(error, "Encountered whilst fetching " +
                                             "post data for " + postDatasetUrl)];
     }
+
     //TODO: Wrap all of these into functions so that a 404 error does not make post not found.
 
     // Post information is found in the #details Thing at the dataset:
@@ -33,7 +34,8 @@ async function getPost(postDir, postName) {
     // Text
     const postText = getStringNoLocale(postThing, SCHEMA_INRUPT.text, { fetch: fetch });
     // Date
-    const postDatetime = getDatetime(postThing, "http://schema.org/dateCreated", { fetch: fetch });
+    const postDatetime = getDatetime(postThing, DATE_CREATED, { fetch: fetch });
+
     // Image
     const postImageLocation = getUrl(postThing, SCHEMA_INRUPT.image, { fetch: fetch });
     const imageBlob = await getFile(postImageLocation, { fetch: fetch });
@@ -99,4 +101,70 @@ export async function fetchPosts(postContainerUrl) {
  */
 export async function deletePost(postDir) {
     return await deleteDirectory(postDir);
+}
+
+export async function createPost(post) {
+    console.log("Creating post: ");
+    console.log(post);
+    let validId = false;
+    let id;
+    while (!validId) {
+        id = makeId(10);
+        try {
+            await getSolidDataset(
+                post.dir + id + "/",
+                {fetch: fetch}
+            )
+        } catch (error) {
+            error = simplifyError(error, "Ecountered whilst creating a new post ID.");
+            if (error.code == 404 || error.code == 401) {
+                validId = true;
+            } else {
+                return [false, error]
+            }
+        }
+    }
+    const postDirUrl = post.dir + id + "/";
+    let dataset;
+    let error;
+    [dataset, error] = await createEmptyDataset(postDirUrl);
+    if (error) {
+        return [false, error];
+    }
+
+    // create image first because we need the url it is saved at.
+    let savedFile;
+    try {
+        savedFile = await saveFileInContainer(
+        postDirUrl,
+        post.image,
+        { slug: post.image.name, 
+            contentType: post.image.type, 
+            fetch: fetch }
+        );
+    } catch (error) {
+        return [false, simplifyError(error, "Encountered whilst trying to save image file.")]
+    }
+    
+    let postDataset = createSolidDataset();
+    let postThing  = buildThing(createThing({ name: "details" }))
+    .addStringNoLocale(TITLE, post.title)
+    .addStringNoLocale(SCHEMA_INRUPT.text, post.text)
+    .addDatetime(DATE_CREATED, new Date(Date.now()))
+    .addUrl(SCHEMA_INRUPT.image, getSourceUrl(savedFile))
+    .build();
+    postDataset = setThing(postDataset, postThing);
+
+
+    try {
+        await saveSolidDatasetAt(
+            postDirUrl + id,
+            postDataset,
+            { fetch: fetch }             // fetch from authenticated Session
+          );
+    } catch(error) {
+        return [false, simplifyError(error, "Encountered whilst trying to create post dataset.")]
+    }
+    
+    return [true, null];
 }

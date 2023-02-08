@@ -1,7 +1,7 @@
 import { fetch } from '@inrupt/solid-client-authn-browser'
-import { buildThing, getThing, createSolidDataset, createThing, FetchError, getSolidDataset, saveSolidDatasetAt, setThing, getSolidDatasetWithAcl, deleteSolidDataset } from '@inrupt/solid-client';
+import { buildThing, getThing, createThing, FetchError, getSolidDataset, saveSolidDatasetAt, setThing, deleteSolidDataset } from '@inrupt/solid-client';
 import { FOAF, SCHEMA_INRUPT } from '@inrupt/vocab-common-rdf';
-import { POSTS_DIR, PROFILE_THING, SOCIAL_DATASET, SOCIAL_ROOT } from './Utils';
+import { createEmptyDataset, POSTS_DIR, PROFILE_THING, SOCIAL_DATASET, SOCIAL_ROOT } from './Utils';
 
 /**
  * A function to check if there is a Dataset at the given URL.
@@ -59,25 +59,6 @@ async function thingExists(dataset, thingUrl) {
             thingUrl + ", exists . Please contact support. Error: " + error);
         return false;
     }
-}
-
-/**
- * A function to create an empty dataset at the given url.
- * @param {string} datasetUrl 
- * @returns 
- */
-async function createEmptyDataset(datasetUrl) {
-    try {
-        const dataset = await saveSolidDatasetAt(
-            datasetUrl,
-            createSolidDataset(),
-            { fetch: fetch }
-        );
-        return dataset;
-    } catch {
-        console.log("An unknown error occured in createEmptyDir. Please contact support.");
-    }
-    return null;
 }
 
 /**

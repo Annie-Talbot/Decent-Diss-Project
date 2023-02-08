@@ -1,5 +1,11 @@
-import { FetchError, deleteFile, deleteSolidDataset, getContainedResourceUrlAll, getSolidDataset, isContainer } from "@inrupt/solid-client";
+import { createSolidDataset, saveSolidDatasetAt, FetchError, deleteFile, deleteSolidDataset, getContainedResourceUrlAll, getSolidDataset, isContainer } from "@inrupt/solid-client";
 import { fetch } from "@inrupt/solid-client-authn-browser";
+
+export const DATE_CREATED = "http://schema.org/dateCreated";
+export const TITLE = "http://schema.org/title";
+
+
+
 
 export const SOCIAL_ROOT = "social/";
 export const POSTS_DIR = "social/posts/";
@@ -138,4 +144,33 @@ export async function deleteDirectory(dirUrl) {
         }]
     }
     return await deleteDataset(dirUrl);
+}
+
+
+export function makeId(length) {
+    let id = '';
+    const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    for (let i = 0; i < length; i++) {
+      id += characters.charAt(Math.floor(Math.random() * characters.length));
+    }
+    return id;
+}
+
+
+/**
+ * A function to create an empty dataset at the given url.
+ * @param {string} datasetUrl 
+ * @returns 
+ */
+export async function createEmptyDataset(datasetUrl) {
+    try {
+        const dataset = await saveSolidDatasetAt(
+            datasetUrl,
+            createSolidDataset(),
+            { fetch: fetch }
+        );
+        return [dataset, null];
+    } catch (error) {
+        return [null, simplifyError(error, "Encountered when creating dataset at " + datasetUrl)]
+    }
 }
