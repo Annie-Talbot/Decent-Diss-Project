@@ -4,7 +4,8 @@
  * names that are used as the display title.
  */
 export const AppStates = {
-    Home: "Home",
+    Posts: "Posts",
     LogIn: "Log In",
-    Profile: "Profile"
+    Profile: "Profile",
+    Connections: "Connections",
 }

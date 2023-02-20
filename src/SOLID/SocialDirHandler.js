@@ -132,6 +132,6 @@ export async function createSocialDirectory(podRootUrl) {
     }
     await createEmptyDataset(podRootUrl + "social/");
     await createEmptyDataset(podRootUrl + "social/posts/");
-    let socialDataset = await createEmptyDataset(podRootUrl + "social/social");
+    let [socialDataset, error] = await createEmptyDataset(podRootUrl + "social/social");
     await createSampleProfile(socialDataset, podRootUrl + "social/social");
 }

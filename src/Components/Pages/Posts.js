@@ -1,7 +1,6 @@
 import React from 'react';
-import { Button, Center, Divider, LoadingOverlay, SimpleGrid, Stack, Text, ThemeIcon} from '@mantine/core';
-import Post from '../Post';
-import { deletePost, fetchPosts } from '../../SOLID/PostHandler';
+import { Button, Center, Divider, LoadingOverlay, ScrollArea, SimpleGrid, Stack, Text, ThemeIcon, Flex, Grid} from '@mantine/core';
+import { fetchPosts } from '../../SOLID/PostHandler';
 import { POSTS_DIR } from '../../SOLID/Utils';
 import { createErrorNotification } from '../ErrorNotification';
 import { IconBeach } from '@tabler/icons';
@@ -9,10 +8,10 @@ import { PostGrid } from '../PostGrid';
 import { CreatePostForm } from '../CreatePostForm';
 
 /**
- * The Home page of the application. This displays the logged 
+ * The Posts page of the application. This displays the logged 
  * in user's posts.
  */
-class Home extends React.Component {
+export class PostsPage extends React.Component {
     constructor(props) {
         super(props);
         this.app = props.app;
@@ -24,11 +23,12 @@ class Home extends React.Component {
         }
     }
 
-    async updatePosts() {
-        const [postList, errorList] = await fetchPosts(this.app.podRootDir + POSTS_DIR);
+    async updatePosts(host) {
+        console.log("updating posts");
+        const [postList, errorList] = await fetchPosts(host.app.podRootDir + POSTS_DIR);
         errorList.forEach((error, i) => createErrorNotification(error));
-
-        this.setState(prevState => (
+        console.log(host.state.postList);
+        host.setState(prevState => (
             {...prevState, 
             loading: false,
             postList: postList,
@@ -47,24 +47,28 @@ class Home extends React.Component {
     }
 
     async componentDidMount() {
-        await this.updatePosts();
+        await this.updatePosts(this);
     }
 
     render() {
-        const postComponents = this.state.postList.map((post) => {
-            return (<Post post={post} parent={this} />
-            )});
         return (
-            <div style={{height: "100%"}}>
+            <div style={{height: "90vh",
+            display: "grid", 
+            gridTemplateRows: "calc(100% - 100px) 100px",
+            gridTemplateColumns: "100%"}}>
                 <LoadingOverlay visible={this.state.loading} overlayBlur={2} />
                 <CreatePostForm 
                     opened={this.state.createPostOpened}
                     toggleOpened={() => this.toggleCreatePostPopup(this)}
                     postDir={this.app.podRootDir + POSTS_DIR}
+                    updatePosts={() => this.updatePosts(this)}
                     />
-                <div style={{height: "85%", width: "100%", overflowY: "scroll"}}>
-                    {postComponents.length > 0 ? 
-                        PostGrid(postComponents) :
+                <ScrollArea offsetScrollbars style={{gridRow: "1", gridColumn: "1"}}>
+                    {this.state.postList.length > 0 ? 
+                        <PostGrid 
+                            posts={this.state.postList}
+                            host={this}
+                            /> :
                         <Stack align="center" justify="center" style={{height: "100%"}}>
                             <ThemeIcon 
                             variant="light"
@@ -75,8 +79,8 @@ class Home extends React.Component {
                             <Text>To create one, press the button below.</Text>
                         </Stack>
                     }                    
-                </div>
-                <div style={{height: "15%", width: "100%", display: "sticky"}}>
+                </ScrollArea>
+                <div style={{gridRow: "2", gridColumn: "1"}}>
                     <Stack spacing="xs">
                         <Divider my="md"/>
                         <Center>
@@ -91,5 +95,3 @@ class Home extends React.Component {
         );
     }
 }
-
-export default Home;

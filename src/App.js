@@ -4,7 +4,7 @@ import Login from './Components/Login';
 import SideBar from './Components/Sidebar.js'
 import { AppShell, Header, LoadingOverlay, MantineProvider } from '@mantine/core';
 import AppHeader from './Components/Header';
-import Home from './Components/Pages/Home';
+import { PostsPage } from './Components/Pages/Posts';
 import { AppStates } from './Constants/AppStates';
 import { handleIncomingRedirect, getDefaultSession } from '@inrupt/solid-client-authn-browser'
 import { AppTheme } from './Constants/AppTheme';
@@ -12,8 +12,8 @@ import ProfilePage from './Components/Pages/Profile';
 import { validateSocialDir } from './SOLID/SocialDirHandler';
 import { SocialDirErrorPopup } from './Components/SocialDirErrorPopup';
 import { getPodUrlAll } from "@inrupt/solid-client";
-import { ErrorDialog } from './Components/ErrorNotification';
 import { NotificationsProvider } from '@mantine/notifications';
+import { ConnectionsPage } from './Components/Pages/Connections';
 
 /**
  * App Component represents the entire app, it uses it's 
@@ -86,11 +86,13 @@ class App extends React.Component {
 
         if (this.state.currPage == AppStates.LogIn) {
             content.push(<Login app={this}/>);
-        } else if (this.state.currPage == AppStates.Home) {
-            content.push(<Home app={this}/>);
+        } else if (this.state.currPage == AppStates.Posts) {
+            content.push(<PostsPage app={this}/>);
         } else if (this.state.currPage == AppStates.Profile) {
             content.push(<ProfilePage app={this}/>);
-        } else {
+        } else if (this.state.currPage == AppStates.Connections) {
+            content.push(<ConnectionsPage app={this}/>);
+        }  else {
             this.setState(prevState => (
                 {...prevState, 
                 currPage: AppStates.LogIn,

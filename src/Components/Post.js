@@ -1,70 +1,55 @@
-import { Card, Text, Image, Badge, Menu, ActionIcon, Stack, Grid } from '@mantine/core';
-import { IconTrash, IconEdit, IconDotsVertical } from '@tabler/icons';
+import { Card, Text, Image, Badge, Menu, ActionIcon, Stack, Grid, Title } from '@mantine/core';
+import { IconEdit, IconDotsVertical, IconTrash } from '@tabler/icons';
 import { Component } from 'react';
-import { deletePost } from '../SOLID/PostHandler';
-import { createErrorNotification } from './ErrorNotification';
 
-export default class Post extends Component {
-    constructor(props) {
-        super(props);
-        this.post = props.post;
-        this.postContainer = props.parent;
-    } 
-
-    async handleDeletePost(postDir) {
-        const [success, error] = await deletePost(postDir);
-        if (!success) {
-            console.log(error)
-            createErrorNotification(error);
-            return;
-        }
-        this.postContainer.updatePosts();
-    }
-
-    render() {
-        return (
-            <Card shadow="sm" p="lg" radius="md" withBorder style={{"maxWidth": 600}}>
+export function Post(props) {
+    console.log("render post func");
+    console.log(props.post)
+    return (
+        <Card shadow="sm" p="lg" radius="md" withBorder style={{"maxWidth": 600}}>
+            {props.post.image? 
                 <Card.Section withBorder >
-                <Image
-                        radius="md"
-                        fit="contain"
-                        height={160}
-                        src={this.post.image}
-                    />
+                    <Image
+                            radius="md"
+                            fit="contain"
+                            height={160}
+                            src={props.post.image}
+                        />
                 </Card.Section>
+            :<></>}
+            
+            <Grid mt="md" mb="xs">
+                <Grid.Col span="auto">
+                    <Title order={3}>
+                        {props.post.title}
+                    </Title>
+                </Grid.Col>
+                <Grid.Col span="content">
+                    <Badge color="sage" variant="light">
+                        {props.post.datetime}
+                    </Badge>
+                </Grid.Col>
+                <Grid.Col span="content">
+                <Menu shadow="md" width={100} withinPortal>
+                    <Menu.Target>
+                        <ActionIcon color="sage" size="lg" variant="default">
+                            <IconDotsVertical size={26} />
+                        </ActionIcon>
+                        </Menu.Target>
 
-                <Grid mt="md" mb="xs">
-                    <Grid.Col span="auto">
-                        <Text size="md">{this.post.text}</Text>
-                    </Grid.Col>
-                    <Grid.Col span="content">
-                        <Stack style={{"minHeight": 100}} align="flex-end" justify="space-between">
-                            <Badge color="sage" variant="light">
-                                {this.post.datetime}
-                            </Badge>
-                            <Menu shadow="md" width={200}>
-                                <Menu.Target>
-                                <ActionIcon color="sage" size="lg" variant="default">
-                                    <IconDotsVertical size={26} />
-                                </ActionIcon>
-                                </Menu.Target>
-
-                                <Menu.Dropdown>
-                                    <Menu.Item icon={<IconEdit size={14} />}>Edit</Menu.Item>
-                                    <Menu.Item 
-                                        onClick={() =>
-                                            this.handleDeletePost(this.post.dir)
-                                        }
-                                        color="red" 
-                                        icon={<IconTrash size={14} />}>
-                                            Delete
-                                    </Menu.Item>
-                                </Menu.Dropdown>
-                            </Menu>
-                        </Stack>
-                    </Grid.Col>
-                </Grid>
-            </Card>
-        );
-    }
+                        <Menu.Dropdown>
+                            <Menu.Item icon={<IconEdit size={14} />}>Edit</Menu.Item>
+                            <Menu.Item 
+                                onClick={props.deletePost}
+                                color="red" 
+                                icon={<IconTrash size={14} />}>
+                                    Delete
+                            </Menu.Item>
+                        </Menu.Dropdown>
+                    </Menu>
+                </Grid.Col>
+            </Grid>
+            {props.post.text? <Text size="md">{props.post.text}</Text>: <></>}
+        </Card>
+    );
 }

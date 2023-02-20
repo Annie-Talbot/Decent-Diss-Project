@@ -1,4 +1,4 @@
-import { ActionIcon, FileInput, Modal, Space, Text, Textarea, TextInput } from "@mantine/core";
+import { ActionIcon, Center, FileInput, Modal, Space, Text, Textarea, TextInput } from "@mantine/core";
 import { IconRocket } from "@tabler/icons";
 import { useState } from "react";
 import { createPost } from "../SOLID/PostHandler";
@@ -6,11 +6,14 @@ import { createErrorNotification } from "./ErrorNotification";
 
 
 
-async function handleCreatePost(post) {
+async function handleCreatePost(post, closePopup, updatePosts) {
     const [success, error] = await createPost(post);
     if (!success) {
         createErrorNotification(error);
+        return;
     }
+    closePopup();
+    updatePosts();
 }
 
 
@@ -68,11 +71,20 @@ export function CreatePostForm(props) {
                 description="Add an image to your post."
                 withAsterisk
             />
-            <ActionIcon
-            onClick={() => handleCreatePost(post)}
-            >
-                <IconRocket />
-            </ActionIcon>
+            <Space h="md"/>
+            <Center>
+                <ActionIcon
+                    color="sage" 
+                    variant="filled"
+                    size="xl"
+                    onClick={() => {
+                        handleCreatePost(post, props.toggleOpened, props.updatePosts);
+                    }}
+                >
+                    <IconRocket />
+                </ActionIcon>
+            </Center>
+            
         </Modal>
     );
 }

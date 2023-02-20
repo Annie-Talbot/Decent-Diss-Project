@@ -14,6 +14,8 @@ import { GetPostDatasetUrl, POST_DETAILS, getChildUrlsList, deleteDirectory, sim
  * @returns {dict} A dictionary will post information in.
  */
 async function getPost(postDir, postName) {
+    const errContext = "Encountered whilst attempting to get post " +
+                            "data for " + postDir + postName;
     const postDatasetUrl = GetPostDatasetUrl(postDir, postName)
     let postDataset;
     try {
@@ -26,25 +28,48 @@ async function getPost(postDir, postName) {
                                             "post data for " + postDatasetUrl)];
     }
 
-    //TODO: Wrap all of these into functions so that a 404 error does not make post not found.
-
     // Post information is found in the #details Thing at the dataset:
     // details Thing URL: https://provider/podname/social/posts/postname/postname#details
     const postThing = getThing(postDataset, postDatasetUrl + POST_DETAILS, { fetch: fetch });
-    // Text
-    const postText = getStringNoLocale(postThing, SCHEMA_INRUPT.text, { fetch: fetch });
+    if (!postThing) {
+        return [null, {
+            code: 0,
+            title: "Post has no #details Thing.",
+            description: errContext,
+        }]
+    }
+    // Title
+    const postTitle = getStringNoLocale(postThing, TITLE);
     // Date
     const postDatetime = getDatetime(postThing, DATE_CREATED, { fetch: fetch });
-
+    // these are the only required attributes so return error if it doesn't exist
+    if (!postTitle) {
+        return [null, {
+            code: 0,
+            title: "Post has no title or datetime predicate, this is required.",
+            description: errContext,
+        }]
+    }
+    // Text
+    const postText = getStringNoLocale(postThing, SCHEMA_INRUPT.text, { fetch: fetch });
     // Image
     const postImageLocation = getUrl(postThing, SCHEMA_INRUPT.image, { fetch: fetch });
-    const imageBlob = await getFile(postImageLocation, { fetch: fetch });
+    let postImg = null;
+    if (postImageLocation) {
+        try {
+            const imgFile = await getFile(postImageLocation, { fetch: fetch });
+            postImg = URL.createObjectURL(imgFile);
+        } catch (error) {
+            return [null, simplifyError(error, errContext)];
+        }
+    }
     // TODO: Missing author details as need some utility functions to do that
 
     let post = {
+        title: postTitle,
         text: postText,
         datetime: postDatetime.toLocaleString(),
-        image: URL.createObjectURL(imageBlob),
+        image: postImg,
         dir: postDir,
         name: postName,
     };
@@ -100,6 +125,7 @@ export async function fetchPosts(postContainerUrl) {
  * @param {string} postDir URL of the post's directory
  */
 export async function deletePost(postDir) {
+    console.log("deleting " + postDir);
     return await deleteDirectory(postDir);
 }
 

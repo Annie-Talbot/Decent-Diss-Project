@@ -1,7 +1,7 @@
 import React from 'react';
 import './../css/App.css';
 import { Navbar, ThemeIcon, UnstyledButton, Group, Text } from '@mantine/core';
-import { IconUser, IconSettings, IconMessages, IconHome } from '@tabler/icons';
+import { IconUser, IconSettings, IconHome, IconAffiliate } from '@tabler/icons';
 import { AppStates } from '../Constants/AppStates';
 
 /**
@@ -11,8 +11,8 @@ const data = [
     { 
         icon: <IconHome size={16} />, 
         color: 'blue', 
-        label: 'Home', 
-        state:AppStates.Home 
+        label: 'Posts', 
+        state:AppStates.Posts 
     },
     { 
         icon: <IconUser size={16} />, 
@@ -21,10 +21,10 @@ const data = [
         state: AppStates.Profile 
     },
     { 
-        icon: <IconMessages size={16} />, 
+        icon: <IconAffiliate size={16} />, 
         color: 'violet', 
-        label: 'Notifications',
-        state:AppStates.Home 
+        label: 'Connections',
+        state:AppStates.Connections 
     },
     { 
         icon: <IconSettings size={16} />, 
