@@ -66,6 +66,7 @@ export class PostsPage extends React.Component {
                 <ScrollArea offsetScrollbars style={{gridRow: "1", gridColumn: "1"}}>
                     {this.state.postList.length > 0 ? 
                         <PostGrid 
+                            authorised={true}
                             posts={this.state.postList}
                             host={this}
                             /> :

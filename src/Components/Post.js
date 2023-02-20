@@ -3,8 +3,6 @@ import { IconEdit, IconDotsVertical, IconTrash } from '@tabler/icons';
 import { Component } from 'react';
 
 export function Post(props) {
-    console.log("render post func");
-    console.log(props.post)
     return (
         <Card shadow="sm" p="lg" radius="md" withBorder style={{"maxWidth": 600}}>
             {props.post.image? 
@@ -29,25 +27,29 @@ export function Post(props) {
                         {props.post.datetime}
                     </Badge>
                 </Grid.Col>
-                <Grid.Col span="content">
-                <Menu shadow="md" width={100} withinPortal>
-                    <Menu.Target>
-                        <ActionIcon color="sage" size="lg" variant="default">
-                            <IconDotsVertical size={26} />
-                        </ActionIcon>
-                        </Menu.Target>
+                {props.authorised? 
+                    <Grid.Col span="content">
+                        <Menu shadow="md" width={100} withinPortal>
+                            <Menu.Target>
+                                <ActionIcon color="sage" size="lg" variant="default">
+                                    <IconDotsVertical size={26} />
+                                </ActionIcon>
+                            </Menu.Target>
 
-                        <Menu.Dropdown>
-                            <Menu.Item icon={<IconEdit size={14} />}>Edit</Menu.Item>
-                            <Menu.Item 
-                                onClick={props.deletePost}
-                                color="red" 
-                                icon={<IconTrash size={14} />}>
-                                    Delete
-                            </Menu.Item>
-                        </Menu.Dropdown>
-                    </Menu>
-                </Grid.Col>
+                            <Menu.Dropdown>
+                                <Menu.Item icon={<IconEdit size={14} />}>Edit</Menu.Item>
+                                <Menu.Item 
+                                    onClick={props.deletePost}
+                                    color="red" 
+                                    icon={<IconTrash size={14} />}>
+                                        Delete
+                                </Menu.Item>
+                            </Menu.Dropdown>
+                        </Menu>
+                    </Grid.Col> 
+                : 
+                    <></>
+                }
             </Grid>
             {props.post.text? <Text size="md">{props.post.text}</Text>: <></>}
         </Card>

@@ -93,7 +93,9 @@ class Login extends React.Component {
                                 Looks like you need to create a pod first. Once created, 
                                 return to this page to log in and get started.
                             </Text>
-                            <Button>Create a POD</Button>
+                            <a href="https://start.inrupt.com/profile">
+                                <Button>Create a POD</Button>
+                            </a>
                         </Group>
                         
                         

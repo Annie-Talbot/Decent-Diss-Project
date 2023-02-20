@@ -19,6 +19,7 @@ export const POST_DETAILS = "#details";
 
 export function simplifyError(error, context) {
     if (error instanceof FetchError) {
+        console.log(error)
         return {
             code: error.statusCode, 
             title: error.statusText, 

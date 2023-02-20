@@ -91,7 +91,7 @@ class App extends React.Component {
         } else if (this.state.currPage == AppStates.Profile) {
             content.push(<ProfilePage app={this}/>);
         } else if (this.state.currPage == AppStates.Connections) {
-            content.push(<ConnectionsPage app={this}/>);
+            content.push(<ConnectionsPage />);
         }  else {
             this.setState(prevState => (
                 {...prevState, 

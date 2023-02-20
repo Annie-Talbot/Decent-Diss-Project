@@ -28,7 +28,8 @@ export function PostGrid(props) {
 
     const postComponents = props.posts.map((post) => {
         console.log(post);
-        return (<Post 
+        return (<Post
+            authorised={props.authorised}
             post={post}
             deletePost={() => handleDeletePost(post, props.posts, props.host)} 
             />)

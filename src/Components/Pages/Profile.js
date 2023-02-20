@@ -2,7 +2,8 @@ import React from 'react';
 import { Avatar, Center, Container, Divider, Paper, Text, LoadingOverlay, SimpleGrid, Stack, Title} from '@mantine/core';
 import getProfile from '../../SOLID/ProfileFetcher';
 
-function Profile(profileData)  {
+export function Profile(props)  {
+    let profileData = props.profileData;
     let dataDisplay = [];
     if (profileData.profilePic) {
         dataDisplay.push(
@@ -17,7 +18,7 @@ function Profile(profileData)  {
     if (profileData.name) {
         dataDisplay.push((
         <Container style={{ marginLeft: "2%"}}>
-            <Title order={3}>Your username: </Title>
+            <Title order={3}>Username: </Title>
             <Text style={{ marginLeft: "10px"}}>{profileData.name}</Text>
         </Container>)
         );
@@ -65,7 +66,7 @@ class ProfilePage extends React.Component {
         return (
             <Paper p="sm" shadow="xs">
                 <LoadingOverlay visible={this.state.loading} overlayBlur={2} />
-                {Profile(this.state.profileData)}
+                <Profile profileData={this.state.profileData} />
             </Paper>
         );
     }
