@@ -22,7 +22,7 @@ export class ConnectionsPage extends React.Component {
     }
 
     async viewAnotherUser(page) {
-        const webID = "https://id.inrupt.com/at698";
+        const webID = "https://id.inrupt.com/talb";
         let [podRoot, error] = await isWebIdDecent(webID);
         if (error) {
             createErrorNotification(error);

@@ -1,7 +1,8 @@
-import { buildThing, createSolidDataset, createThing, getDatetime, getFile, getSolidDataset, getSourceUrl, getStringNoLocale, getThing, getUrl, saveFileInContainer, saveSolidDatasetAt, setThing } from "@inrupt/solid-client";
+import { access, buildThing, createSolidDataset, createThing, getDatetime, getFile, getSolidDataset, getSourceUrl, getStringNoLocale, getThing, getUrl, saveFileInContainer, saveSolidDatasetAt, setThing } from "@inrupt/solid-client";
 import { fetch } from '@inrupt/solid-client-authn-browser'
-import { FOAF, LDP, SCHEMA_INRUPT, VCARD } from "@inrupt/vocab-common-rdf";
+import { SCHEMA_INRUPT } from "@inrupt/vocab-common-rdf";
 import { GetPostDatasetUrl, POST_DETAILS, getChildUrlsList, deleteDirectory, simplifyError, makeId, createEmptyDataset, DATE_CREATED, TITLE } from "./Utils";
+import { getAllAgentWebIDs, setAllReadAccess } from './AccessHandler'
 
 
 
@@ -130,8 +131,7 @@ export async function deletePost(postDir) {
 }
 
 export async function createPost(post) {
-    console.log("Creating post: ");
-    console.log(post);
+    // Find valid ID
     let validId = false;
     let id;
     while (!validId) {
@@ -150,6 +150,7 @@ export async function createPost(post) {
             }
         }
     }
+    // Create post directory
     const postDirUrl = post.dir + id + "/";
     let dataset;
     let error;
@@ -159,9 +160,9 @@ export async function createPost(post) {
     }
 
     // create image first because we need the url it is saved at.
-    let savedFile;
+    let imgFile;
     try {
-        savedFile = await saveFileInContainer(
+        imgFile = await saveFileInContainer(
         postDirUrl,
         post.image,
         { slug: post.image.name, 
@@ -171,26 +172,35 @@ export async function createPost(post) {
     } catch (error) {
         return [false, simplifyError(error, "Encountered whilst trying to save image file.")]
     }
-    
+    const postImgUrl = getSourceUrl(imgFile);
+
+    const postDatasetUrl = postDirUrl + id;
     let postDataset = createSolidDataset();
     let postThing  = buildThing(createThing({ name: "details" }))
     .addStringNoLocale(TITLE, post.title)
     .addStringNoLocale(SCHEMA_INRUPT.text, post.text)
     .addDatetime(DATE_CREATED, new Date(Date.now()))
-    .addUrl(SCHEMA_INRUPT.image, getSourceUrl(savedFile))
+    .addUrl(SCHEMA_INRUPT.image, postImgUrl)
     .build();
     postDataset = setThing(postDataset, postThing);
 
 
     try {
         await saveSolidDatasetAt(
-            postDirUrl + id,
+            postDatasetUrl,
             postDataset,
             { fetch: fetch }             // fetch from authenticated Session
           );
     } catch(error) {
         return [false, simplifyError(error, "Encountered whilst trying to create post dataset.")]
     }
-    
+    // Set post public access to private
+    // await setReadAccess(postDirUrl + id, "https://id.inrupt.com/at698");
+
+    // Generate list of agents who will have read access
+    let accessList = await getAllAgentWebIDs(post.agentAccess);
+    // Set access for post directory, image file, and post dataset
+    await setAllReadAccess([postDirUrl, postImgUrl, postDatasetUrl], accessList);
+
     return [true, null];
 }

@@ -34,10 +34,20 @@ class Login extends React.Component {
                 solidProviderError: errMsg,
             }));
         }
-      }
+    }
+
+    inruptLogin(loginController) {
+        loginController.setState(prevState => (
+            {...prevState, 
+                solidProvider: "https://login.inrupt.com",
+        }));
+    }
 
     handleInputChange(event) {
-        this.setState({solidProvider: event.target.value});
+        this.setState(prevState => (
+            {...prevState, 
+                solidProvider: event.target.value,
+        }));
     }
 
     componentDidMount() {
@@ -72,15 +82,20 @@ class Login extends React.Component {
                             directed to webpage to authenticate. When you return, 
                             click start session to start using the app.
                         </Text>
-                        <TextInput
-                            placeholder="http://localhost:3000/"
-                            label="Solid Identity Provider"
-                            size="md"
-                            withAsterisk
-                            value={this.state.solidProvider}
-                            onChange={this.handleInputChange}
-                            error={this.state.solidProviderError}
-                        />
+                        <Group align="center" position="apart" spacing="sm">
+                            <TextInput
+                                placeholder="http://localhost:3000/"
+                                label="Solid Identity Provider"
+                                size="md"
+                                withAsterisk
+                                value={this.state.solidProvider}
+                                onChange={this.handleInputChange}
+                                error={this.state.solidProviderError}
+                                style={{width: "80%"}}
+                            />
+                            <Button style={{width: "18%"}} color="blue" onClick={() => {this.inruptLogin(this)}}>Inrupt</Button>
+                        </Group>
+                        
                         <Group position="center" spacing="sm">
                             <Button onClick={() => {this.handleLogin(this)}}>Log in</Button>
                         </Group>

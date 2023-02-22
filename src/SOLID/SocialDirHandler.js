@@ -2,6 +2,7 @@ import { fetch } from '@inrupt/solid-client-authn-browser'
 import { buildThing, getThing, createThing, FetchError, getSolidDataset, saveSolidDatasetAt, setThing, deleteSolidDataset } from '@inrupt/solid-client';
 import { FOAF, SCHEMA_INRUPT } from '@inrupt/vocab-common-rdf';
 import { createEmptyDataset, POSTS_DIR, PROFILE_THING, SOCIAL_DATASET, SOCIAL_ROOT } from './Utils';
+import { setReadAccess } from './AccessHandler'
 
 /**
  * A function to check if there is a Dataset at the given URL.
@@ -124,14 +125,17 @@ export async function validateSocialDir(podRootUrl) {
  *              e.g. http://pod-provider.com/mypodname/
  */
 export async function createSocialDirectory(podRootUrl) {
-    if (await datasetExists(podRootUrl + "social/")) {
+    if (await datasetExists(podRootUrl + SOCIAL_ROOT)) {
         await deleteSolidDataset(
-            podRootUrl + "social/",
+            podRootUrl + SOCIAL_ROOT,
             { fetch: fetch }
         );
     }
-    await createEmptyDataset(podRootUrl + "social/");
-    await createEmptyDataset(podRootUrl + "social/posts/");
-    let [socialDataset, error] = await createEmptyDataset(podRootUrl + "social/social");
-    await createSampleProfile(socialDataset, podRootUrl + "social/social");
+    await createEmptyDataset(podRootUrl + SOCIAL_ROOT);
+    await setReadAccess(podRootUrl + SOCIAL_ROOT, null)
+    await createEmptyDataset(podRootUrl + POSTS_DIR);
+    await setReadAccess(podRootUrl + POSTS_DIR, null)
+    let [socialDataset, error] = await createEmptyDataset(podRootUrl + SOCIAL_DATASET);
+    await createSampleProfile(socialDataset, podRootUrl + SOCIAL_DATASET);
+    await setReadAccess(podRootUrl + SOCIAL_DATASET, null)
 }

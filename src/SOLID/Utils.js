@@ -1,4 +1,4 @@
-import { createSolidDataset, saveSolidDatasetAt, FetchError, deleteFile, deleteSolidDataset, getContainedResourceUrlAll, getSolidDataset, isContainer } from "@inrupt/solid-client";
+import { createSolidDataset, saveSolidDatasetAt, FetchError, deleteFile, deleteSolidDataset, getContainedResourceUrlAll, getSolidDataset, isContainer, universalAccess } from "@inrupt/solid-client";
 import { fetch } from "@inrupt/solid-client-authn-browser";
 
 export const DATE_CREATED = "http://schema.org/dateCreated";
