@@ -1,7 +1,7 @@
 import React from "react";
-import Logout from './Logout';
+import Logout from '../Login/Logout';
 import { Title, Group, Center } from '@mantine/core';
-import { Logo } from "./../Constants/Logo";
+import { Logo } from "./Constants/Logo";
 
 /**
  * A component that groups all items that should be included 

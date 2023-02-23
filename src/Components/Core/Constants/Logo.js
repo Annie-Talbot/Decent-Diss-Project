@@ -1,5 +1,5 @@
 import { Image, Text } from "@mantine/core"
-import logo from './../assets/logo_w_text.png'
+import logo from './../../../assets/logo_w_text.png'
 
 /**
  * Returns a react Image component with the company logo enclosed.

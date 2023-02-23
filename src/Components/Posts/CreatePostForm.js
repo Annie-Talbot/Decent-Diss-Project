@@ -1,9 +1,9 @@
-import { ActionIcon, MultiSelect, Center, FileInput, Modal, Space, Text, Textarea, TextInput } from "@mantine/core";
+import { ActionIcon, MultiSelect, Center, FileInput, Modal, Space, Textarea, TextInput } from "@mantine/core";
 import { IconRocket } from "@tabler/icons";
 import { useState } from "react";
-import { ACCESS_AGENT_TYPE } from "../SOLID/AccessHandler";
-import { createPost } from "../SOLID/PostHandler";
-import { createErrorNotification } from "./ErrorNotification";
+import { ACCESS_AGENT_TYPE } from "../../SOLID/AccessHandler";
+import { createPost } from "../../SOLID/PostHandler";
+import { createErrorNotification } from "../Core/Notifications/ErrorNotification";
 
 const userOptions = [
     {value: [ACCESS_AGENT_TYPE.Person, 'https://id.inrupt.com/at698'], label: 'Annie T'},
@@ -11,8 +11,9 @@ const userOptions = [
 ]
 
 
-async function handleCreatePost(post, closePopup, updatePosts) {
-    console.log(post.agentAccess);
+async function handleCreatePost(post, connections, closePopup, updatePosts) {
+    const agents = post.agentAccess.map((index) => connections[parseInt(index)])
+    post["agentAccess"] = agents;
     const [success, error] = await createPost(post);
     if (!success) {
         createErrorNotification(error);
@@ -30,6 +31,13 @@ export function CreatePostForm(props) {
         text: "",
         image: null,
         agentAccess: [],
+    });
+    let accessOptions = [];
+    props.connections.forEach(function(person, index) {
+        accessOptions.push({
+            value: index.toString(),
+            label: person.nickname,
+        });
     });
     return (
         <Modal
@@ -80,12 +88,11 @@ export function CreatePostForm(props) {
             />
             <Space />
             <MultiSelect
-                data={userOptions}
+                data={accessOptions}
                 label="Who would you like to give access to"
                 placeholder="Pick all that you like"
                 value={post.agentAccess}
                 onChange={(event) => {
-                    console.log(event);
                     setPost(
                     {...post, 
                         agentAccess: event}
@@ -98,7 +105,10 @@ export function CreatePostForm(props) {
                     variant="filled"
                     size="xl"
                     onClick={() => {
-                        handleCreatePost(post, props.toggleOpened, props.updatePosts);
+                        handleCreatePost(post, 
+                            props.connections, 
+                            props.toggleOpened, 
+                            props.updatePosts);
                     }}
                 >
                     <IconRocket />

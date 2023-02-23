@@ -1,8 +1,7 @@
 import React from 'react';
-import './../css/App.css';
 import { Navbar, ThemeIcon, UnstyledButton, Group, Text } from '@mantine/core';
 import { IconUser, IconSettings, IconHome, IconAffiliate } from '@tabler/icons';
-import { AppStates } from '../Constants/AppStates';
+import { AppStates } from './Constants/AppStates';
 
 /**
  * The information to be displayed in the side bar incl. the state they should set the app to.
@@ -58,7 +57,7 @@ function SideBarItem({icon, label, color, state}, app) {
             },
             })}
             onClick={() => {
-                if (app.state.loggedIn != false) {
+                if (app.state.loggedIn !== false) {
                     app.setState(prevState => (
                         {...prevState, 
                         currPage: state,
@@ -80,21 +79,14 @@ function SideBarItem({icon, label, color, state}, app) {
 /**
  * An extention of the Mantine Navbar Component to allow for an additional prop.
  */
-class SideBar extends React.Component {
-    constructor(props) {
-        super(props);
-        this.app = props.app;
-    }
-
-    render() {
-        return (
-            <Navbar height={600} p="xs" width={{ base: 300 }}>
-                {data.map((item) => (
-                    <Navbar.Section mt="md">{SideBarItem(item, this.app)}</Navbar.Section>
-                ))}
-            </Navbar>
-        )
-    }
+function SideBar(props) {
+    return (
+        <Navbar height={600} p="xs" width={{ base: 300 }}>
+            {data.map((item) => (
+                <Navbar.Section mt="md">{SideBarItem(item, props.app)}</Navbar.Section>
+            ))}
+        </Navbar>
+    );
 }
 
 export default SideBar;

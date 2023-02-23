@@ -1,19 +1,19 @@
 import React from 'react';
 import './css/App.css';
-import Login from './Components/Login';
-import SideBar from './Components/Sidebar.js'
+import Login from './Components/Login/LoginPage';
+import SideBar from './Components/Core/Sidebar'
 import { AppShell, Header, LoadingOverlay, MantineProvider } from '@mantine/core';
-import AppHeader from './Components/Header';
-import { PostsPage } from './Components/Pages/Posts';
-import { AppStates } from './Constants/AppStates';
+import AppHeader from './Components/Core/Header';
+import { PostsPage } from './Components/Posts/PostsPage';
+import { AppStates } from './Components/Core/Constants/AppStates';
 import { handleIncomingRedirect, getDefaultSession } from '@inrupt/solid-client-authn-browser'
-import { AppTheme } from './Constants/AppTheme';
-import ProfilePage from './Components/Pages/Profile';
+import { AppTheme } from './Components/Core/Constants/AppTheme';
+import ProfilePage from './Components/Profile/ProfilePage';
 import { validateSocialDir } from './SOLID/SocialDirHandler';
-import { SocialDirErrorPopup } from './Components/SocialDirErrorPopup';
+import { SocialDirErrorPopup } from './Components/Login/SocialDirErrorPopup';
 import { getPodUrlAll } from "@inrupt/solid-client";
 import { NotificationsProvider } from '@mantine/notifications';
-import { ConnectionsPage } from './Components/Pages/Connections';
+import { ConnectionsPage } from './Components/Connections/ConnectionsPage';
 
 /**
  * App Component represents the entire app, it uses it's 
@@ -35,7 +35,7 @@ class App extends React.Component {
     async componentDidMount() {
         // Check if we are in the correct state, or if 
         // something has changed e.g. Just been logged in
-        if (this.state.loggedIn == false) {
+        if (this.state.loggedIn === false) {
             // Check if we've just returned from log in redirect
             await handleIncomingRedirect();
             if (getDefaultSession().info.isLoggedIn) {
@@ -84,14 +84,14 @@ class App extends React.Component {
         let content = [];
         content.push(SocialDirErrorPopup(this));
 
-        if (this.state.currPage == AppStates.LogIn) {
+        if (this.state.currPage === AppStates.LogIn) {
             content.push(<Login app={this}/>);
-        } else if (this.state.currPage == AppStates.Posts) {
+        } else if (this.state.currPage === AppStates.Posts) {
             content.push(<PostsPage app={this}/>);
-        } else if (this.state.currPage == AppStates.Profile) {
+        } else if (this.state.currPage === AppStates.Profile) {
             content.push(<ProfilePage app={this}/>);
-        } else if (this.state.currPage == AppStates.Connections) {
-            content.push(<ConnectionsPage />);
+        } else if (this.state.currPage === AppStates.Connections) {
+            content.push(<ConnectionsPage app={this}/>);
         }  else {
             this.setState(prevState => (
                 {...prevState, 

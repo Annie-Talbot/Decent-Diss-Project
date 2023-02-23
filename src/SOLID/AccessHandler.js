@@ -27,18 +27,15 @@ export const ACCESS_AGENT_TYPE = {
 
 
 export async function getAllAgentWebIDs(agentList) {
-    console.log("agent list: " + agentList);
     let webIds = [];
-    agentList.forEach(([type, id]) => {
-        console.log("type: " + type)
-        console.log("id: " + id)
-        if (type == ACCESS_AGENT_TYPE.Person) {
+    agentList.forEach((agent) => {
+        if (agent.type == ACCESS_AGENT_TYPE.Person) {
             console.log("Encountered person agent. Added to list.")
-            webIds.push(id)
-        } else if (type == ACCESS_AGENT_TYPE.Group) {
+            webIds.push(agent.webId)
+        } else if (agent.type == ACCESS_AGENT_TYPE.Group) {
             console.log("Encountered group agent. No handling for this yet.")
         } else {
-            console.log("Encountered unknown type of agent. ID: " + id)
+            console.log("Encountered unknown type of agent. ID: " + agent.webId)
         }
     });
     return webIds;

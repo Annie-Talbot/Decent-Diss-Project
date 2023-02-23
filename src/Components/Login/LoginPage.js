@@ -1,6 +1,6 @@
 import React from 'react';
 import { Paper, Title, Text, Stack, Divider, Button, Group, TextInput, LoadingOverlay, Modal } from '@mantine/core';
-import SolidLoginHandler from '../SOLID/LoginHandler';
+import SolidLoginHandler from '../../SOLID/LoginHandler';
 
 
 /**

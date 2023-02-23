@@ -1,6 +1,6 @@
 import { Button, Space, Group, Modal, Text } from '@mantine/core';
-import { createSocialDirectory } from '../SOLID/SocialDirHandler';
-import { SOCIAL_ROOT } from '../SOLID/Utils';
+import { createSocialDirectory } from '../../SOLID/SocialDirHandler';
+import { SOCIAL_ROOT } from '../../SOLID/Utils';
 
 
 export function SocialDirErrorPopup(app) {

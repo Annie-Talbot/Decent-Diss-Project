@@ -1,6 +1,6 @@
 import { SimpleGrid } from "@mantine/core";
-import { deletePost } from "../SOLID/PostHandler";
-import { createErrorNotification } from "./ErrorNotification";
+import { deletePost } from "../../SOLID/PostHandler";
+import { createErrorNotification } from "../Core/Notifications/ErrorNotification";
 import {Post} from "./Post";
 
 async function handleDeletePost(post, posts, host) {

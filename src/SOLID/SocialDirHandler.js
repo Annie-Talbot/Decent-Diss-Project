@@ -1,7 +1,7 @@
 import { fetch } from '@inrupt/solid-client-authn-browser'
 import { buildThing, getThing, createThing, FetchError, getSolidDataset, saveSolidDatasetAt, setThing, deleteSolidDataset } from '@inrupt/solid-client';
 import { FOAF, SCHEMA_INRUPT } from '@inrupt/vocab-common-rdf';
-import { createEmptyDataset, POSTS_DIR, PROFILE_THING, SOCIAL_DATASET, SOCIAL_ROOT } from './Utils';
+import { CONNECTIONS_DIR, createEmptyDataset, GROUP_DATASET, PEOPLE_DATASET, POSTS_DIR, PROFILE_THING, SOCIAL_DATASET, SOCIAL_ROOT } from './Utils';
 import { setReadAccess } from './AccessHandler'
 
 /**
@@ -131,11 +131,19 @@ export async function createSocialDirectory(podRootUrl) {
             { fetch: fetch }
         );
     }
+    // Main - public read access to directory and profile
     await createEmptyDataset(podRootUrl + SOCIAL_ROOT);
     await setReadAccess(podRootUrl + SOCIAL_ROOT, null)
-    await createEmptyDataset(podRootUrl + POSTS_DIR);
-    await setReadAccess(podRootUrl + POSTS_DIR, null)
     let [socialDataset, error] = await createEmptyDataset(podRootUrl + SOCIAL_DATASET);
     await createSampleProfile(socialDataset, podRootUrl + SOCIAL_DATASET);
     await setReadAccess(podRootUrl + SOCIAL_DATASET, null)
+
+    // Posts - public read access to the containing 
+    // directory but not to individual hosts
+    await createEmptyDataset(podRootUrl + POSTS_DIR);
+    await setReadAccess(podRootUrl + POSTS_DIR, null)
+
+    // Connections - no public read access
+    await createEmptyDataset(podRootUrl + CONNECTIONS_DIR);
+    await createEmptyDataset(podRootUrl + CONNECTIONS_DIR + PEOPLE_DATASET);
 }

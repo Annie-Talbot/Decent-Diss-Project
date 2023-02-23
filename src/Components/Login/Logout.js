@@ -1,7 +1,7 @@
 import React from 'react';
 import { logout } from '@inrupt/solid-client-authn-browser';
 import { Button } from '@mantine/core';
-import { AppStates } from '../Constants/AppStates';
+import { AppStates } from '../Core/Constants/AppStates';
 
 /**
  * A React Class component.
