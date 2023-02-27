@@ -4,7 +4,6 @@ import { createErrorNotification } from "../Core/Notifications/ErrorNotification
 import {Post} from "./Post";
 
 async function handleDeletePost(post, posts, host) {
-    console.log("handle delete");
     const [success, error] = await deletePost(post.dir);
     if (!success) {
         createErrorNotification(error);

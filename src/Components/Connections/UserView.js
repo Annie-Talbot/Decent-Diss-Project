@@ -1,6 +1,6 @@
 import { Paper, Skeleton, Stack, Title } from "@mantine/core";
-import getProfile from "../../SOLID/ProfileFetcher";
-import { Profile } from "../Profile/ProfilePage";
+import {getProfile}from "../../SOLID/ProfileFetcher";
+import { Profile } from "../Profile/Profile";
 import React from "react";
 import { fetchPosts } from "../../SOLID/PostHandler";
 import { POSTS_DIR } from "../../SOLID/Utils";
@@ -22,7 +22,7 @@ export class UserView extends React.Component {
 
     async componentDidMount() {
         // Fetch profile
-        const profile = await getProfile(this.podRoot);
+        const [profile, error] = await getProfile(this.podRoot);
         // Fetch posts
         const [posts, errors] = await fetchPosts(this.podRoot + POSTS_DIR);
 

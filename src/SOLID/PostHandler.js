@@ -1,7 +1,7 @@
 import { buildThing, createSolidDataset, createThing, getDatetime, getFile, getSolidDataset, getSourceUrl, getStringNoLocale, getThing, getUrl, saveFileInContainer, saveSolidDatasetAt, setThing } from "@inrupt/solid-client";
 import { fetch } from '@inrupt/solid-client-authn-browser'
 import { SCHEMA_INRUPT } from "@inrupt/vocab-common-rdf";
-import { GetPostDatasetUrl, POST_DETAILS, getChildUrlsList, deleteDirectory, simplifyError, makeId, createEmptyDataset, DATE_CREATED, TITLE } from "./Utils";
+import { GetPostDatasetUrl, POST_DETAILS, getChildUrlsList, deleteDirectory, simplifyError, makeId, createEmptyDataset, DATE_CREATED, TITLE, getImage } from "./Utils";
 import { getAllAgentWebIDs, setAllReadAccess } from './AccessHandler'
 
 
@@ -57,12 +57,11 @@ async function getPost(postDir, postName) {
     const postImageLocation = getUrl(postThing, SCHEMA_INRUPT.image, { fetch: fetch });
     let postImg = null;
     if (postImageLocation) {
-        try {
-            const imgFile = await getFile(postImageLocation, { fetch: fetch });
-            postImg = URL.createObjectURL(imgFile);
-        } catch (error) {
-            return [null, simplifyError(error, errContext)];
+        const [image, error] = getImage(postImageLocation);
+        if (error) {
+            return [null, error]
         }
+        postImg = URL.createObjectURL(image);
     }
     // TODO: Missing author details as need some utility functions to do that
 

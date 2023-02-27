@@ -1,4 +1,4 @@
-import { createSolidDataset, saveSolidDatasetAt, FetchError, deleteFile, deleteSolidDataset, getContainedResourceUrlAll, getSolidDataset, isContainer } from "@inrupt/solid-client";
+import { createSolidDataset, saveSolidDatasetAt, FetchError, deleteFile, deleteSolidDataset, getContainedResourceUrlAll, getSolidDataset, isContainer, getFile } from "@inrupt/solid-client";
 import { fetch } from "@inrupt/solid-client-authn-browser";
 
 export const DATE_CREATED = "http://schema.org/dateCreated";
@@ -174,6 +174,16 @@ export async function createEmptyDataset(datasetUrl) {
         return [dataset, null];
     } catch (error) {
         return [null, simplifyError(error, "Encountered when creating dataset at " + datasetUrl)]
+    }
+}
+
+
+export async function getImage(url) {
+    try {
+        const imageBlob = await getFile(url, { fetch: fetch });
+        return [imageBlob, null];
+       } catch (error) {
+        return [null, simplifyError(error, "Could not load image at " + url)]
     }
 }
 

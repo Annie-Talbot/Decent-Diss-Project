@@ -80,8 +80,7 @@ async function createSampleProfile(socialDataset, datasetUrl) {
         datasetUrl,
         socialDataset,
         { fetch: fetch }
-      );
-      
+    );
 }
 
 /**

@@ -1,42 +1,7 @@
 import React from 'react';
-import { Avatar, Center, Container, Divider, Paper, Text, LoadingOverlay, SimpleGrid, Stack, Title} from '@mantine/core';
-import getProfile from '../../SOLID/ProfileFetcher';
-
-export function Profile(props)  {
-    let profileData = props.profileData;
-    let dataDisplay = [];
-    if (profileData.profilePic) {
-        dataDisplay.push(
-            (
-                <Center>
-                    <Avatar radius="md" size="xl" color="sage" 
-                        src={profileData.profilePic? profileData.profilePic : null} />
-                </Center>
-            )
-        );
-    }
-    if (profileData.name) {
-        dataDisplay.push((
-        <Container style={{ marginLeft: "2%"}}>
-            <Title order={3}>Username: </Title>
-            <Text style={{ marginLeft: "10px"}}>{profileData.name}</Text>
-        </Container>)
-        );
-    }
-    if (profileData.description) {
-        dataDisplay.push((
-        <Container style={{ marginLeft: "2%"}}>
-            <Title order={3}>About me: </Title>
-            <Text style={{ marginLeft: "10px"}}>{profileData.description}</Text>
-        </Container>)
-        );
-    }
-    return (
-        <Stack>
-            {dataDisplay}
-        </Stack>
-    );
-}
+import { ActionIcon, Button, Center, Group, Paper} from '@mantine/core';
+import { Profile } from './Profile';
+import { IconArrowBack } from '@tabler/icons';
 
 
 class ProfilePage extends React.Component {
@@ -45,28 +10,43 @@ class ProfilePage extends React.Component {
         this.app = props.app;
 
         this.state = {
-            loading: true,
-            profileData: {}
+            profileData: {},
+            editing: false,
         }
     }
 
-    async componentDidMount() {
-        // TODO: get profile info here
-        const profile = await getProfile(this.app.podRootDir);
-        console.log(profile);
-        this.setState(prevState => (
-            {...prevState, 
-            loading: false,
-            profileData: profile,
-        }))
-
-    }
-
     render() {
+        console.log("editing: " + this.state.editing);
         return (
             <Paper p="sm" shadow="xs">
-                <LoadingOverlay visible={this.state.loading} overlayBlur={2} />
-                <Profile profileData={this.state.profileData} />
+                <Group position="flex-start" style={{height: "24px", marginBottom: "5px"}}>
+                    {this.state.editing? <ActionIcon
+                        onClick={() => {this.setState(prevState => (
+                            {...prevState, 
+                                editing: false,
+                            }))}}
+                    >
+                        <IconArrowBack />
+                    </ActionIcon>: <></>}
+                </Group>
+                <Profile 
+                    userPod={this.app.podRootDir} 
+                    profileData={this.state.profileData} 
+                    editing={this.state.editing}
+                />
+                <Center>
+                    {!this.state.editing &&
+                        <Button visible={this.state.editing} 
+                            onClick={() => this.setState(prevState => ({
+                            ...prevState,
+                            editing: true,
+                            }))
+                        }>
+                            Edit
+                        </Button>
+                    }
+                </Center>
+                
             </Paper>
         );
     }
