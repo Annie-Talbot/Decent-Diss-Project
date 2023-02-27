@@ -21,14 +21,10 @@ export class UserView extends React.Component {
     }
 
     async componentDidMount() {
-        // Fetch profile
-        const [profile, error] = await getProfile(this.podRoot);
         // Fetch posts
         const [posts, errors] = await fetchPosts(this.podRoot + POSTS_DIR);
-
         this.setState(prevState => (
             {...prevState, 
-            profileData: profile,
             postList: posts,
             loading: false
         }))
@@ -43,7 +39,10 @@ export class UserView extends React.Component {
                         <Title>
                             Profile
                         </Title>
-                        <Profile profileData={this.state.profileData}/>
+                        <Profile 
+                            userPod={this.podRoot} 
+                            editing={false}
+                        />
                     </Paper>
                     <Paper shadow="sm" p="md" withBorder style={{width:"100%",}}>
                         <Title>

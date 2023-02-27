@@ -1,4 +1,4 @@
-import { ActionIcon, MultiSelect, Center, FileInput, Modal, Space, Textarea, TextInput } from "@mantine/core";
+import { ActionIcon, MultiSelect, Center, FileInput, Modal, Space, Textarea, TextInput, Checkbox, Title } from "@mantine/core";
 import { IconRocket } from "@tabler/icons";
 import { useState } from "react";
 import { ACCESS_AGENT_TYPE } from "../../SOLID/AccessHandler";
@@ -31,6 +31,7 @@ export function CreatePostForm(props) {
         text: "",
         image: null,
         agentAccess: [],
+        publicAccess: 0,
     });
     let accessOptions = [];
     props.connections.forEach(function(person, index) {
@@ -75,7 +76,7 @@ export function CreatePostForm(props) {
             />
             <Space />
             <FileInput
-                value={post.image? post.image.name: ""}
+                value={post.image}
                 onChange={(event) => {
                     setPost(
                     {...post, 
@@ -86,9 +87,19 @@ export function CreatePostForm(props) {
                 description="Add an image to your post."
                 withAsterisk
             />
-            <Space />
+            <Space h="md"/>
+            <Center><Title c="grey" order={5}>Access Control</Title></Center>
+            <Checkbox
+                label="Public Access"
+                value={post.publicAccess}
+                onChange={(event) => setPost({
+                    ...post,
+                    publicAccess: event.currentTarget.value == true? 0: 1,
+                })}
+            />
             <MultiSelect
                 data={accessOptions}
+                disabled={post.publicAccess}
                 label="Who would you like to give access to"
                 placeholder="Pick all that you like"
                 value={post.agentAccess}

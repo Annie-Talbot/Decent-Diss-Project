@@ -48,3 +48,7 @@ export async function setAllReadAccess(resourceUrls, agentList) {
     })
     return errorList;
 }
+
+export async function setAllPublicReadAccess(resourceUrls) {
+    resourceUrls.forEach(async (res) => await setReadAccess(res));
+}

@@ -2,7 +2,7 @@ import { buildThing, createSolidDataset, createThing, getDatetime, getFile, getS
 import { fetch } from '@inrupt/solid-client-authn-browser'
 import { SCHEMA_INRUPT } from "@inrupt/vocab-common-rdf";
 import { GetPostDatasetUrl, POST_DETAILS, getChildUrlsList, deleteDirectory, simplifyError, makeId, createEmptyDataset, DATE_CREATED, TITLE, getImage } from "./Utils";
-import { getAllAgentWebIDs, setAllReadAccess } from './AccessHandler'
+import { getAllAgentWebIDs, setAllPublicReadAccess, setAllReadAccess, setReadAccess } from './AccessHandler'
 
 
 
@@ -57,7 +57,7 @@ async function getPost(postDir, postName) {
     const postImageLocation = getUrl(postThing, SCHEMA_INRUPT.image, { fetch: fetch });
     let postImg = null;
     if (postImageLocation) {
-        const [image, error] = getImage(postImageLocation);
+        const [image, error] = await getImage(postImageLocation);
         if (error) {
             return [null, error]
         }
@@ -87,7 +87,6 @@ async function getPost(postDir, postName) {
  * a seperate post's information.
  */
 export async function fetchPosts(postContainerUrl) {
-    console.log("Fetching posts from " + postContainerUrl);
     let postList = [];
     let postUrlList = [];
     let error;
@@ -125,7 +124,6 @@ export async function fetchPosts(postContainerUrl) {
  * @param {string} postDir URL of the post's directory
  */
 export async function deletePost(postDir) {
-    console.log("deleting " + postDir);
     return await deleteDirectory(postDir);
 }
 
@@ -193,13 +191,13 @@ export async function createPost(post) {
     } catch(error) {
         return [false, simplifyError(error, "Encountered whilst trying to create post dataset.")]
     }
-    // Set post public access to private
-    // await setReadAccess(postDirUrl + id, "https://id.inrupt.com/at698");
-
-    // Generate list of agents who will have read access
-    let accessList = await getAllAgentWebIDs(post.agentAccess);
-    // Set access for post directory, image file, and post dataset
-    await setAllReadAccess([postDirUrl, postImgUrl, postDatasetUrl], accessList);
-
+    if (post.publicAccess) {
+        await setAllPublicReadAccess([postDirUrl, postImgUrl, postDatasetUrl]);
+    } else {
+        // Generate list of agents who will have read access
+        let accessList = await getAllAgentWebIDs(post.agentAccess);
+        // Set access for post directory, image file, and post dataset
+        await setAllReadAccess([postDirUrl, postImgUrl, postDatasetUrl], accessList);
+    }
     return [true, null];
 }

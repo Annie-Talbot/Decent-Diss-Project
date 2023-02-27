@@ -1,6 +1,5 @@
 import { Card, Text, Image, Badge, Menu, ActionIcon, Stack, Grid, Title } from '@mantine/core';
 import { IconEdit, IconDotsVertical, IconTrash } from '@tabler/icons';
-import { Component } from 'react';
 
 export function Post(props) {
     return (

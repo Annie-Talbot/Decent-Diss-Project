@@ -26,7 +26,6 @@ async function handleDeletePost(post, posts, host) {
 export function PostGrid(props) {
 
     const postComponents = props.posts.map((post) => {
-        console.log(post);
         return (<Post
             authorised={props.authorised}
             post={post}
