@@ -25,8 +25,9 @@ async function handleDeletePost(post, posts, host) {
 
 export function PostGrid(props) {
 
-    const postComponents = props.posts.map((post) => {
+    const postComponents = props.posts.map((post, index) => {
         return (<Post
+            key={index}
             authorised={props.authorised}
             post={post}
             deletePost={() => handleDeletePost(post, props.posts, props.host)} 

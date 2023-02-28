@@ -69,7 +69,6 @@ export async function createPerson(person) {
         .build();
 
     // add person Thing to people Dataset and save
-    console.log(dataset);
     dataset = setThing(dataset, thing);
     try {
         await saveSolidDatasetAt(person.dataset, dataset, {fetch: fetch});
@@ -84,7 +83,6 @@ export async function createPerson(person) {
 
 
 function getPersonFromThing(thing) {
-    console.log(thing);
     if (getUrl(thing, RDF.type) !== SCHEMA_INRUPT.Person) {
         return [null, "Thing is not a person."];
     }
@@ -115,8 +113,6 @@ function getPersonFromThing(thing) {
 
 async function getAllPeople(peopleDataset, datasetUrl) {
     const peopleThings = getThingAll(peopleDataset);
-    console.log(peopleThings)
-
     let people = [];
     let errorList = [];
     peopleThings.forEach((thing) => {

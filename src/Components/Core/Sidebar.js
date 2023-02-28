@@ -1,6 +1,6 @@
 import React from 'react';
 import { Navbar, ThemeIcon, UnstyledButton, Group, Text } from '@mantine/core';
-import { IconUser, IconSettings, IconHome, IconAffiliate } from '@tabler/icons';
+import { IconUser, IconHome, IconAffiliate, IconFlipFlops } from '@tabler/icons';
 import { AppStates } from './Constants/AppStates';
 
 /**
@@ -26,10 +26,10 @@ const data = [
         state:AppStates.Connections 
     },
     { 
-        icon: <IconSettings size={16} />, 
-        color: 'grape', 
-        label: 'Settings', 
-        state:AppStates.Home 
+        icon: <IconFlipFlops size={16} />, 
+        color: 'pink', 
+        label: 'Notifications', 
+        state: AppStates.Notifications 
     },
 ];
 
@@ -56,6 +56,7 @@ function SideBarItem({icon, label, color, state}, app) {
                 theme.colorScheme === 'dark' ? theme.colors.dark[6] : theme.colors.gray[0],
             },
             })}
+            key={label}
             onClick={() => {
                 if (app.state.loggedIn !== false) {
                     app.setState(prevState => (

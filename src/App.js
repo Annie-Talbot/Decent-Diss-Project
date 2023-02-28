@@ -14,6 +14,7 @@ import { SocialDirErrorPopup } from './Components/Login/SocialDirErrorPopup';
 import { getPodUrlAll } from "@inrupt/solid-client";
 import { NotificationsProvider } from '@mantine/notifications';
 import { ConnectionsPage } from './Components/Connections/ConnectionsPage';
+import { NotificationsPage } from './Components/Notifications/NotificationsPage';
 
 /**
  * App Component represents the entire app, it uses it's 
@@ -92,6 +93,8 @@ class App extends React.Component {
             content.push(<ProfilePage app={this}/>);
         } else if (this.state.currPage === AppStates.Connections) {
             content.push(<ConnectionsPage app={this}/>);
+        } else if (this.state.currPage === AppStates.Notifications) {
+            content.push(<NotificationsPage app={this}/>);
         }  else {
             this.setState(prevState => (
                 {...prevState, 

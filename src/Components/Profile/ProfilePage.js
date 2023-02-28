@@ -16,7 +16,6 @@ class ProfilePage extends React.Component {
     }
 
     render() {
-        console.log("editing: " + this.state.editing);
         return (
             <Paper p="sm" shadow="xs">
                 <Group position="flex-start" style={{height: "24px", marginBottom: "5px"}}>
@@ -36,7 +35,7 @@ class ProfilePage extends React.Component {
                 />
                 <Center>
                     {!this.state.editing &&
-                        <Button visible={this.state.editing} 
+                        <Button
                             onClick={() => this.setState(prevState => ({
                             ...prevState,
                             editing: true,

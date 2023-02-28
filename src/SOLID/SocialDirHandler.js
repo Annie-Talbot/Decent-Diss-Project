@@ -1,8 +1,8 @@
 import { fetch } from '@inrupt/solid-client-authn-browser'
 import { buildThing, getThing, createThing, FetchError, getSolidDataset, saveSolidDatasetAt, setThing, deleteSolidDataset } from '@inrupt/solid-client';
 import { FOAF, SCHEMA_INRUPT } from '@inrupt/vocab-common-rdf';
-import { CONNECTIONS_DIR, createEmptyDataset, GROUP_DATASET, PEOPLE_DATASET, POSTS_DIR, PROFILE_THING, SOCIAL_DATASET, SOCIAL_ROOT } from './Utils';
-import { setReadAccess } from './AccessHandler'
+import { CONNECTIONS_DIR, createEmptyDataset, GROUP_DATASET, NOTIFICATIONS_DIR, PEOPLE_DATASET, POSTS_DIR, PROFILE_THING, SOCIAL_DATASET, SOCIAL_ROOT } from './Utils';
+import { setPublicAppendAccess, setReadAccess } from './AccessHandler'
 
 /**
  * A function to check if there is a Dataset at the given URL.
@@ -112,7 +112,14 @@ export async function validateSocialDir(podRootUrl) {
     if (! await thingExists(socialDatset, podRootUrl + PROFILE_THING)) {
         return [false, "No profile found at " + PROFILE_THING + "."]
     }
-
+    // check if connections directory exists
+    if (! await datasetExists(podRootUrl + CONNECTIONS_DIR)) {
+        return [false, "No " + CONNECTIONS_DIR + " directory found."]
+    }
+    // check if notifications directory exists
+    if (! await datasetExists(podRootUrl + NOTIFICATIONS_DIR)) {
+        return [false, "No " + NOTIFICATIONS_DIR + " directory found."]
+    }
     return [true, null];
 }
 
@@ -132,17 +139,21 @@ export async function createSocialDirectory(podRootUrl) {
     }
     // Main - public read access to directory and profile
     await createEmptyDataset(podRootUrl + SOCIAL_ROOT);
-    await setReadAccess(podRootUrl + SOCIAL_ROOT, null)
+    await setReadAccess(podRootUrl + SOCIAL_ROOT, null);
     let [socialDataset, error] = await createEmptyDataset(podRootUrl + SOCIAL_DATASET);
     await createSampleProfile(socialDataset, podRootUrl + SOCIAL_DATASET);
-    await setReadAccess(podRootUrl + SOCIAL_DATASET, null)
+    await setReadAccess(podRootUrl + SOCIAL_DATASET, null);
 
     // Posts - public read access to the containing 
     // directory but not to individual hosts
     await createEmptyDataset(podRootUrl + POSTS_DIR);
-    await setReadAccess(podRootUrl + POSTS_DIR, null)
+    await setReadAccess(podRootUrl + POSTS_DIR, null);
 
     // Connections - no public read access
     await createEmptyDataset(podRootUrl + CONNECTIONS_DIR);
     await createEmptyDataset(podRootUrl + CONNECTIONS_DIR + PEOPLE_DATASET);
+
+    // Notifications - public append access
+    await createEmptyDataset(podRootUrl + NOTIFICATIONS_DIR);
+    await setPublicAppendAccess(podRootUrl + NOTIFICATIONS_DIR);
 }

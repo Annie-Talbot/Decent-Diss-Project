@@ -12,6 +12,7 @@ export const POSTS_DIR = "social/posts/";
 export const SOCIAL_DATASET = "social/social";
 export const PROFILE_THING = "social/social#profile";
 export const CONNECTIONS_DIR = "social/connections/"
+export const NOTIFICATIONS_DIR = "social/notifications/"
 
 export function GetPostDatasetUrl(postDir, postName) {return postDir + postName;}
 export const POST_DETAILS = "#details";

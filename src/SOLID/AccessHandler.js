@@ -1,5 +1,6 @@
 import { universalAccess } from "@inrupt/solid-client";
 import { fetch } from "@inrupt/solid-client-authn-browser";
+
 /**
 * Sets the access of a resource to read-only. If agentID is null, 
 * public access is set. Otherwise, agent access is set.
@@ -51,4 +52,13 @@ export async function setAllReadAccess(resourceUrls, agentList) {
 
 export async function setAllPublicReadAccess(resourceUrls) {
     resourceUrls.forEach(async (res) => await setReadAccess(res));
+}
+
+export async function setPublicAppendAccess(resourceUrl) {
+    const appendAccess = {
+        read: false,
+        write: false,
+        append: true
+    }
+    await universalAccess.setPublicAccess(resourceUrl, appendAccess, {fetch: fetch});
 }
