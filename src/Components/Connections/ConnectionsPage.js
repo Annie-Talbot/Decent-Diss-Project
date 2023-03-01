@@ -1,12 +1,12 @@
 import { Paper, Button, Group, Stack, ActionIcon, Title, Divider, Grid } from "@mantine/core";
 import { IconArrowBack } from "@tabler/icons";
 import React from 'react';
-import { fetchPeople } from "../../SOLID/ConnectionHandler";
 import { CONNECTIONS_DIR, PEOPLE_DATASET } from "../../SOLID/Utils";
 import { CreatePersonForm } from "./CreatePersonForm";
-import { createErrorNotification } from "../Core/Notifications/ErrorNotification";
 import { PeopleList } from "./PeopleList";
 import { UserView } from "./UserView";
+import { PageLoader } from '../Core/PageLoader';
+import { createConnectionsDir, doesConnectionsDirExist } from "../../SOLID/ConnectionHandler";
 
 export const ViewStates = {
     Main: 0,
@@ -16,25 +16,14 @@ export const ViewStates = {
 export class ConnectionsPage extends React.Component {
     constructor(props) {
         super(props);
-        this.connectionsDir = props.app.podRootDir + CONNECTIONS_DIR;
+        this.podRootDir = props.app.podRootDir;
         this.state = {
             currView: ViewStates.Main,
-            peopleLoading: true,
-            peopleList: [],
             createPersonOpened: false,
+            peoplelistKey: 0,
         };
         this.viewUserWebID = "";
         this.viewUserPodRoot = "";
-    }
-
-    async updatePeople(host) {
-        const [peopleList, errorList] = await fetchPeople(host.connectionsDir + PEOPLE_DATASET);
-        errorList.forEach((error) => createErrorNotification(error));
-        host.setState(prevState => (
-            {...prevState, 
-            peopleLoading: false,
-            peopleList: peopleList,
-        }));
     }
 
     toggleCreatePersonPopup(host) {
@@ -48,8 +37,12 @@ export class ConnectionsPage extends React.Component {
         }));
     }
 
-    async componentDidMount() {
-        await this.updatePeople(this);
+
+    updatePeople(connectionsPage) {
+        connectionsPage.setState(prevState => ({
+            ...prevState,
+            peoplelistKey: connectionsPage.state.peoplelistKey + 1
+        }))
     }
 
     render() {
@@ -60,7 +53,7 @@ export class ConnectionsPage extends React.Component {
                     <CreatePersonForm 
                         opened={this.state.createPersonOpened}
                         toggleOpened={() => this.toggleCreatePersonPopup(this)}
-                        datasetUrl={this.connectionsDir + PEOPLE_DATASET}
+                        datasetUrl={this.podRootDir + CONNECTIONS_DIR + PEOPLE_DATASET}
                         updatePeople={() => this.updatePeople(this)}
                     />
                     <Grid grow>
@@ -76,8 +69,8 @@ export class ConnectionsPage extends React.Component {
                                     </Group>
                                     <PeopleList 
                                         host={this} 
-                                        people={this.state.peopleList} 
-                                        loading={this.state.peopleLoading}/>
+                                        podRootDir={this.podRootDir}
+                                    />
                                 </Stack>
                             </Paper>
                         </Grid.Col>
@@ -118,7 +111,15 @@ export class ConnectionsPage extends React.Component {
 
         return (
             <Paper p="sm" shadow="xs">
-                {content}
+                <PageLoader
+                    checkFunction={doesConnectionsDirExist}
+                    createFunction={createConnectionsDir}
+                    podRootDir={this.podRootDir}
+                    podStructureRequired="connections directory"
+                >
+                    {content}
+                </PageLoader>
+                
             </Paper>
         );
     }

@@ -1,6 +1,9 @@
-import { Paper, Button } from "@mantine/core";
+import { Paper, Button, Center, Title, Stack, Space } from "@mantine/core";
 import React from 'react';
-import { createConnectionRequest } from "../../SOLID/NotificationHandler";
+import { createConnectionRequest, createNotificationsDir, doesNotificationsDirExist } from "../../SOLID/NotificationHandler";
+import { createErrorNotification } from "../Core/Notifications/ErrorNotification";
+import { PageLoader } from "../Core/PageLoader";
+import { NotificationList } from "./NotificationList";
 
 export class NotificationsPage extends React.Component {
     constructor(props) {
@@ -9,15 +12,25 @@ export class NotificationsPage extends React.Component {
     }
 
     render() {
+
         return (
             <Paper p="sm" shadow="xs">
-                <Button onClick={() => createConnectionRequest({
-                        webId: "https://id.inrupt.com/at698",
-                        msg: "Hi, this is at698. Add me to your contacts!",
-                        socialPod: this.podRootDir
-                    }, this.podRootDir)}>
-                    create notification
-                </Button>
+                <PageLoader 
+                    checkFunction={doesNotificationsDirExist}
+                    createFunction={createNotificationsDir}
+                    podRootDir={this.podRootDir}
+                    podStructureRequired="notification directory"
+                >
+                    <Button onClick={() => createConnectionRequest({
+                            webId: "https://id.inrupt.com/at698",
+                            msg: "Hi, this is at698. Add me to your contacts!",
+                            socialPod: this.podRootDir
+                        }, this.podRootDir)}>
+                        create notification
+                    </Button>
+                    <Space h="md"/>
+                    <NotificationList podRootDir={this.podRootDir} />
+                </PageLoader>
             </Paper>
         );
     }

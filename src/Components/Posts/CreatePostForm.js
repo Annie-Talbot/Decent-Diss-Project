@@ -1,15 +1,11 @@
 import { ActionIcon, MultiSelect, Center, FileInput, Modal, Space, Textarea, TextInput, Checkbox, Title } from "@mantine/core";
 import { IconRocket } from "@tabler/icons";
-import { useState } from "react";
-import { ACCESS_AGENT_TYPE } from "../../SOLID/AccessHandler";
+import { useState, useEffect } from "react";
+import { fetchAllConnections } from "../../SOLID/ConnectionHandler";
 import { createPost } from "../../SOLID/PostHandler";
+import { POSTS_DIR } from "../../SOLID/Utils";
 import { createErrorNotification } from "../Core/Notifications/ErrorNotification";
-
-const userOptions = [
-    {value: [ACCESS_AGENT_TYPE.Person, 'https://id.inrupt.com/at698'], label: 'Annie T'},
-
-]
-
+import { createPlainNotification } from "../Core/Notifications/PlainNotification";
 
 async function handleCreatePost(post, connections, closePopup, updatePosts) {
     const agents = post.agentAccess.map((index) => connections[parseInt(index)])
@@ -20,26 +16,31 @@ async function handleCreatePost(post, connections, closePopup, updatePosts) {
         return;
     }
     closePopup();
+    createPlainNotification({title: "Success!", description: "Successfully created post."})
     updatePosts();
 }
 
 
 export function CreatePostForm(props) {
+    const [connections, setConnections] = useState([]);
     const [post, setPost] = useState({
-        dir: props.postDir,
+        dir: props.podRootDir + POSTS_DIR,
         title: "",
         text: "",
         image: null,
         agentAccess: [],
         publicAccess: 0,
     });
-    let accessOptions = [];
-    props.connections.forEach(function(person, index) {
-        accessOptions.push({
-            value: index.toString(),
-            label: person.nickname,
-        });
-    });
+
+    useEffect(() => {
+        fetchAllConnections(props.podRootDir).then(([connects, error]) => {
+            if (error) {
+                return;
+            }
+            setConnections(connects.map((c, i) => ({value: i.toString(), label: c.nickname})))
+        })
+    }, [props.podRootDir]);
+
     return (
         <Modal
             centered
@@ -97,18 +98,20 @@ export function CreatePostForm(props) {
                     publicAccess: event.currentTarget.value == true? 0: 1,
                 })}
             />
-            <MultiSelect
-                data={accessOptions}
-                disabled={post.publicAccess}
-                label="Who would you like to give access to"
-                placeholder="Pick all that you like"
-                value={post.agentAccess}
-                onChange={(event) => {
-                    setPost(
-                    {...post, 
-                        agentAccess: event}
-                ); }}
-            />
+            {connections.length > 0 &&
+                <MultiSelect
+                    data={connections}
+                    disabled={post.publicAccess}
+                    label="Who would you like to give access to"
+                    placeholder="Pick all that you like"
+                    value={post.agentAccess}
+                    onChange={(event) => {
+                        setPost(
+                        {...post, 
+                            agentAccess: event}
+                    ); }}
+                />
+            }
             <Space h="md"/>
             <Center>
                 <ActionIcon
@@ -117,7 +120,7 @@ export function CreatePostForm(props) {
                     size="xl"
                     onClick={() => {
                         handleCreatePost(post, 
-                            props.connections, 
+                            connections, 
                             props.toggleOpened, 
                             props.updatePosts);
                     }}

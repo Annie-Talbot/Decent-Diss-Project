@@ -1,11 +1,34 @@
 import { buildThing, createSolidDataset, createThing, getDatetime, getFile, getSolidDataset, getSourceUrl, getStringNoLocale, getThing, getUrl, saveFileInContainer, saveSolidDatasetAt, setThing } from "@inrupt/solid-client";
 import { fetch } from '@inrupt/solid-client-authn-browser'
 import { SCHEMA_INRUPT } from "@inrupt/vocab-common-rdf";
-import { GetPostDatasetUrl, POST_DETAILS, getChildUrlsList, deleteDirectory, simplifyError, makeId, createEmptyDataset, DATE_CREATED, TITLE, getImage } from "./Utils";
+import { GetPostDatasetUrl, POST_DETAILS, getChildUrlsList, deleteDirectory, simplifyError, makeId, createEmptyDataset, DATE_CREATED, TITLE, getImage, POSTS_DIR, delay } from "./Utils";
 import { getAllAgentWebIDs, setAllPublicReadAccess, setAllReadAccess, setReadAccess } from './AccessHandler'
 
+export async function doesPostsDirExist(podRootDir) {
+    try {
+        await getSolidDataset(
+            podRootDir + POSTS_DIR, 
+            { fetch: fetch }
+        )
+        return [true, null];
+    } catch (error) {
+        let e = simplifyError(error, "Whilst checking if posts directory exists.");
+        if (e.code == 404) {
+            return [false, null];
+        }
+        return [false, e];
+    }
+}
 
 
+export async function createPostsDir(podRootDir) {
+    const error = await createEmptyDataset(podRootDir + POSTS_DIR)[1];
+    if (error) {
+        return error;
+    }
+    await delay(500);
+    await setReadAccess(podRootDir + POSTS_DIR, null);
+}
 
 /**
  * This function retrieves all information about a post and returns
@@ -86,11 +109,11 @@ async function getPost(postDir, postName) {
  * @returns {[dict]} A list of dictionaries, each one container 
  * a seperate post's information.
  */
-export async function fetchPosts(postContainerUrl) {
+export async function fetchPosts(podRootDir) {
     let postList = [];
     let postUrlList = [];
     let error;
-    [postUrlList, error] = await getChildUrlsList(postContainerUrl);
+    [postUrlList, error] = await getChildUrlsList(podRootDir + POSTS_DIR);
     if (error) {
         return [[], [error]];
     }
@@ -101,7 +124,7 @@ export async function fetchPosts(postContainerUrl) {
     // post container URL: https://provider/podname/social/posts/postname/
     // post dataset URL: https://provider/podname/social/posts/postname/postname
 
-    const postRegex = new RegExp(postContainerUrl + '(.*)/');
+    const postRegex = new RegExp(podRootDir + POSTS_DIR + '(.*)/');
     let post;
     let errorList = [];
     for (const i in postUrlList) {

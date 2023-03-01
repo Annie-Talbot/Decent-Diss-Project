@@ -1,19 +1,77 @@
 import { createSolidDataset, createThing, getDate, getSolidDataset, 
     getStringNoLocale, getThing, getUrl, saveSolidDatasetAt, addDate, setThing,
-    removeStringNoLocale, removeDate, removeUrl, deleteFile, addStringNoLocale, saveFileInContainer, addUrl, getSourceUrl } from "@inrupt/solid-client";
+    removeStringNoLocale, removeDate, removeUrl, deleteFile, addStringNoLocale, 
+    saveFileInContainer, addUrl, getSourceUrl, buildThing } from "@inrupt/solid-client";
 import { fetch } from '@inrupt/solid-client-authn-browser'
 import { FOAF, SCHEMA_INRUPT } from "@inrupt/vocab-common-rdf";
 import { setReadAccess } from "./AccessHandler";
-import { getImage, PROFILE_THING, simplifyError, SOCIAL_DATASET, SOCIAL_ROOT } from "./Utils";
+import { delay, getImage, PROFILE_DATASET, PROFILE_THING, simplifyError, SOCIAL_DATASET, SOCIAL_ROOT } from "./Utils";
+
+
+
+export async function doesProfileExist(podRootDir) {
+    try {
+        const dataset = await getSolidDataset(
+            podRootDir + PROFILE_DATASET, 
+            { fetch: fetch }
+        )
+        const thing = getThing(dataset, podRootDir + PROFILE_THING);
+        if (thing == null) {
+            return [false, null]
+        }
+        return [true, null];
+    } catch (error) {
+        let e = simplifyError(error, "Whilst checking if profile exists.");
+        if (e.code == 404) {
+            return [false, null];
+        }
+        return [false, e];
+    }
+}
+
+export async function createSampleProfile(podRootDir) {
+    let profileThing  = buildThing(createThing({ name: "me" }))
+        .addStringNoLocale(SCHEMA_INRUPT.name, "CoolNewUser")
+        .addStringNoLocale(SCHEMA_INRUPT.description, "I'm a new user!")
+        .addDate(FOAF.birthday, new Date("2000-03-07"))
+        .build();
+    let profileDataset = createSolidDataset();
+    profileDataset = setThing(profileDataset, profileThing);
+    try {
+        await saveSolidDatasetAt(
+            podRootDir + PROFILE_DATASET,
+            profileDataset,
+            { fetch: fetch }
+        );
+        await delay(500);
+        await setReadAccess(podRootDir + PROFILE_DATASET, null)
+        return null;
+    } catch (error) {
+        return simplifyError(error);
+    }
+    
+}
+
+
 
 export async function getProfile(podRootUrl) {
-    const profileDataset = await getSolidDataset(
-        podRootUrl + SOCIAL_DATASET, 
-        { fetch: fetch }
-    );
-    const profileThing = getThing(profileDataset, podRootUrl + PROFILE_THING, 
-                                    { fetch: fetch });
     let profile = {};
+    let profileDataset;
+    try {
+        profileDataset = await getSolidDataset(
+            podRootUrl + PROFILE_DATASET, 
+            { fetch: fetch }
+        );
+    } catch (error) {
+        return [profile, simplifyError(error)]
+    }
+    const profileThing = getThing(profileDataset, podRootUrl + PROFILE_THING, 
+        { fetch: fetch });
+    if (profileThing == null) {
+        return [profile, {code: 0, title: "No profile Thing found", 
+            description: "Whilst attempting to load profile."}];
+    }
+    
     // name
     profile["name"] = getStringNoLocale(
         profileThing, 
@@ -77,7 +135,7 @@ export async function updateProfile(podRootUrl, profile) {
     let errors = [];
     let success = true;
     let profileDataset = await getSolidDataset(
-        podRootUrl + SOCIAL_DATASET, 
+        podRootUrl + PROFILE_DATASET, 
         { fetch: fetch }
     );
     if (profileDataset == null) {
@@ -120,11 +178,11 @@ export async function updateProfile(podRootUrl, profile) {
     profileDataset = setThing(profileDataset, profileThing);
     try {
         await saveSolidDatasetAt(
-            podRootUrl + SOCIAL_DATASET,
+            podRootUrl + PROFILE_DATASET,
             profileDataset,
             { fetch: fetch }
         );
-        await setReadAccess(podRootUrl + SOCIAL_DATASET);
+        await setReadAccess(podRootUrl + PROFILE_DATASET);
     } catch (e) {
         errors.push(simplifyError(e, "Whilst saving profile dataset."));
         success = false;

@@ -1,20 +1,17 @@
 import React from 'react';
 import './css/App.css';
-import Login from './Components/Login/LoginPage';
+import LoginPage from './Components/Login/LoginPage';
 import SideBar from './Components/Core/Sidebar'
-import { AppShell, Header, LoadingOverlay, MantineProvider } from '@mantine/core';
+import { AppShell, Header, MantineProvider } from '@mantine/core';
 import AppHeader from './Components/Core/Header';
 import { PostsPage } from './Components/Posts/PostsPage';
 import { AppStates } from './Components/Core/Constants/AppStates';
-import { handleIncomingRedirect, getDefaultSession } from '@inrupt/solid-client-authn-browser'
 import { AppTheme } from './Components/Core/Constants/AppTheme';
 import ProfilePage from './Components/Profile/ProfilePage';
-import { validateSocialDir } from './SOLID/SocialDirHandler';
-import { SocialDirErrorPopup } from './Components/Login/SocialDirErrorPopup';
-import { getPodUrlAll } from "@inrupt/solid-client";
 import { NotificationsProvider } from '@mantine/notifications';
 import { ConnectionsPage } from './Components/Connections/ConnectionsPage';
 import { NotificationsPage } from './Components/Notifications/NotificationsPage';
+import { SocialDirectoryPage } from './Components/Login/SocialDirectoryPage';
 
 /**
  * App Component represents the entire app, it uses it's 
@@ -24,73 +21,23 @@ class App extends React.Component {
     constructor(props) {
         super(props);
         this.podRootDir = '';
-        this.socialDirError = '';
+        this.webId = '';
         this.state = {
             currPage: AppStates.LogIn,
             loggedIn: false,
-            socialDir: false,
-            loading:true,
         }
     }
-
-    async componentDidMount() {
-        // Check if we are in the correct state, or if 
-        // something has changed e.g. Just been logged in
-        if (this.state.loggedIn === false) {
-            // Check if we've just returned from log in redirect
-            await handleIncomingRedirect();
-            if (getDefaultSession().info.isLoggedIn) {
-                // User has just logged in
-                // Attempt to find root social directory
-                console.log(getDefaultSession().info);
-                const webId = getDefaultSession().info.webId;
-                const rootList = await getPodUrlAll(webId, {fetch: fetch});
-                this.podRootDir = rootList[0];
-                
-                console.log(this.podRootDir);
-                const [valid, error] = await validateSocialDir(this.podRootDir);
-                let nextState = AppStates.Profile
-                if (!valid) {
-                    this.socialDirError = error;
-                    nextState = AppStates.LogIn
-                }
-
-                this.setState(prevState => (
-                    {...prevState, 
-                    loggedIn: true,
-                    loading: false,
-                    socialDir: valid,
-                    currPage: nextState,
-                }))
-                return;
-            }
-        }
-        // We are in correct state, display app.
-        this.setState(prevState => (
-            {...prevState,
-            loading: false,
-        }))
-        return;
-    }
-
-    socialDirFound(app) {
-        app.setState(prevState => (
-            {...prevState, 
-            socialDir: true,
-            currPage: AppStates.Profile,
-        }))
-    }
-
+    
     render() {
         let content = [];
-        content.push(SocialDirErrorPopup(this));
-
         if (this.state.currPage === AppStates.LogIn) {
-            content.push(<Login app={this}/>);
+            content.push(<LoginPage app={this}/>);
+        } else if (this.state.currPage === AppStates.FindSocialDirectory) {
+            content.push(<SocialDirectoryPage app={this}/>);
         } else if (this.state.currPage === AppStates.Posts) {
-            content.push(<PostsPage app={this}/>);
+            content.push(<PostsPage podRootDir={this.podRootDir}/>);
         } else if (this.state.currPage === AppStates.Profile) {
-            content.push(<ProfilePage app={this}/>);
+            content.push(<ProfilePage podRootDir={this.podRootDir}/>);
         } else if (this.state.currPage === AppStates.Connections) {
             content.push(<ConnectionsPage app={this}/>);
         } else if (this.state.currPage === AppStates.Notifications) {
@@ -101,7 +48,7 @@ class App extends React.Component {
                 currPage: AppStates.LogIn,
                 loggedIn: false,
             }))
-            content.push(<Login app={this}/>)
+            content.push(<LoginPage app={this}/>)
         }
         
                 
@@ -112,7 +59,6 @@ class App extends React.Component {
             theme={AppTheme}
             >
                 <NotificationsProvider>
-                    <LoadingOverlay visible={this.state.loading} overlayBlur={1}/>
                     <AppShell
                         padding = "md"
                         navbar = {<SideBar app={this}/>}

@@ -58,7 +58,7 @@ function SideBarItem({icon, label, color, state}, app) {
             })}
             key={label}
             onClick={() => {
-                if (app.state.loggedIn !== false) {
+                if (app.state.loggedIn !== false && app.podRootDir !== '') {
                     app.setState(prevState => (
                         {...prevState, 
                         currPage: state,

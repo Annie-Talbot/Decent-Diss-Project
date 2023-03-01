@@ -3,7 +3,7 @@ import { Username } from "./Username";
 import { useState, useEffect } from "react";
 import { Description } from "./Description"
 import { Button, Center, Group, Skeleton, Stack } from "@mantine/core";
-import {getProfile, updateProfile} from "../../SOLID/ProfileFetcher";
+import {getProfile, updateProfile} from "../../SOLID/ProfileHandler";
 import { ProfileAdditions } from "./ProfileAdditions";
 import { Birthday } from "./Birthday";
 import { createErrorNotification } from "../Core/Notifications/ErrorNotification";

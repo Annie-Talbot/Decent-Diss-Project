@@ -1,6 +1,8 @@
 import React from 'react';
 import { Paper, Title, Text, Stack, Divider, Button, Group, TextInput, LoadingOverlay, Modal } from '@mantine/core';
 import SolidLoginHandler from '../../SOLID/LoginHandler';
+import { AppStates } from '../Core/Constants/AppStates';
+import { getDefaultSession, handleIncomingRedirect } from '@inrupt/solid-client-authn-browser';
 
 
 /**
@@ -13,7 +15,7 @@ import SolidLoginHandler from '../../SOLID/LoginHandler';
  * @return {string} errMsg The message corresponding to the error recieved.
  * If no error, then the function returns ''.
  */
-class Login extends React.Component {
+class LoginPage extends React.Component {
     constructor(props) {
         super(props);
         this.app = props.app;
@@ -22,8 +24,6 @@ class Login extends React.Component {
             solidProviderError: '',
             loading: true,
         }
-        this.handleInputChange = this.handleInputChange.bind(this);
-        this.handleLogin = this.handleLogin.bind(this)
     }
 
     async handleLogin(loginController) {     
@@ -50,16 +50,43 @@ class Login extends React.Component {
         }));
     }
 
-    componentDidMount() {
-        if (this.app.state.loggedIn == false) {
+    socialDirCreated(app) {
+        app.setState(prevState => (
+            {...prevState, 
+            socialDir: true,
+            currPage: AppStates.Profile,
+        }))
+    }
+
+    async componentDidMount() {
+        // Check if we are in the correct state, or if 
+        // something has changed e.g. Just been logged in
+        if (this.app.state.loggedIn === false) {
+            // Check if we've just returned from log in redirect
+            await handleIncomingRedirect();
+            if (getDefaultSession().info.isLoggedIn) {
+                // User has just logged in
+                this.app.webId = getDefaultSession().info.webId;
+                // set app state to loggedIn and page to social directory page.
+                this.app.setState(prevState => ({
+                    ...prevState,
+                    loggedIn: true,
+                    currPage: AppStates.FindSocialDirectory
+                }))
+                return;
+            }
+            // Still not logged in
             this.setState(prevState => (
                 {...prevState, 
                 loading: false,
             }));
             return;
         }
+        console.log("oh no");
+        // loggedIn is true. Should not be here.
     }
 
+    // content.push((<SocialDirErrorPopup app={this} loadSocialDirectory={this.socialDirCreated}/>));
 
     render() {
         return (
@@ -84,7 +111,7 @@ class Login extends React.Component {
                         </Text>
                         <Group align="center" position="apart" spacing="sm">
                             <TextInput
-                                placeholder="http://localhost:3000/"
+                                placeholder="http://login.inrupt.com/"
                                 label="Solid Identity Provider"
                                 size="md"
                                 withAsterisk
@@ -121,4 +148,4 @@ class Login extends React.Component {
     }
 }
 
-export default Login;
+export default LoginPage;

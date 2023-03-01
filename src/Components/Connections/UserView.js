@@ -1,5 +1,4 @@
-import { Paper, Skeleton, Stack, Title } from "@mantine/core";
-import {getProfile}from "../../SOLID/ProfileFetcher";
+import { Center, Paper, Skeleton, Stack, Title, Text } from "@mantine/core";
 import { Profile } from "../Profile/Profile";
 import React from "react";
 import { fetchPosts } from "../../SOLID/PostHandler";
@@ -13,49 +12,32 @@ export class UserView extends React.Component {
         super(props);
         this.podRoot = props.podRoot;
         this.webID = props.webID;
-        this.state = {
-            profileData: {},
-            postList: [],
-            loading: true,
-        }
-    }
-
-    async componentDidMount() {
-        // Fetch posts
-        const [posts, errors] = await fetchPosts(this.podRoot + POSTS_DIR);
-        this.setState(prevState => (
-            {...prevState, 
-            postList: posts,
-            loading: false
-        }))
     }
 
     render() {
         return (
-            <Skeleton visible={this.state.loading}>
-                <Stack justify="flex-start" spacing="sm">
-                    
-                    <Paper shadow="sm" p="md" withBorder style={{width:"100%",}}>
-                        <Title>
-                            Profile
-                        </Title>
-                        <Profile 
-                            userPod={this.podRoot} 
-                            editing={false}
-                        />
-                    </Paper>
-                    <Paper shadow="sm" p="md" withBorder style={{width:"100%",}}>
-                        <Title>
-                            Posts
-                        </Title>
-                        <PostGrid
-                            authorised={false}
-                            posts={this.state.postList} 
-                            host={this}
-                        />
-                    </Paper>
-                </Stack>
-            </Skeleton>
+            <Stack justify="flex-start" spacing="sm">
+                
+                <Paper shadow="sm" p="md" withBorder style={{width:"100%",}}>
+                    <Title>
+                        Profile
+                    </Title>
+                    <Profile 
+                        userPod={this.podRoot} 
+                        editing={false}
+                    />
+                </Paper>
+                <Paper shadow="sm" p="md" withBorder style={{width:"100%",}}>
+                    <Title>
+                        Posts
+                    </Title>
+                    <PostGrid
+                        podRootDir={this.podRoot}
+                        authorised={false}
+                        emptyComponent={(<Center><Text> No posts to see...</Text></Center>)}
+                    />
+                </Paper>
+            </Stack>
         );
     }
 }

@@ -10,9 +10,11 @@ export const TITLE = "http://schema.org/title";
 export const SOCIAL_ROOT = "social/";
 export const POSTS_DIR = "social/posts/";
 export const SOCIAL_DATASET = "social/social";
-export const PROFILE_THING = "social/social#profile";
+export const PROFILE_DATASET = "social/profile";
+export const PROFILE_THING = "social/profile#me";
 export const CONNECTIONS_DIR = "social/connections/"
 export const NOTIFICATIONS_DIR = "social/notifications/"
+export const NOTIFICATIONS_THING = "#this"
 
 export function GetPostDatasetUrl(postDir, postName) {return postDir + postName;}
 export const POST_DETAILS = "#details";
@@ -187,4 +189,7 @@ export async function getImage(url) {
         return [null, simplifyError(error, "Could not load image at " + url)]
     }
 }
+
+export const delay = ms => new Promise(res => setTimeout(res, ms));
+
 
