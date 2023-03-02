@@ -1,5 +1,5 @@
 import { ActionIcon, Grid, Group, Select, Skeleton, Stack } from "@mantine/core";
-import { createGroupsDataset, createPeopleDataset, doesGroupsDatasetExist, doesPeopleDatasetExist, fetchPeople } from "../../SOLID/ConnectionHandler";
+import { createGroupsDataset, doesGroupsDatasetExist } from "../../SOLID/Connections/GroupHandler";
 import { createErrorNotification } from "../Core/Notifications/ErrorNotification";
 import { Person } from "./Person";
 import { useState, useEffect } from "react";

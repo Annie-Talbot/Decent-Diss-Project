@@ -6,7 +6,7 @@ import { CreatePersonForm } from "./CreatePersonForm";
 import { PeopleList } from "./PeopleList";
 import { UserView } from "./UserView";
 import { PageLoader } from '../Core/PageLoader';
-import { createConnectionsDir, doesConnectionsDirExist } from "../../SOLID/ConnectionHandler";
+import { createConnectionsDir, doesConnectionsDirExist } from "../../SOLID/Connections/ConnectionHandler";
 import { GroupsList } from "./GroupList";
 
 export const ViewStates = {

@@ -1,35 +1,9 @@
-import { asUrl, buildThing, createThing, getSolidDataset, getStringNoLocale,
-    getThing, getThingAll, getUrl, saveSolidDatasetAt, setThing } from "@inrupt/solid-client";
-import { fetch } from "@inrupt/solid-client-authn-browser";
-import { RDF, SCHEMA_INRUPT, VCARD } from "@inrupt/vocab-common-rdf";
-import { ACCESS_AGENT_TYPE } from "./AccessHandler";
-import { CONNECTIONS_DIR, createEmptyDataset, delay, GROUPS_DATASET, makeId, 
-    PEOPLE_DATASET, simplifyError } from "./Utils";
-
-
-
-export async function doesConnectionsDirExist(podRootDir) {
-    try {
-        await getSolidDataset(
-            podRootDir + CONNECTIONS_DIR, 
-            { fetch: fetch }
-        )
-        return [true, null];
-    } catch (error) {
-        let e = simplifyError(error, "Whilst checking if connections directory exists.");
-        if (e.code === 404) {
-            return [false, null];
-        }
-        return [false, e];
-    }
-}
-
-export async function createConnectionsDir(podRootDir) {
-    const error = await createEmptyDataset(podRootDir + CONNECTIONS_DIR)[1];
-    if (error) {
-        return error;
-    }
-}
+import { asUrl, buildThing, createThing, getSolidDataset, getStringNoLocale, 
+    getThing, getThingAll, getUrl, saveSolidDatasetAt, setThing } from '@inrupt/solid-client';
+import { createEmptyDataset, simplifyError } from '../Utils';
+import { fetch, delay, CONNECTIONS_DIR, PEOPLE_DATASET, makeId } from '@inrupt/solid-client-authn-browser';
+import { RDF, SCHEMA_INRUPT, VCARD } from '@inrupt/vocab-common-rdf';
+import { ACCESS_AGENT_TYPE } from '../AccessHandler';
 
 export async function doesPeopleDatasetExist(podRootDir) {
     try {
@@ -56,32 +30,7 @@ export async function createPeopleDataset(podRootDir) {
     return null;
 }
 
-export async function doesGroupsDatasetExist(podRootDir) {
-    try {
-        await getSolidDataset(
-            podRootDir + CONNECTIONS_DIR + GROUPS_DATASET,
-            {fetch: fetch}
-        );
-        return [true, null];
-    } catch (error) {
-        let e = simplifyError(error, "Whilst checking if groups dataset exists.");
-        if (e.code === 404) {
-            return [false, null];
-        }
-        return [false, e];
-    }
-}
-
-export async function createGroupsDataset(podRootDir) {
-    const error = await createEmptyDataset(podRootDir + CONNECTIONS_DIR + GROUPS_DATASET)[1];
-    if (error) {
-        return error;
-    }
-    await delay(500)
-    return null;
-}
-
-async function getPeopleDataset(url) {
+export async function getPeopleDataset(url) {
     try {
         let dataset = await getSolidDataset(url, {fetch: fetch})
         return [dataset, null];
@@ -168,7 +117,7 @@ function getPersonFromThing(thing) {
     
 }
 
-async function getAllPeople(peopleDataset) {
+export async function getAllPeople(peopleDataset) {
     const peopleThings = getThingAll(peopleDataset);
     let people = [];
     let errorList = [];
@@ -193,15 +142,4 @@ export async function fetchPeople(podRootDir) {
     // Turn dataset into people
     return await getAllPeople(dataset);
     
-}
-
-export async function fetchAllConnections(podRootDir) {
-    // Fetch people dataset
-    const [dataset, error] = await getPeopleDataset(podRootDir + CONNECTIONS_DIR + PEOPLE_DATASET);
-    if (error) {
-        return [null, error]
-    }
-
-    const people = await getAllPeople(dataset, podRootDir + CONNECTIONS_DIR + PEOPLE_DATASET)[0];
-    return [people, null]
 }

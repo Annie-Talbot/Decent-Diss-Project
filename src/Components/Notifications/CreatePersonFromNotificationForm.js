@@ -1,5 +1,5 @@
 import { Button, Group, Modal, Space, TextInput } from "@mantine/core";
-import { createPerson } from "../../SOLID/ConnectionHandler";
+import { createPerson } from "../../SOLID/Connections/PeopleHandler";
 import { isValidWebID } from "../../SOLID/Utils";
 import { createErrorNotification } from "../Core/Notifications/ErrorNotification";
 import { useState } from "react";

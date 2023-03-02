@@ -1,7 +1,7 @@
 import { ActionIcon, MultiSelect, Center, FileInput, Modal, Space, Textarea, TextInput, Checkbox, Title } from "@mantine/core";
 import { IconRocket } from "@tabler/icons";
 import { useState, useEffect } from "react";
-import { fetchAllConnections } from "../../SOLID/ConnectionHandler";
+import { fetchAllConnections } from "../../SOLID/Connections/ConnectionHandler";
 import { createPost } from "../../SOLID/PostHandler";
 import { POSTS_DIR } from "../../SOLID/Utils";
 import { createErrorNotification } from "../Core/Notifications/ErrorNotification";
@@ -95,7 +95,7 @@ export function CreatePostForm(props) {
                 value={post.publicAccess}
                 onChange={(event) => setPost({
                     ...post,
-                    publicAccess: event.currentTarget.value == true? 0: 1,
+                    publicAccess: event.currentTarget.value === true? 0: 1,
                 })}
             />
             {connections.length > 0 &&
