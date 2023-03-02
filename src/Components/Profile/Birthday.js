@@ -1,4 +1,4 @@
-import { Text, Textarea, Title, Grid, Center, ActionIcon } from "@mantine/core";
+import { Text, Title, Grid, Center, ActionIcon } from "@mantine/core";
 import { DatePicker } from "@mantine/dates";
 import { IconCake, IconTrash } from "@tabler/icons";
 

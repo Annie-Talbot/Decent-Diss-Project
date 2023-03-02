@@ -7,6 +7,7 @@ import { PeopleList } from "./PeopleList";
 import { UserView } from "./UserView";
 import { PageLoader } from '../Core/PageLoader';
 import { createConnectionsDir, doesConnectionsDirExist } from "../../SOLID/ConnectionHandler";
+import { GroupsList } from "./GroupList";
 
 export const ViewStates = {
     Main: 0,
@@ -24,6 +25,7 @@ export class ConnectionsPage extends React.Component {
         };
         this.viewUserWebID = "";
         this.viewUserPodRoot = "";
+        console.log(props.app.webId)
     }
 
     toggleCreatePersonPopup(host) {
@@ -55,6 +57,8 @@ export class ConnectionsPage extends React.Component {
                         toggleOpened={() => this.toggleCreatePersonPopup(this)}
                         datasetUrl={this.podRootDir + CONNECTIONS_DIR + PEOPLE_DATASET}
                         updatePeople={() => this.updatePeople(this)}
+                        webId={this.props.app.webId}
+                        pod={this.podRootDir}
                     />
                     <Grid grow>
                         <Grid.Col span={4} grow gutter="sm">
@@ -68,6 +72,7 @@ export class ConnectionsPage extends React.Component {
                                         </Button>
                                     </Group>
                                     <PeopleList 
+                                        key={this.state.peoplelistKey}
                                         host={this} 
                                         podRootDir={this.podRootDir}
                                     />
@@ -76,7 +81,19 @@ export class ConnectionsPage extends React.Component {
                         </Grid.Col>
                         <Grid.Col span={4}>
                             <Paper shadow="xs" p="md" withBorder>
-                                <Title order={2}> Group </Title>
+                                <Stack>
+                                    <Group position="apart">
+                                        <Title order={2}> Groups </Title>
+                                        <Button
+                                            onClick={() => this.toggleCreatePersonPopup(this)}>
+                                                Create a Group
+                                        </Button>
+                                    </Group>
+                                    <GroupsList 
+                                        host={this} 
+                                        podRootDir={this.podRootDir}
+                                    />
+                                </Stack>
                             </Paper>
                         </Grid.Col>
                     </Grid>

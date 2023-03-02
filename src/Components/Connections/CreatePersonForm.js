@@ -1,17 +1,51 @@
-import { ActionIcon, Center, Modal, Space, TextInput } from "@mantine/core";
-import { IconRocket } from "@tabler/icons";
+import { Button, Group, Modal, Space, TextInput } from "@mantine/core";
 import { useState } from "react";
 import { createPerson } from "../../SOLID/ConnectionHandler";
+import { createConnectionRequest, findSocialPodFromWebId } from "../../SOLID/NotificationHandler";
+import { isValidWebID } from "../../SOLID/Utils";
 import { createErrorNotification } from "../Core/Notifications/ErrorNotification";
 
-async function handleCreatePerson(person, closePopup, updatePeople) {
+async function handleCreateAPerson(person) {
     const error = await createPerson(person);
     if (error) {
         createErrorNotification(error);
+        return false;
+    }
+    return true;
+}
+
+async function sendConnectionRequest(webId, pod, person) {
+    // Check we can send a notification first.
+    let [personPod, error] = await findSocialPodFromWebId(person.webId);
+    if (error) {
+        createErrorNotification(error);
+        return false;
+    }
+    console.log("valid notif dir");
+    error = await createConnectionRequest({webId: webId, socialPod: pod, msg: "Hello."}, personPod);
+    if (error) {
+        createErrorNotification(error);
+        return false;
+    }
+    return true;
+}
+
+async function handleCreatePerson(webId, pod, person, closePopup, updatePeople, sendConnReq) {
+    if (!await isValidWebID(person.webId)) {
+        createErrorNotification({title: "Invalid webID.", 
+            description: "WebID is not a valid URL."});
         return;
     }
-    closePopup();
-    updatePeople();
+    let success = true;
+    if (sendConnReq) {
+        success = await sendConnectionRequest(webId, pod, person);
+    }
+    if (success) {
+        if (await handleCreateAPerson(person)) {
+            closePopup();
+            updatePeople();
+        }
+    }
 }
 
 
@@ -28,7 +62,7 @@ export function CreatePersonForm(props) {
             overlayOpacity={0.55}
             overlayBlur={3}
             opened={props.opened}
-            title={"Create a new person"}
+            title={"Add a new person"}
             onClose={props.toggleOpened}
         >
             <Space />
@@ -55,18 +89,24 @@ export function CreatePersonForm(props) {
                 description="The name to give to this user."
             />
             <Space h="md"/>
-            <Center>
-                <ActionIcon
-                    color="sage" 
-                    variant="filled"
-                    size="xl"
+            <Group>
+                <Button
                     onClick={() => {
-                        handleCreatePerson(person, props.toggleOpened, props.updatePeople);
+                        handleCreatePerson(props.webId, props.pod, 
+                            person, props.toggleOpened, props.updatePeople, true);
                     }}
                 >
-                    <IconRocket />
-                </ActionIcon>
-            </Center>
+                    Add and Send Connection Request
+                </Button>
+                <Button
+                    onClick={() => {
+                        handleCreatePerson(props.webId, props.pod, 
+                            person, props.toggleOpened, props.updatePeople, false);
+                    }}
+                >
+                    Just Add
+                </Button>
+            </Group>
             
         </Modal>
     );

@@ -1,5 +1,5 @@
-import { ActionIcon, Grid, Select, Skeleton, Stack } from "@mantine/core";
-import { createPeopleDataset, doesPeopleDatasetExist, fetchPeople } from "../../SOLID/ConnectionHandler";
+import { ActionIcon, Grid, Group, Select, Skeleton, Stack } from "@mantine/core";
+import { createGroupsDataset, createPeopleDataset, doesGroupsDatasetExist, doesPeopleDatasetExist, fetchPeople } from "../../SOLID/ConnectionHandler";
 import { createErrorNotification } from "../Core/Notifications/ErrorNotification";
 import { Person } from "./Person";
 import { useState, useEffect } from "react";
@@ -7,50 +7,28 @@ import { PageLoader } from "../Core/PageLoader";
 import { IconCircleChevronsRight } from "@tabler/icons";
 import { createPlainNotification } from "../Core/Notifications/PlainNotification";
 import { ViewStates } from "./ConnectionsPage";
-import { findSocialPodFromWebId } from "../../SOLID/NotificationHandler";
 
-
-async function viewAnotherUser(page, person) {
-    let [podRoot, error] = await findSocialPodFromWebId(person.webId);
-    if (error) {
-        createErrorNotification(error);
-        return;
-    }
-    createPlainNotification({
-        title: "Success!",
-        description: "This user does have a Decent profile!!"
-    });
-    
-    page.viewUserPodRoot = podRoot;
-    page.viewUserWebID = person.webId;
-    page.setState(prevState => (
-        {...prevState, 
-            currView: ViewStates.UserView,
-    }));
-}
-
-
-function People(props) {
+function Groups(props) {
     const [loading, setLoading] = useState(true);
-    const [people, setPeople] = useState([]);
-    const [searchPerson, setSearchPerson] = useState(null);
+    // const [people, setPeople] = useState([]);
+    // const [searchPerson, setSearchPerson] = useState(null);
 
-    useEffect(() => {
-        fetchPeople(props.podRootDir).then(([peoples, errors]) => {
-            console.log(peoples);
-            if (errors) {
-                errors.forEach((error) => createErrorNotification(error));
-            }
-            setPeople(peoples);
-            setLoading(false);
-        })
+    // useEffect(() => {
+    //     fetchPeople(props.podRootDir).then(([peoples, errors]) => {
+    //         console.log(peoples);
+    //         if (errors) {
+    //             errors.forEach((error) => createErrorNotification(error));
+    //         }
+    //         setPeople(peoples);
+    //         setLoading(false);
+    //     })
         
-    }, [props.podRootDir]);
+    // }, [props.podRootDir]);
 
     return (
         <Skeleton visible={loading}>
             <Stack style={{gap: "2px"}}>
-                <Grid grow align="center">
+                {/* <Grid grow align="center">
                     <Grid.Col span={10} grow>
                         <Select
                             label="Search"
@@ -74,22 +52,21 @@ function People(props) {
                         viewUser={() => viewAnotherUser(props.host, person)}
                         key={index} 
                         person={person}
-                    />))}
+                    />))} */}
             </Stack>
         </Skeleton>
     );
 }
 
-export function PeopleList(props) {
-
+export function GroupsList(props) {
     return (
         <PageLoader
-            checkFunction={doesPeopleDatasetExist}
-            createFunction={createPeopleDataset}
+            checkFunction={doesGroupsDatasetExist}
+            createFunction={createGroupsDataset}
             podRootDir={props.podRootDir}
-            podStructureRequired="people dataset"
+            podStructureRequired="groups dataset"
         >
-            <People host={props.host} podRootDir={props.podRootDir}/>
+            <Groups host={props.host} podRootDir={props.podRootDir}/>
             
         </PageLoader>
     );

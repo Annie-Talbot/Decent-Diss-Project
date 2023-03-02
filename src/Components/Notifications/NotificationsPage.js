@@ -1,7 +1,6 @@
-import { Paper, Button, Center, Title, Stack, Space } from "@mantine/core";
+import { Paper, Button, Space } from "@mantine/core";
 import React from 'react';
 import { createConnectionRequest, createNotificationsDir, doesNotificationsDirExist } from "../../SOLID/NotificationHandler";
-import { createErrorNotification } from "../Core/Notifications/ErrorNotification";
 import { PageLoader } from "../Core/PageLoader";
 import { NotificationList } from "./NotificationList";
 

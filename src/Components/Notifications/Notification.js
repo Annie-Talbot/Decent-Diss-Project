@@ -1,14 +1,23 @@
-import { Badge, Button, Grid, Group, Paper, Stack, Text, Title } from "@mantine/core";
+import { Badge, Button, Group, Paper, Stack, Text, Title } from "@mantine/core";
 import { NOTIFICATIONS_TYPES } from "../../SOLID/NotificationHandler";
-
-
+import { CONNECTIONS_DIR, PEOPLE_DATASET } from "../../SOLID/Utils";
+import { CreatePersonFromConnReqForm } from "./CreatePersonFromNotificationForm";
+import { useState } from "react";
 
 export function Notification(props) {
+    const [popup, setPopup] = useState(false);
+
     const notif = props.notification;
     let content;
     if (notif.type === NOTIFICATIONS_TYPES.ConnectionRequest) {
         content = (
             <Stack>
+                <CreatePersonFromConnReqForm 
+                    opened={popup}
+                    closePopup={() => setPopup(false)}
+                    webId={notif.senderWebId}
+                    datasetUrl={props.podRootDir + CONNECTIONS_DIR + PEOPLE_DATASET}
+                />
                 <Group position="apart">
                     <Title order={4}>
                         Connection request
@@ -25,13 +34,10 @@ export function Notification(props) {
                     <Text>{notif.msg}</Text>
                 }
                 <Group position="center" spacing="xl">
-                    <Button>
+                    <Button onClick={() => setPopup(true)}>
                         Create Person
                     </Button>
-                    <Button>
-                        Send Friend Request Back
-                    </Button>
-                    <Button>
+                    <Button onClick={props.delete}>
                         Ignore
                     </Button>
                 </Group>

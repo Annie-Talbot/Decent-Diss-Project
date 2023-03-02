@@ -1,8 +1,10 @@
-import { asUrl, buildThing, createThing, getPodUrlAll, getSolidDataset, getStringNoLocale, getThing, getThingAll, getUrl, saveSolidDatasetAt, setThing } from "@inrupt/solid-client";
+import { asUrl, buildThing, createThing, getSolidDataset, getStringNoLocale,
+    getThing, getThingAll, getUrl, saveSolidDatasetAt, setThing } from "@inrupt/solid-client";
 import { fetch } from "@inrupt/solid-client-authn-browser";
 import { RDF, SCHEMA_INRUPT, VCARD } from "@inrupt/vocab-common-rdf";
-import { ACCESS_AGENT_TYPE, setPublicAppendAccess } from "./AccessHandler";
-import { CONNECTIONS_DIR, createEmptyDataset, delay, makeId, PEOPLE_DATASET, simplifyError } from "./Utils";
+import { ACCESS_AGENT_TYPE } from "./AccessHandler";
+import { CONNECTIONS_DIR, createEmptyDataset, delay, GROUPS_DATASET, makeId, 
+    PEOPLE_DATASET, simplifyError } from "./Utils";
 
 
 
@@ -15,7 +17,7 @@ export async function doesConnectionsDirExist(podRootDir) {
         return [true, null];
     } catch (error) {
         let e = simplifyError(error, "Whilst checking if connections directory exists.");
-        if (e.code == 404) {
+        if (e.code === 404) {
             return [false, null];
         }
         return [false, e];
@@ -38,7 +40,7 @@ export async function doesPeopleDatasetExist(podRootDir) {
         return [true, null];
     } catch (error) {
         let e = simplifyError(error, "Whilst checking if people dataset exists.");
-        if (e.code == 404) {
+        if (e.code === 404) {
             return [false, null];
         }
         return [false, e];
@@ -54,31 +56,37 @@ export async function createPeopleDataset(podRootDir) {
     return null;
 }
 
-export async function isWebIdDecent(webId) {
-    // Check if a pod exists for this webId.
-    let socialDir = "";
+export async function doesGroupsDatasetExist(podRootDir) {
     try {
-        const podUrls = await getPodUrlAll(webId, { fetch: fetch });
-        socialDir = podUrls[0];
-    } catch (e) {
-        const error = simplifyError(e, "Whilst attempting to validate WebID: " + webId);
-        if (error.code === 404) {
-            error.title = "WebID does not exist";
-            return [socialDir, error];
+        await getSolidDataset(
+            podRootDir + CONNECTIONS_DIR + GROUPS_DATASET,
+            {fetch: fetch}
+        );
+        return [true, null];
+    } catch (error) {
+        let e = simplifyError(error, "Whilst checking if groups dataset exists.");
+        if (e.code === 404) {
+            return [false, null];
         }
-        return [socialDir, error];
+        return [false, e];
     }
-    return [socialDir, null];
-    // TODO: This function should also check if this pod has a decent link.
-    // TODO: This function should also work if multiple pods exist
+}
+
+export async function createGroupsDataset(podRootDir) {
+    const error = await createEmptyDataset(podRootDir + CONNECTIONS_DIR + GROUPS_DATASET)[1];
+    if (error) {
+        return error;
+    }
+    await delay(500)
+    return null;
 }
 
 async function getPeopleDataset(url) {
     try {
         let dataset = await getSolidDataset(url, {fetch: fetch})
         return [dataset, null];
-    } catch(error) {
-        error = simplifyError(error, "Encountered whilst attempting to access people dataset");
+    } catch(e) {
+        let error = simplifyError(e, "Encountered whilst attempting to access people dataset");
         if (error.code === 404) {
             error.title = "Could not find your people dataset at " + CONNECTIONS_DIR + PEOPLE_DATASET;
         }
@@ -121,8 +129,8 @@ export async function createPerson(person) {
     dataset = setThing(dataset, thing);
     try {
         await saveSolidDatasetAt(person.dataset, dataset, {fetch: fetch});
-    } catch (error) {
-        error = simplifyError(error, "Encountered whilst attempting to create a person.");
+    } catch (e) {
+        let error = simplifyError(e, "Encountered whilst attempting to create a person.");
         error.title = "Could no save the person";
         return error;
     }
@@ -194,6 +202,6 @@ export async function fetchAllConnections(podRootDir) {
         return [null, error]
     }
 
-    const [people, _] = await getAllPeople(dataset, podRootDir + CONNECTIONS_DIR + PEOPLE_DATASET);
+    const people = await getAllPeople(dataset, podRootDir + CONNECTIONS_DIR + PEOPLE_DATASET)[0];
     return [people, null]
 }

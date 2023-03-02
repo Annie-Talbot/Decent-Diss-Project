@@ -1,5 +1,9 @@
-import { createSolidDataset, saveSolidDatasetAt, FetchError, deleteFile, deleteSolidDataset, getContainedResourceUrlAll, getSolidDataset, isContainer, getFile } from "@inrupt/solid-client";
+import { createSolidDataset, saveSolidDatasetAt, FetchError, deleteFile, 
+    deleteSolidDataset, getContainedResourceUrlAll, getSolidDataset, 
+    isContainer, getFile, getPodUrlAll } from "@inrupt/solid-client";
 import { fetch } from "@inrupt/solid-client-authn-browser";
+import { universalAccess } from "@inrupt/solid-client";
+
 
 export const DATE_CREATED = "http://schema.org/dateCreated";
 export const TITLE = "http://schema.org/title";
@@ -57,9 +61,9 @@ export async function getChildUrlsList(containerUrl) {
         ); 
         return [childUrls, null];
     } catch(error) {
-        error = simplifyError(error, "Encountered whilst attemping to " + 
+        const e = simplifyError(error, "Encountered whilst attemping to " + 
                             "fetch the child URLs of directory" + containerUrl)
-        return [[], error]
+        return [[], e]
     }
 }
 
@@ -78,7 +82,7 @@ async function deleteRawFile(url) {
     }
 }
 
-async function deleteDataset(url) {
+export async function deleteDataset(url) {
     try {
         await deleteSolidDataset(
           url, 
@@ -108,11 +112,11 @@ export async function deleteDirectory(dirUrl) {
                 {fetch: fetch}
             );
             isCtnr = isContainer(res);
-        } catch (error) {
-            error = simplifyError(error, "Encountered whilst attempting to fetch the " +
+        } catch (e) {
+            const error = simplifyError(e, "Encountered whilst attempting to fetch the " +
                                         "dataset at " + childUrls[i] + ". During the " +
                                         "delete directory operation on " + dirUrl +".")
-            if (error.code == 406) {
+            if (error.code === 406) {
                 isFile = true;
             } else {
                 return [false, error]
@@ -193,3 +197,21 @@ export async function getImage(url) {
 export const delay = ms => new Promise(res => setTimeout(res, ms));
 
 
+export async function isValidWebID(webId) {
+    try{
+        await getPodUrlAll(webId);
+        return true;
+    } catch {
+        return false;
+    }
+}
+
+export async function getaccess(podroot) {
+    try {
+        const access = await universalAccess.getPublicAccess(podroot + NOTIFICATIONS_DIR);
+        console.log(access);
+
+    } catch (e) {
+        console.log(e)
+    }
+}

@@ -1,6 +1,9 @@
-import { buildThing, createSolidDataset, createThing, getBoolean, getDatetime, getSolidDataset, getStringNoLocale, getThing, getUrl, getUrlAll, saveSolidDatasetAt, setThing } from "@inrupt/solid-client";
-import { FOAF, RDF, SCHEMA_INRUPT, VCARD } from "@inrupt/vocab-common-rdf";
-import { createEmptyDataset, delay, getChildUrlsList, makeId, NOTIFICATIONS_DIR, NOTIFICATIONS_THING, simplifyError } from "./Utils";
+import { buildThing, createSolidDataset, createThing, getBoolean, getDatetime, 
+    getPodUrlAll, getSolidDataset, getStringNoLocale, getThing, getUrl, getUrlAll, 
+    saveSolidDatasetInContainer, setThing } from "@inrupt/solid-client";
+import { RDF } from "@inrupt/vocab-common-rdf";
+import { createEmptyDataset, delay, deleteDataset, getChildUrlsList, NOTIFICATIONS_DIR, 
+    NOTIFICATIONS_THING, simplifyError, SOCIAL_ROOT } from "./Utils";
 import { fetch } from "@inrupt/solid-client-authn-browser";
 import { SOCIAL_SOLID } from "./SolidTerms";
 import { setPublicAppendAccess } from "./AccessHandler";
@@ -10,8 +13,43 @@ export const NOTIFICATIONS_TYPES = {
 }
 
 
+export async function findSocialPodFromWebId(webId) {
+    // Get all pods of this webId
+    let podUrls;
+    try {
+        podUrls = await getPodUrlAll(webId, { fetch: fetch });
+        console.log(podUrls)
+    } catch (e) {
+        const error = simplifyError(e, "Whilst attempting to validate WebID: " + webId);
+        if (error.code === 404) {
+            error.title = "WebID has no associated pods.";
+            return [null, error];
+        }
+        return [null, error];
+    }
+    // Find the pod with the social directory
+    let socialPod;
+    for (let i = 0; i < podUrls.length; i++) {
+        try {
+            await getSolidDataset(podUrls[i] + SOCIAL_ROOT, {fetch: fetch});
+            // If no error, this pod has a social directory!
+            socialPod = podUrls[i];
+            break;
+        } catch {
+            // No social directory here, try next pod
+            continue;
+        }
+    }
+    if (socialPod == null) {
+        return [null, {title: "Failed to find social information.",
+            description: "Could not find a pod with a social directory belonging to " + webId}];
+    }
+    // No issues
+    return [socialPod, null];
+}
 
 export async function doesNotificationsDirExist(podRootDir) {
+    console.log("check");
     try {
         await getSolidDataset(
             podRootDir + NOTIFICATIONS_DIR, 
@@ -20,7 +58,7 @@ export async function doesNotificationsDirExist(podRootDir) {
         return [true, null];
     } catch (error) {
         let e = simplifyError(error, "Whilst checking if notifications directory exists.");
-        if (e.code == 404) {
+        if (e.code === 404) {
             return [false, null];
         }
         return [false, e];
@@ -35,6 +73,7 @@ export async function createNotificationsDir(podRootDir) {
     await delay(500);
     await setPublicAppendAccess(podRootDir + NOTIFICATIONS_DIR);
 }
+
 
 export async function createConnectionRequest(senderDetails, recieverPodRoot) {
     console.log("creating request");
@@ -52,31 +91,27 @@ export async function createConnectionRequest(senderDetails, recieverPodRoot) {
     
     notifDataset = setThing(notifDataset, notifThing);
 
-    let id;
-    let invalidId = true;
-    for (let i = 0; i < 20; i++) {
-        id = makeId(10);
-        try {
-            await saveSolidDatasetAt(
-                recieverPodRoot + NOTIFICATIONS_DIR + id,
-                notifDataset,
-                { fetch: fetch }
-            );
-            invalidId = false;
-            break;
-        } catch (e) {
-            let error = simplifyError(e, "Whilst creating connection request notification.");
-            if (error.code != 412) {
-                return error;
-            }
+    try {
+        await saveSolidDatasetInContainer(
+            recieverPodRoot + NOTIFICATIONS_DIR,
+            notifDataset,
+            { fetch: fetch }
+        );
+    } catch (e) {
+        let error = simplifyError(e, "Whilst creating connection request notification.");
+        console.log(error);
+        if (error.code === 404) {
+            // Not found
+            return {title: "User has no notifications directory", 
+                description: "Cannot send a notification to them."};
         }
-    }
-    if (invalidId) {
-        return {
-            code : 0,
-            title: "Could not create a unique id for this notification.",
-            description: "Failed to create connection request. Try again."
+        if (error.code === 403) {
+            // Unauthorised
+            return {title: "No access to this user's notifications directory", 
+                description: "You may have been blocked."};
         }
+        return {title: "Cannot add to notifications directory", 
+            description: error.description};
     }
     return null;
 }
@@ -210,4 +245,10 @@ export async function fetchNotifications(podRootDir) {
         notifList.push(notif);
     }
     return [notifList, errorList];
+}
+
+
+
+export async function deleteNotification(notifUrl) {
+    return await deleteDataset(notifUrl)[1];
 }
