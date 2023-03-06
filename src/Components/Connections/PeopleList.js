@@ -5,9 +5,6 @@ import { Person } from "./Person";
 import { useState, useEffect } from "react";
 import { PageLoader } from "../Core/PageLoader";
 import { IconCircleChevronsRight } from "@tabler/icons";
-import { createPlainNotification } from "../Core/Notifications/PlainNotification";
-import { ViewStates } from "./ConnectionsPage";
-import { findSocialPodFromWebId } from "../../SOLID/NotificationHandler";
 
 function People(props) {
     const [loading, setLoading] = useState(true);
@@ -43,14 +40,14 @@ function People(props) {
                         />
                     </Grid.Col>
                     <Grid.Col span={1}>
-                        <ActionIcon color="sage" size="xl" onClick={() => props.viewPerson(props.host, people[searchPerson])}>
+                        <ActionIcon color="sage" size="xl" onClick={() => props.viewPerson(people[searchPerson])}>
                             <IconCircleChevronsRight size={34}/>
                         </ActionIcon>
                     </Grid.Col>
                 </Grid>
                 {people.map((person, index) => (
                     <Person 
-                        viewPerson={() => props.viewPerson(props.host, person)}
+                        viewPerson={() => props.viewPerson(person)}
                         key={index} 
                         person={person}
                     />))}
@@ -68,7 +65,7 @@ export function PeopleList(props) {
             podRootDir={props.podRootDir}
             podStructureRequired="people dataset"
         >
-            <People host={props.host} podRootDir={props.podRootDir} viewPerson={props.viewPerson} />
+            <People podRootDir={props.podRootDir} viewPerson={props.viewPerson} />
             
         </PageLoader>
     );

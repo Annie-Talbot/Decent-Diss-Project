@@ -1,12 +1,9 @@
-import { ActionIcon, Center, Grid, Group, Select, Skeleton, Stack } from "@mantine/core";
+import { ActionIcon, Grid, Select, Skeleton, Stack } from "@mantine/core";
 import { createGroupsDataset, doesGroupsDatasetExist, fetchGroups } from "../../SOLID/Connections/GroupHandler";
 import { createErrorNotification } from "../Core/Notifications/ErrorNotification";
-import { Person } from "./Person";
 import { useState, useEffect } from "react";
 import { PageLoader } from "../Core/PageLoader";
 import { IconCircleChevronsRight } from "@tabler/icons";
-import { createPlainNotification } from "../Core/Notifications/PlainNotification";
-import { ViewStates } from "./ConnectionsPage";
 import { GroupItem } from "./GroupItem";
 
 function Groups(props) {
@@ -19,7 +16,6 @@ function Groups(props) {
             if (errors) {
                 errors.forEach((error) => createErrorNotification(error));
             }
-            console.log(groupList);
             setGroups(groupList);
             setLoading(false);
         })
@@ -44,7 +40,10 @@ function Groups(props) {
                     </Grid.Col>
                     <Grid.Col span={1}>
                         <ActionIcon color="sage" size="xl" >
-                            <IconCircleChevronsRight size={34} onClick={() => props.viewGroup(props.host, groups[searchGroup])}/>
+                            <IconCircleChevronsRight 
+                                size={34} 
+                                onClick={() => props.viewGroup(groups[searchGroup])}
+                            />
                         </ActionIcon>
                     </Grid.Col>
                 </Grid>
@@ -52,7 +51,7 @@ function Groups(props) {
                     <GroupItem 
                         key={index} 
                         group={group}
-                        viewGroup={() => props.viewGroup(props.host, group)}
+                        viewGroup={() => props.viewGroup(group)}
                         people={props.people}
                     />))}
             </Stack>
@@ -69,7 +68,6 @@ export function GroupsList(props) {
             podStructureRequired="groups dataset"
         >
             <Groups 
-                host={props.host} 
                 podRootDir={props.podRootDir} 
                 viewGroup={props.viewGroup}
                 people={props.people}

@@ -1,8 +1,8 @@
-import { Paper, Skeleton, Stack, Title, Text, Grid, Select, ActionIcon, ThemeIcon, Center } from "@mantine/core";
+import { Paper, Skeleton, Stack, Title, Text, Center } from "@mantine/core";
 import { IconPlus } from "@tabler/icons";
 import React from "react";
 import { useState, useEffect } from "react";
-import { addMember, fetchGroup, fetchGroupDetailed } from "../../SOLID/Connections/GroupHandler";
+import { addMember, fetchGroupDetailed } from "../../SOLID/Connections/GroupHandler";
 import { createErrorNotification } from "../Core/Notifications/ErrorNotification";
 import { Members } from "./Members";
 import { PeopleSearcher } from "./PeopleSearcher";
@@ -59,12 +59,10 @@ function Group(props) {
                             <PeopleSearcher 
                                 podRootDir={props.podRootDir}
                                 icon={<IconPlus />}
-                                action={(person) => handleAddMember(props.podRootDir, group.url, person.url, props.updateGroup)}
+                                action={(person) => handleAddMember(props.podRootDir, group.url, 
+                                    person.url, props.updateGroup)}
                             />
-                            <Members 
-                                podRootDir={props.podRootDir}
-                                members={group.members}
-                            />
+                            <Members members={group.members} viewPerson={props.viewPerson}/>
                         </Stack>
                     </Paper>
                 </Stack>
@@ -80,6 +78,7 @@ export class GroupView extends React.Component {
         super(props)
         this.groupUrl = props.groupUrl;
         this.podRootDir = props.podRootDir;
+        this.viewPerson = props.viewPerson;
         this.state = {
             groupKey: 0
         }
@@ -99,6 +98,7 @@ export class GroupView extends React.Component {
                 url={this.groupUrl}
                 podRootDir={this.podRootDir}
                 updateGroup={() => this.updateGroup(this)}
+                viewPerson={this.viewPerson}
             />      
         );
     }

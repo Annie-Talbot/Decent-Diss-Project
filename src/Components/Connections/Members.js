@@ -23,7 +23,7 @@ export function Members(props) {
                 <Stack>
                     {props.members.map((person, index) => (
                     <Person 
-                        // viewPerson={() => props.viewPerson(props.host, person)}
+                        viewPerson={() => props.viewPerson(person)}
                         key={index} 
                         person={person}
                     />))}

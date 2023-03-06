@@ -27,6 +27,7 @@ export class ConnectionsPage extends React.Component {
             peoplelistKey: 0,
             createGroupOpened: false,
             groupslistKey: 0,
+            backButton: []
         };
         this.viewPersonObject = null;
         this.viewGroupObject = null;
@@ -70,20 +71,36 @@ export class ConnectionsPage extends React.Component {
         }))
     }
 
-    viewGroup(connectionsPage, group) {
+    viewGroup(connectionsPage, group, backwardsState) {
         connectionsPage.viewGroupObject = group;
+        let backHistory = connectionsPage.state.backButton
+        backHistory.push(backwardsState)
         connectionsPage.setState(prevState => ({
             ...prevState,
-            currView: ViewStates.GroupView
+            currView: ViewStates.GroupView,
+            backButton: backHistory
         }));
     }
 
-    viewPerson(connectionsPage, person) {
+    viewPerson(connectionsPage, person, backwardsState) {
         connectionsPage.viewPersonObject = person;
+        let backHistory = connectionsPage.state.backButton
+        backHistory.push(backwardsState)
         connectionsPage.setState(prevState => ({
             ...prevState,
-            currView: ViewStates.PersonView
+            currView: ViewStates.PersonView,
+            backButton: backHistory
         }));
+    }
+
+    back(connectionsPage) {
+        let backHistory = connectionsPage.state.backButton
+        let newState = backHistory.pop();
+        connectionsPage.setState(prevState => (
+            {...prevState, 
+                currView: newState,
+                backButton: backHistory
+        }))
     }
 
     render() {
@@ -118,9 +135,8 @@ export class ConnectionsPage extends React.Component {
                                     </Group>
                                     <PeopleList 
                                         key={this.state.peoplelistKey}
-                                        host={this} 
                                         podRootDir={this.podRootDir}
-                                        viewPerson={this.viewPerson}
+                                        viewPerson={(person) => this.viewPerson(this, person, ViewStates.Main)}
                                     />
                                 </Stack>
                             </Paper>
@@ -139,7 +155,7 @@ export class ConnectionsPage extends React.Component {
                                         host={this}
                                         key={this.state.groupslistKey}
                                         podRootDir={this.podRootDir}
-                                        viewGroup={this.viewGroup}
+                                        viewGroup={(person) => this.viewGroup(this, person, ViewStates.Group)}
                                     />
                                 </Stack>
                             </Paper>
@@ -150,18 +166,16 @@ export class ConnectionsPage extends React.Component {
         } else if (this.state.currView === ViewStates.PersonView) {
             content.push((
                 <Stack justify="flex-start" spacing="xs">
-                    <Group position="apart">
-                        <ActionIcon onClick={
-                            () => {this.setState(prevState => (
-                                {...prevState, 
-                                    currView: ViewStates.Main,
-                            })
-                            )}
-                        }>
-                            <IconArrowBack />
-                        </ActionIcon>
-                        <Title order={2}>{this.viewPersonObject.webId}</Title>
-                    </Group>
+                    <Grid grow align="flex-end" justify="space-between">
+                        <Grid.Col span={1}>
+                            <ActionIcon onClick={() => {this.back(this)}} >
+                                <IconArrowBack />
+                            </ActionIcon>
+                        </Grid.Col>
+                        <Grid.Col span={8}>
+                            <Title align="right" order={2}>{this.viewPersonObject.webId}</Title>
+                        </Grid.Col>
+                    </Grid>
                     <Divider h="md"/>
                     <PersonView person={this.viewPersonObject} />
                 </Stack>
@@ -169,22 +183,21 @@ export class ConnectionsPage extends React.Component {
         } else if (this.state.currView === ViewStates.GroupView) {
             content.push((
                 <Stack justify="flex-start" spacing="xs">
-                    <Group position="apart" grow>
-                        <ActionIcon onClick={
-                            () => {this.setState(prevState => (
-                                {...prevState, 
-                                    currView: ViewStates.Main,
-                            })
-                            )}
-                        }>
-                            <IconArrowBack />
-                        </ActionIcon>
-                        <Title order={4}>{this.viewGroupObject.url}</Title>
-                    </Group>
+                    <Grid grow align="flex-end" justify="space-between">
+                        <Grid.Col span={1}>
+                            <ActionIcon onClick={() => {this.back(this)}} >
+                                <IconArrowBack />
+                            </ActionIcon>
+                        </Grid.Col>
+                        <Grid.Col span={8}>
+                            <Title align="right" order={4}>{this.viewGroupObject.url}</Title>
+                        </Grid.Col>
+                    </Grid>
                     <Divider h="md"/>
                     <GroupView 
                         groupUrl={this.viewGroupObject.url}
                         podRootDir={this.podRootDir}
+                        viewPerson={(person) => this.viewPerson(this, person, ViewStates.GroupView)}
                     />
                 </Stack>
             ));
