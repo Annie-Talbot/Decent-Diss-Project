@@ -5,13 +5,13 @@ import { createErrorNotification } from "../Core/Notifications/ErrorNotification
 import { useState } from "react";
 
 
-async function handleCreatePerson(person, closePopup) {
+async function handleCreatePerson(podRootDir, person, closePopup) {
     if (!await isValidWebID(person.webId)) {
         createErrorNotification({title: "Invalid webID.", 
             description: "WebID is not a valid URL."});
         return;
     }
-    const error = await createPerson(person);
+    const error = await createPerson(podRootDir, person);
     if (error) {
         createErrorNotification(error);
         return;
@@ -23,7 +23,6 @@ export function CreatePersonFromConnReqForm(props) {
     const [person, setPerson] = useState({
         webId: props.webId,
         nickname: "",
-        dataset: props.datasetUrl
     });
     return (
         <Modal
@@ -49,7 +48,7 @@ export function CreatePersonFromConnReqForm(props) {
             <Group>
                 <Button
                     onClick={() => {
-                        handleCreatePerson(person, props.closePopup);
+                        handleCreatePerson(props.podRootDir, person, props.closePopup);
                     }}
                 >
                     Add

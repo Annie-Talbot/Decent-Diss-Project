@@ -2,7 +2,7 @@ import { getSolidDataset} from "@inrupt/solid-client";
 import { fetch } from "@inrupt/solid-client-authn-browser";
 import { CONNECTIONS_DIR, createEmptyDataset, delay, PEOPLE_DATASET, 
     simplifyError } from "../Utils";
-import { getAllPeople, getPeopleDataset } from "./PeopleHandler";
+import { fetchPeople, getAllPeople, getPeopleDataset } from "./PeopleHandler";
 
 export async function doesConnectionsDirExist(podRootDir) {
     try {
@@ -30,11 +30,5 @@ export async function createConnectionsDir(podRootDir) {
 
 export async function fetchAllConnections(podRootDir) {
     // Fetch people dataset
-    const [dataset, error] = await getPeopleDataset(podRootDir + CONNECTIONS_DIR + PEOPLE_DATASET);
-    if (error) {
-        return [null, error]
-    }
-
-    const people = await getAllPeople(dataset, podRootDir + CONNECTIONS_DIR + PEOPLE_DATASET)[0];
-    return [people, null]
+    return await fetchPeople(podRootDir);
 }

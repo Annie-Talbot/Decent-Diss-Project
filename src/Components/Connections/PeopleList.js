@@ -9,27 +9,6 @@ import { createPlainNotification } from "../Core/Notifications/PlainNotification
 import { ViewStates } from "./ConnectionsPage";
 import { findSocialPodFromWebId } from "../../SOLID/NotificationHandler";
 
-
-async function viewAnotherUser(page, person) {
-    let [podRoot, error] = await findSocialPodFromWebId(person.webId);
-    if (error) {
-        createErrorNotification(error);
-        return;
-    }
-    createPlainNotification({
-        title: "Success!",
-        description: "This user does have a Decent profile!!"
-    });
-    
-    page.viewUserPodRoot = podRoot;
-    page.viewUserWebID = person.webId;
-    page.setState(prevState => (
-        {...prevState, 
-            currView: ViewStates.UserView,
-    }));
-}
-
-
 function People(props) {
     const [loading, setLoading] = useState(true);
     const [people, setPeople] = useState([]);
@@ -64,14 +43,14 @@ function People(props) {
                         />
                     </Grid.Col>
                     <Grid.Col span={1}>
-                        <ActionIcon color="sage" size="xl" onClick={() => viewAnotherUser(props.host, people[searchPerson])}>
+                        <ActionIcon color="sage" size="xl" onClick={() => props.viewPerson(props.host, people[searchPerson])}>
                             <IconCircleChevronsRight size={34}/>
                         </ActionIcon>
                     </Grid.Col>
                 </Grid>
                 {people.map((person, index) => (
                     <Person 
-                        viewUser={() => viewAnotherUser(props.host, person)}
+                        viewPerson={() => props.viewPerson(props.host, person)}
                         key={index} 
                         person={person}
                     />))}
@@ -89,7 +68,7 @@ export function PeopleList(props) {
             podRootDir={props.podRootDir}
             podStructureRequired="people dataset"
         >
-            <People host={props.host} podRootDir={props.podRootDir}/>
+            <People host={props.host} podRootDir={props.podRootDir} viewPerson={props.viewPerson} />
             
         </PageLoader>
     );

@@ -16,11 +16,13 @@ export async function setReadAccess(resourceUrl, agentID) {
        append: false
    }
    try {
+    let access;
         if (agentID) {
-            await universalAccess.setAgentAccess(resourceUrl, agentID, readAccess, {fetch: fetch});
+            access = await universalAccess.setAgentAccess(resourceUrl, agentID, readAccess, {fetch: fetch});
         } else {
-            await universalAccess.setPublicAccess(resourceUrl, readAccess, {fetch: fetch});
+            access = await universalAccess.setPublicAccess(resourceUrl, readAccess, {fetch: fetch});
         }
+        return access;
     } catch (e) {
         console.log(e);
         return simplifyError(e, "Whilst setting read access.");

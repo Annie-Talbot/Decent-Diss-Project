@@ -5,8 +5,8 @@ import { createConnectionRequest, findSocialPodFromWebId } from "../../SOLID/Not
 import { isValidWebID } from "../../SOLID/Utils";
 import { createErrorNotification } from "../Core/Notifications/ErrorNotification";
 
-async function handleCreateAPerson(person) {
-    const error = await createPerson(person);
+async function handleCreateAPerson(podRootDir, person) {
+    const error = await createPerson(podRootDir, person);
     if (error) {
         createErrorNotification(error);
         return false;
@@ -14,7 +14,7 @@ async function handleCreateAPerson(person) {
     return true;
 }
 
-async function sendConnectionRequest(webId, pod, person) {
+async function sendConnectionRequest(webId, podRootDir, person) {
     // Check we can send a notification first.
     let [personPod, error] = await findSocialPodFromWebId(person.webId);
     if (error) {
@@ -22,7 +22,7 @@ async function sendConnectionRequest(webId, pod, person) {
         return false;
     }
     console.log("valid notif dir");
-    error = await createConnectionRequest({webId: webId, socialPod: pod, msg: "Hello."}, personPod);
+    error = await createConnectionRequest({webId: webId, socialPod: podRootDir, msg: "Hello."}, personPod);
     if (error) {
         createErrorNotification(error);
         return false;
@@ -30,7 +30,7 @@ async function sendConnectionRequest(webId, pod, person) {
     return true;
 }
 
-async function handleCreatePerson(webId, pod, person, closePopup, updatePeople, sendConnReq) {
+async function handleCreatePerson(webId, podRootDir, person, closePopup, updatePeople, sendConnReq) {
     if (!await isValidWebID(person.webId)) {
         createErrorNotification({title: "Invalid webID.", 
             description: "WebID is not a valid URL."});
@@ -38,10 +38,12 @@ async function handleCreatePerson(webId, pod, person, closePopup, updatePeople, 
     }
     let success = true;
     if (sendConnReq) {
-        success = await sendConnectionRequest(webId, pod, person);
+        success = await sendConnectionRequest(webId, podRootDir, person);
     }
     if (success) {
-        if (await handleCreateAPerson(person)) {
+        console.log("here")
+        if (await handleCreateAPerson(podRootDir, person)) {
+            console.log("here2")
             closePopup();
             updatePeople();
         }
@@ -53,7 +55,6 @@ export function CreatePersonForm(props) {
     const [person, setPerson] = useState({
         webId: "",
         nickname: "",
-        dataset: props.datasetUrl
     });
     return (
         <Modal

@@ -4,14 +4,16 @@ import React from 'react';
 import { CONNECTIONS_DIR, PEOPLE_DATASET } from "../../SOLID/Utils";
 import { CreatePersonForm } from "./CreatePersonForm";
 import { PeopleList } from "./PeopleList";
-import { UserView } from "./UserView";
+import { PersonView } from "./PersonView";
 import { PageLoader } from '../Core/PageLoader';
 import { createConnectionsDir, doesConnectionsDirExist } from "../../SOLID/Connections/ConnectionHandler";
 import { GroupsList } from "./GroupList";
+import { CreateGroupForm } from "./CreateGroupForm";
 
 export const ViewStates = {
     Main: 0,
-    UserView: 1,
+    PersonView: 1,
+    GroupView: 2,
 }
 
 export class ConnectionsPage extends React.Component {
@@ -22,10 +24,30 @@ export class ConnectionsPage extends React.Component {
             currView: ViewStates.Main,
             createPersonOpened: false,
             peoplelistKey: 0,
+            createGroupOpened: false,
+            groupslistKey: 0,
         };
-        this.viewUserWebID = "";
-        this.viewUserPodRoot = "";
-        console.log(props.app.webId)
+        this.viewPersonObject = null;
+        this.viewGroupObject = null;
+    }
+
+    toggleCreateGroupPopup(connectionsPage) {
+        let newState = true;
+        if (connectionsPage.state.createGroupOpened) {
+            newState = false;
+        }
+        connectionsPage.setState(prevState => (
+            {...prevState, 
+            createGroupOpened: newState,
+        }));
+    }
+
+
+    updateGroups(connectionsPage) {
+        connectionsPage.setState(prevState => ({
+            ...prevState,
+            groupslistKey: connectionsPage.state.groupslistKey + 1
+        }))
     }
 
     toggleCreatePersonPopup(host) {
@@ -47,6 +69,22 @@ export class ConnectionsPage extends React.Component {
         }))
     }
 
+    viewGroup(connectionsPage, group) {
+        connectionsPage.viewGroupObject = group;
+        connectionsPage.setState(prevState => ({
+            ...prevState,
+            currView: ViewStates.GroupView
+        }));
+    }
+
+    viewPerson(connectionsPage, person) {
+        connectionsPage.viewPersonObject = person;
+        connectionsPage.setState(prevState => ({
+            ...prevState,
+            currView: ViewStates.PersonView
+        }));
+    }
+
     render() {
         let content = [];
         if (this.state.currView === ViewStates.Main) {
@@ -59,6 +97,12 @@ export class ConnectionsPage extends React.Component {
                         updatePeople={() => this.updatePeople(this)}
                         webId={this.props.app.webId}
                         pod={this.podRootDir}
+                    />
+                    <CreateGroupForm 
+                        opened={this.state.createGroupOpened}
+                        close={() => this.toggleCreateGroupPopup(this)}
+                        updateGroups={() => this.updateGroups(this)}
+                        podRootDir={this.podRootDir}
                     />
                     <Grid grow>
                         <Grid.Col span={4} grow gutter="sm">
@@ -75,6 +119,7 @@ export class ConnectionsPage extends React.Component {
                                         key={this.state.peoplelistKey}
                                         host={this} 
                                         podRootDir={this.podRootDir}
+                                        viewPerson={this.viewPerson}
                                     />
                                 </Stack>
                             </Paper>
@@ -85,13 +130,15 @@ export class ConnectionsPage extends React.Component {
                                     <Group position="apart">
                                         <Title order={2}> Groups </Title>
                                         <Button
-                                            onClick={() => this.toggleCreatePersonPopup(this)}>
+                                            onClick={() => this.toggleCreateGroupPopup(this)}>
                                                 Create a Group
                                         </Button>
                                     </Group>
                                     <GroupsList 
-                                        host={this} 
+                                        host={this}
+                                        key={this.state.groupslistKey}
                                         podRootDir={this.podRootDir}
+                                        viewGroup={this.viewGroup}
                                     />
                                 </Stack>
                             </Paper>
@@ -99,7 +146,7 @@ export class ConnectionsPage extends React.Component {
                     </Grid>
                 </>
             ));
-        } else if (this.state.currView === ViewStates.UserView) {
+        } else if (this.state.currView === ViewStates.PersonView) {
             content.push((
                 <Stack justify="flex-start" spacing="xs">
                     <Group position="apart">
@@ -112,10 +159,29 @@ export class ConnectionsPage extends React.Component {
                         }>
                             <IconArrowBack />
                         </ActionIcon>
-                        <Title order={2}>{this.viewUserWebID}</Title>
+                        <Title order={2}>{this.viewPersonObject.webId}</Title>
                     </Group>
                     <Divider h="md"/>
-                    <UserView webID={this.viewUserWebID} podRoot={this.viewUserPodRoot}/>
+                    <PersonView person={this.viewPersonObject} />
+                </Stack>
+            ));
+        } else if (this.state.currView === ViewStates.GroupView) {
+            content.push((
+                <Stack justify="flex-start" spacing="xs">
+                    <Group position="apart">
+                        <ActionIcon onClick={
+                            () => {this.setState(prevState => (
+                                {...prevState, 
+                                    currView: ViewStates.Main,
+                            })
+                            )}
+                        }>
+                            <IconArrowBack />
+                        </ActionIcon>
+                        <Title order={2}>{this.viewGroup.name}</Title>
+                    </Group>
+                    <Divider h="md"/>
+                    {/* <UserView webID={this.viewUserWebID} podRoot={this.viewUserPodRoot}/> */}
                 </Stack>
             ));
         } else {

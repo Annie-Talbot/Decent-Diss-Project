@@ -1,5 +1,5 @@
 import { ActionIcon, Grid, Group, Select, Skeleton, Stack } from "@mantine/core";
-import { createGroupsDataset, doesGroupsDatasetExist } from "../../SOLID/Connections/GroupHandler";
+import { createGroupsDataset, doesGroupsDatasetExist, fetchGroups } from "../../SOLID/Connections/GroupHandler";
 import { createErrorNotification } from "../Core/Notifications/ErrorNotification";
 import { Person } from "./Person";
 import { useState, useEffect } from "react";
@@ -7,52 +7,52 @@ import { PageLoader } from "../Core/PageLoader";
 import { IconCircleChevronsRight } from "@tabler/icons";
 import { createPlainNotification } from "../Core/Notifications/PlainNotification";
 import { ViewStates } from "./ConnectionsPage";
+import { GroupItem } from "./GroupItem";
 
 function Groups(props) {
     const [loading, setLoading] = useState(true);
-    // const [people, setPeople] = useState([]);
-    // const [searchPerson, setSearchPerson] = useState(null);
+    const [groups, setGroups] = useState([]);
+    const [searchGroup, setSearchGroup] = useState(null);
 
-    // useEffect(() => {
-    //     fetchPeople(props.podRootDir).then(([peoples, errors]) => {
-    //         console.log(peoples);
-    //         if (errors) {
-    //             errors.forEach((error) => createErrorNotification(error));
-    //         }
-    //         setPeople(peoples);
-    //         setLoading(false);
-    //     })
+    useEffect(() => {
+        fetchGroups(props.podRootDir).then(([groupList, errors]) => {
+            if (errors) {
+                errors.forEach((error) => createErrorNotification(error));
+            }
+            setGroups(groupList);
+            setLoading(false);
+        })
         
-    // }, [props.podRootDir]);
+    }, [props.podRootDir]);
 
     return (
         <Skeleton visible={loading}>
             <Stack style={{gap: "2px"}}>
-                {/* <Grid grow align="center">
+                <Grid grow align="center">
                     <Grid.Col span={10} grow>
                         <Select
                             label="Search"
                             searchable
-                            nothingFound="No people found."
-                            data={people.map((person, index) => ({value: index.toString(), label: person.nickname}))}
-                            value={searchPerson}
+                            nothingFound="No groups found."
+                            data={groups.map((group, index) => ({value: index.toString(), label: group.name}))}
+                            value={searchGroup}
                             onChange={(event) => {
-                                setSearchPerson(event)
+                                setSearchGroup(event)
                             }}
                         />
                     </Grid.Col>
                     <Grid.Col span={1}>
-                        <ActionIcon color="sage" size="xl" onClick={() => viewAnotherUser(props.host, people[searchPerson])}>
-                            <IconCircleChevronsRight size={34}/>
+                        <ActionIcon color="sage" size="xl" >
+                            <IconCircleChevronsRight size={34} onClick={() => props.viewGroup(props.host, groups[searchGroup])}/>
                         </ActionIcon>
                     </Grid.Col>
                 </Grid>
-                {people.map((person, index) => (
-                    <Person 
-                        viewUser={() => viewAnotherUser(props.host, person)}
+                {groups.map((group, index) => (
+                    <GroupItem 
                         key={index} 
-                        person={person}
-                    />))} */}
+                        group={group}
+                        viewGroup={() => props.viewGroup(props.host, group)}
+                    />))}
             </Stack>
         </Skeleton>
     );
@@ -66,7 +66,7 @@ export function GroupsList(props) {
             podRootDir={props.podRootDir}
             podStructureRequired="groups dataset"
         >
-            <Groups host={props.host} podRootDir={props.podRootDir}/>
+            <Groups host={props.host} podRootDir={props.podRootDir} viewGroup={props.viewGroup}/>
             
         </PageLoader>
     );

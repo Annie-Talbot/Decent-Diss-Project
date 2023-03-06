@@ -1,7 +1,7 @@
 import { asUrl, buildThing, createThing, getSolidDataset, getStringNoLocale, 
     getThing, getThingAll, getUrl, saveSolidDatasetAt, setThing } from '@inrupt/solid-client';
-import { createEmptyDataset, simplifyError } from '../Utils';
-import { fetch, delay, CONNECTIONS_DIR, PEOPLE_DATASET, makeId } from '@inrupt/solid-client-authn-browser';
+import { CONNECTIONS_DIR, delay, makeId, createEmptyDataset, PEOPLE_DATASET, simplifyError } from '../Utils';
+import { fetch } from '@inrupt/solid-client-authn-browser';
 import { RDF, SCHEMA_INRUPT, VCARD } from '@inrupt/vocab-common-rdf';
 import { ACCESS_AGENT_TYPE } from '../AccessHandler';
 
@@ -30,9 +30,9 @@ export async function createPeopleDataset(podRootDir) {
     return null;
 }
 
-export async function getPeopleDataset(url) {
+async function getPeopleDataset(podRootDir) {
     try {
-        let dataset = await getSolidDataset(url, {fetch: fetch})
+        let dataset = await getSolidDataset(podRootDir + CONNECTIONS_DIR + PEOPLE_DATASET, {fetch: fetch})
         return [dataset, null];
     } catch(e) {
         let error = simplifyError(e, "Encountered whilst attempting to access people dataset");
@@ -44,31 +44,15 @@ export async function getPeopleDataset(url) {
 }
 
 
-export async function createPerson(person) {
+export async function createPerson(podRootDir, person) {
     // Fetch people dataset
-    let [dataset, error] = await getPeopleDataset(person.dataset);
+    let [dataset, error] = await getPeopleDataset(podRootDir);
     if (error) {
         return error;
     }
 
-    // Find an available id for the new Thing
-    let thing;
-    let id;
-    while (true) {
-        id = makeId(10);
-        try {
-            thing = getThing(
-                person.dataset + "#" + id,
-                {fetch: fetch}
-            )
-        } catch (error) {
-            // Found a valid id
-            break;
-        }
-    }
-
     // Create Person thing
-    thing = buildThing(createThing({ name: id }))
+    let thing = buildThing(createThing())
         .addStringNoLocale(VCARD.nickname, person.nickname)
         .addUrl(SCHEMA_INRUPT.identifier, person.webId)
         .addUrl(RDF.type, SCHEMA_INRUPT.Person)
@@ -77,7 +61,7 @@ export async function createPerson(person) {
     // add person Thing to people Dataset and save
     dataset = setThing(dataset, thing);
     try {
-        await saveSolidDatasetAt(person.dataset, dataset, {fetch: fetch});
+        await saveSolidDatasetAt(podRootDir + CONNECTIONS_DIR + PEOPLE_DATASET, dataset, {fetch: fetch});
     } catch (e) {
         let error = simplifyError(e, "Encountered whilst attempting to create a person.");
         error.title = "Could no save the person";
@@ -117,7 +101,7 @@ function getPersonFromThing(thing) {
     
 }
 
-export async function getAllPeople(peopleDataset) {
+async function getAllPeople(peopleDataset) {
     const peopleThings = getThingAll(peopleDataset);
     let people = [];
     let errorList = [];
@@ -126,7 +110,6 @@ export async function getAllPeople(peopleDataset) {
         if (error) {
             errorList.push({code: 400, title: error, description: ""});
         } else {
-            person["dataset"] = peopleDataset.datasetUrl;
             people.push(person);
         }
     });
@@ -135,9 +118,9 @@ export async function getAllPeople(peopleDataset) {
 
 export async function fetchPeople(podRootDir) {
     // Fetch people dataset
-    let [dataset, error] = await getPeopleDataset(podRootDir + CONNECTIONS_DIR + PEOPLE_DATASET);
+    let [dataset, error] = await getPeopleDataset(podRootDir);
     if (error) {
-        return [null, [error]];
+        return [[], [error]];
     }
     // Turn dataset into people
     return await getAllPeople(dataset);

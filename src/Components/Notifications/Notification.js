@@ -16,7 +16,7 @@ export function Notification(props) {
                     opened={popup}
                     closePopup={() => setPopup(false)}
                     webId={notif.senderWebId}
-                    datasetUrl={props.podRootDir + CONNECTIONS_DIR + PEOPLE_DATASET}
+                    podRootDir={props.podRootDir}
                 />
                 <Group position="apart">
                     <Title order={4}>
