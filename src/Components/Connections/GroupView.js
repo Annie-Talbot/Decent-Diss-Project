@@ -2,7 +2,7 @@ import { Paper, Skeleton, Stack, Title, Text, Center } from "@mantine/core";
 import { IconPlus } from "@tabler/icons";
 import React from "react";
 import { useState, useEffect } from "react";
-import { addMember, fetchGroupDetailed } from "../../SOLID/Connections/GroupHandler";
+import { addMember, fetchGroupDetailed, removeMember } from "../../SOLID/Connections/GroupHandler";
 import { createErrorNotification } from "../Core/Notifications/ErrorNotification";
 import { Members } from "./Members";
 import { PeopleSearcher } from "./PeopleSearcher";
@@ -16,14 +16,14 @@ async function handleAddMember(podRootDir, groupUrl, personUrl, updateGroup) {
     updateGroup();
 }
 
-// async function handleDeleteMember(podRootDir, groupUrl, personUrl, updateGroup) {
-//     const error = await deleteMember(podRootDir, groupUrl, personUrl);
-//     if (error) {
-//         createErrorNotification(error);
-//         return;
-//     }
-//     updateGroup();
-// }
+async function handleRemoveMember(podRootDir, groupUrl, personUrl, updateGroup) {
+    const error = await removeMember(podRootDir, groupUrl, personUrl);
+    if (error) {
+        createErrorNotification(error);
+        return;
+    }
+    updateGroup();
+}
 
 
 function Group(props) {
@@ -62,7 +62,12 @@ function Group(props) {
                                 action={(person) => handleAddMember(props.podRootDir, group.url, 
                                     person.url, props.updateGroup)}
                             />
-                            <Members members={group.members} viewPerson={props.viewPerson}/>
+                            <Members 
+                                members={group.members} 
+                                viewPerson={props.viewPerson}
+                                removeMember={(personUrl) => handleRemoveMember(props.podRootDir, 
+                                    group.url, personUrl, props.updateGroup)}
+                            />
                         </Stack>
                     </Paper>
                 </Stack>
