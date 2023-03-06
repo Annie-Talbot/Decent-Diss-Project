@@ -92,7 +92,6 @@ function getGroupFromThing(thing) {
 
 async function getAllGroups(groupsDataset) {
     const groupThings = getThingAll(groupsDataset);
-    console.log(groupThings);
     let groups = [];
     let errorList = [];
     groupThings.forEach((thing) => {
