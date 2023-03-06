@@ -22,7 +22,6 @@ export default async function loginHandler(solidProvider, appName) {
               });
         } catch (error) {
             const validUrl = /.*Invalid URL.*/;
-            let errorMsg = '';
             if (validUrl.test(solidProvider)) {
                 errorMsg = "Invalid URL";
             } else {

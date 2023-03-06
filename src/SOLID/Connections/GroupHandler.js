@@ -150,7 +150,7 @@ export async function fetchGroupDetailed(podRootDir, groupUrl) {
         return [null, error];
     }
     if (group.members.length > 0) {
-        let [people, errors] = await fetchPeopleFromList(podRootDir, group.members);
+        let people = await fetchPeopleFromList(podRootDir, group.members)[0];
         if (people.length === 0) {
             return [null, {title: "Could not fetch group members",
                 description: ""}];

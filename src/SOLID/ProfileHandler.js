@@ -5,7 +5,7 @@ import { createSolidDataset, createThing, getDate, getSolidDataset,
 import { fetch } from '@inrupt/solid-client-authn-browser'
 import { FOAF, SCHEMA_INRUPT } from "@inrupt/vocab-common-rdf";
 import { setReadAccess } from "./AccessHandler";
-import { delay, getImage, PROFILE_DATASET, PROFILE_THING, simplifyError, SOCIAL_DATASET, SOCIAL_ROOT } from "./Utils";
+import { delay, getImage, PROFILE_DATASET, PROFILE_THING, simplifyError, SOCIAL_ROOT } from "./Utils";
 
 
 
@@ -22,7 +22,7 @@ export async function doesProfileExist(podRootDir) {
         return [true, null];
     } catch (error) {
         let e = simplifyError(error, "Whilst checking if profile exists.");
-        if (e.code == 404) {
+        if (e.code === 404) {
             return [false, null];
         }
         return [false, e];
@@ -44,7 +44,7 @@ export async function createSampleProfile(podRootDir) {
             { fetch: fetch }
         );
         await delay(500);
-        let access = await setReadAccess(podRootDir + PROFILE_DATASET, null);
+        await setReadAccess(podRootDir + PROFILE_DATASET, null);
         return null;
     } catch (error) {
         return simplifyError(error);

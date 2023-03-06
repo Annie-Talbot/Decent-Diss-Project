@@ -18,7 +18,7 @@ async function datasetExists(datasetUrl) {
         return true;
     } catch (error) {
         if (error instanceof FetchError) {
-            if (error.statusCode == 404) {
+            if (error.statusCode === 404) {
                 return false;
             }
         }
@@ -47,7 +47,7 @@ export async function validateSocialDir(podRootDir) {
         return [true, null];
     } catch (error) {
         let e = simplifyError(error, "Whilst checking if social directory exists.");
-        if (e.code == 404) {
+        if (e.code === 404) {
             return [false, null];
         }
         return [false, e];
@@ -75,24 +75,6 @@ export async function createSocialDirectory(podRootDir) {
         return simplifyError(e);
     }
     return null;
-
-
-    // let [socialDataset, error] = await createEmptyDataset(podRootUrl + SOCIAL_DATASET);
-    // await createSampleProfile(socialDataset, podRootUrl + SOCIAL_DATASET);
-    // await setReadAccess(podRootUrl + SOCIAL_DATASET, null);
-
-    // // Posts - public read access to the containing 
-    // // directory but not to individual hosts
-    // await createEmptyDataset(podRootUrl + POSTS_DIR);
-    // await setReadAccess(podRootUrl + POSTS_DIR, null);
-
-    // // Connections - no public read access
-    // await createEmptyDataset(podRootUrl + CONNECTIONS_DIR);
-    // await createEmptyDataset(podRootUrl + CONNECTIONS_DIR + PEOPLE_DATASET);
-
-    // // Notifications - public append access
-    // await createEmptyDataset(podRootUrl + NOTIFICATIONS_DIR);
-    // await setPublicAppendAccess(podRootUrl + NOTIFICATIONS_DIR);
 }
 
 export async function findUsersSocialPod(webId) {
