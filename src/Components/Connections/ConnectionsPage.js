@@ -9,6 +9,7 @@ import { PageLoader } from '../Core/PageLoader';
 import { createConnectionsDir, doesConnectionsDirExist } from "../../SOLID/Connections/ConnectionHandler";
 import { GroupsList } from "./GroupList";
 import { CreateGroupForm } from "./CreateGroupForm";
+import { GroupView } from "./GroupView";
 
 export const ViewStates = {
     Main: 0,
@@ -168,7 +169,7 @@ export class ConnectionsPage extends React.Component {
         } else if (this.state.currView === ViewStates.GroupView) {
             content.push((
                 <Stack justify="flex-start" spacing="xs">
-                    <Group position="apart">
+                    <Group position="apart" grow>
                         <ActionIcon onClick={
                             () => {this.setState(prevState => (
                                 {...prevState, 
@@ -178,10 +179,13 @@ export class ConnectionsPage extends React.Component {
                         }>
                             <IconArrowBack />
                         </ActionIcon>
-                        <Title order={2}>{this.viewGroup.name}</Title>
+                        <Title order={4}>{this.viewGroupObject.url}</Title>
                     </Group>
                     <Divider h="md"/>
-                    {/* <UserView webID={this.viewUserWebID} podRoot={this.viewUserPodRoot}/> */}
+                    <GroupView 
+                        groupUrl={this.viewGroupObject.url}
+                        podRootDir={this.podRootDir}
+                    />
                 </Stack>
             ));
         } else {

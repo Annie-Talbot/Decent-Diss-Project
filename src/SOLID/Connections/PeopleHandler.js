@@ -71,7 +71,6 @@ export async function createPerson(podRootDir, person) {
 }
 
 
-
 function getPersonFromThing(thing) {
     if (getUrl(thing, RDF.type) !== SCHEMA_INRUPT.Person) {
         return [null, "Thing is not a person."];
@@ -108,7 +107,7 @@ async function getAllPeople(peopleDataset) {
     peopleThings.forEach((thing) => {
         let [person, error] = getPersonFromThing(thing);
         if (error) {
-            errorList.push({code: 400, title: error, description: ""});
+            errorList.push({title: error, description: ""});
         } else {
             people.push(person);
         }
@@ -125,4 +124,36 @@ export async function fetchPeople(podRootDir) {
     // Turn dataset into people
     return await getAllPeople(dataset);
     
+}
+
+
+export async function fetchPeopleFromList(podRootDir, peopleUrlList) {
+    if (peopleUrlList.length === 0) {
+        return [[], []];
+    }
+    // Fetch people dataset
+    let [dataset, error] = await getPeopleDataset(podRootDir);
+    if (error) {
+        return [[], [error]];
+    }
+    // Get people
+    let people = [];
+    let errors = [];
+    for (let i = 0; i < peopleUrlList.length; i++) {
+        // Get thing
+        let personThing = getThing(dataset, peopleUrlList[i]);
+        if (personThing === null) {
+            errors.push({title: "Could not load person: " + peopleUrlList[i], 
+                description: "Thing does not exist."});
+            continue;
+        }
+        let [person, error] = getPersonFromThing(personThing);
+        if (error) {
+           errors.push({title: error, description: ""});
+           continue;
+        }
+        people.push(person);
+    }
+    return [people, errors];
+
 }

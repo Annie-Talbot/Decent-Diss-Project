@@ -1,8 +1,9 @@
-import { asUrl, buildThing, createThing, getSolidDataset, getStringNoLocale, getThingAll, getUrl, getUrlAll, saveSolidDatasetAt, setThing } from "@inrupt/solid-client";
+import { addUrl, asUrl, buildThing, createThing, getSolidDataset, getStringNoLocale, getThing, getThingAll, getUrl, getUrlAll, saveSolidDatasetAt, setThing } from "@inrupt/solid-client";
 import { fetch } from "@inrupt/solid-client-authn-browser";
 import { FOAF, RDF } from "@inrupt/vocab-common-rdf";
 import { ACCESS_AGENT_TYPE } from "../AccessHandler";
 import { CONNECTIONS_DIR, PEOPLE_DATASET, createEmptyDataset, delay, GROUPS_DATASET, simplifyError } from "../Utils";
+import { fetchPeopleFromList } from "./PeopleHandler";
 
 export async function doesGroupsDatasetExist(podRootDir) {
     try {
@@ -114,4 +115,78 @@ export async function fetchGroups(podRootDir) {
     // Turn dataset into people
     return await getAllGroups(dataset);
     
+}
+
+export async function fetchGroup(podRootDir, groupUrl) {
+    let error, dataset, group;
+    [dataset, error] = await getGroupsDataset(podRootDir);
+    if (error) {
+        return [null, error];
+    }
+    let groupThing = getThing(dataset, groupUrl);
+    if (groupThing === null) {
+        return [null, {title: "Could not add member.", 
+            description: "Failed to get group information."}];
+    }
+    [group, error] = getGroupFromThing(groupThing);
+    if (error) {
+        return [null, error];
+    }
+    return [group, null];
+}
+
+export async function fetchGroupDetailed(podRootDir, groupUrl) {
+    let error, dataset, group;
+    [dataset, error] = await getGroupsDataset(podRootDir);
+    if (error) {
+        return [null, error];
+    }
+    let groupThing = getThing(dataset, groupUrl);
+    if (groupThing === null) {
+        return [null, {title: "Could not add member.", 
+            description: "Failed to get group information."}];
+    }
+    [group, error] = getGroupFromThing(groupThing);
+    if (error) {
+        return [null, error];
+    }
+    if (group.members.length > 0) {
+        let [people, errors] = await fetchPeopleFromList(podRootDir, group.members);
+        if (people.length === 0) {
+            return [null, {title: "Could not fetch group members",
+                description: ""}];
+        }
+        group.members = people;
+    }
+    return [group, null];
+}
+
+
+export async function addMember(podRootDir, groupUrl, personUrl) {
+    // Fetch group dataset
+    let [dataset, error] = await getGroupsDataset(podRootDir);
+    if (error) {
+        return error;
+    }
+
+    let groupThing = getThing(dataset, groupUrl);
+    if (groupThing === null) {
+        return {title: "Could not add member.", 
+            description: "Failed to get group information."};
+    }
+
+    groupThing = addUrl(groupThing, FOAF.member, personUrl);
+
+    dataset = setThing(dataset, groupThing);
+
+    try{
+        saveSolidDatasetAt(
+            podRootDir + CONNECTIONS_DIR + GROUPS_DATASET,
+            dataset,
+            {fetch: fetch}
+        )
+    } catch (error) {
+        return simplifyError(error, "Could not save group with new member added.");
+    }
+    return null;
 }

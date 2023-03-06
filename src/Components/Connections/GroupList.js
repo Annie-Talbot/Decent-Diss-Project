@@ -1,4 +1,4 @@
-import { ActionIcon, Grid, Group, Select, Skeleton, Stack } from "@mantine/core";
+import { ActionIcon, Center, Grid, Group, Select, Skeleton, Stack } from "@mantine/core";
 import { createGroupsDataset, doesGroupsDatasetExist, fetchGroups } from "../../SOLID/Connections/GroupHandler";
 import { createErrorNotification } from "../Core/Notifications/ErrorNotification";
 import { Person } from "./Person";
@@ -19,6 +19,7 @@ function Groups(props) {
             if (errors) {
                 errors.forEach((error) => createErrorNotification(error));
             }
+            console.log(groupList);
             setGroups(groupList);
             setLoading(false);
         })
@@ -52,6 +53,7 @@ function Groups(props) {
                         key={index} 
                         group={group}
                         viewGroup={() => props.viewGroup(props.host, group)}
+                        people={props.people}
                     />))}
             </Stack>
         </Skeleton>
@@ -66,7 +68,12 @@ export function GroupsList(props) {
             podRootDir={props.podRootDir}
             podStructureRequired="groups dataset"
         >
-            <Groups host={props.host} podRootDir={props.podRootDir} viewGroup={props.viewGroup}/>
+            <Groups 
+                host={props.host} 
+                podRootDir={props.podRootDir} 
+                viewGroup={props.viewGroup}
+                people={props.people}
+            />
             
         </PageLoader>
     );
