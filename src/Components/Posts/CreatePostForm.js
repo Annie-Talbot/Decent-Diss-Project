@@ -23,6 +23,7 @@ async function handleCreatePost(post, connections, closePopup, updatePosts) {
 
 export function CreatePostForm(props) {
     const [connections, setConnections] = useState([]);
+    const [connectionIndexes, setConnectionIndexes] = useState([]);
     const [post, setPost] = useState({
         dir: props.podRootDir + POSTS_DIR,
         title: "",
@@ -33,11 +34,10 @@ export function CreatePostForm(props) {
     });
 
     useEffect(() => {
-        fetchAllConnections(props.podRootDir).then(([connects, error]) => {
-            if (error) {
-                return;
-            }
-            setConnections(connects.map((c, i) => ({value: i.toString(), label: c.nickname})))
+        fetchAllConnections(props.podRootDir).then(([connects, errors]) => {
+            errors.forEach((e) => createErrorNotification(e));
+            setConnections(connects);
+            setConnectionIndexes(connects.map((c, i) => ({value: i.toString(), label: c.nickname})));
         })
     }, [props.podRootDir]);
 
@@ -100,7 +100,7 @@ export function CreatePostForm(props) {
             />
             {connections.length > 0 &&
                 <MultiSelect
-                    data={connections}
+                    data={connectionIndexes}
                     disabled={post.publicAccess}
                     label="Who would you like to give access to"
                     placeholder="Pick all that you like"

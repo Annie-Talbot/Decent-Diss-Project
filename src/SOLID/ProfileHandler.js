@@ -15,12 +15,16 @@ export async function doesProfileExist(podRootDir) {
             podRootDir + PROFILE_DATASET, 
             { fetch: fetch }
         )
+        console.log("success with dataset");
         const thing = getThing(dataset, podRootDir + PROFILE_THING);
         if (thing == null) {
+            console.log("failure with thing")
             return [false, null]
         }
+        console.log("success with thing")
         return [true, null];
     } catch (error) {
+        console.log("hit error");
         let e = simplifyError(error, "Whilst checking if profile exists.");
         if (e.code == 404) {
             return [false, null];

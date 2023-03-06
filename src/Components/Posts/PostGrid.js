@@ -31,7 +31,7 @@ export function PostGrid(props) {
     useEffect(() => {
         fetchPosts(props.podRootDir).then(([posts, errors]) => {
             setPostList(posts);
-            errors.forEach(error => createErrorNotification(error));
+            if (props.authorised) errors.forEach(error => createErrorNotification(error));
             setLoading(false);
         })
     }, []);

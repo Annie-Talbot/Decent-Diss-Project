@@ -26,10 +26,10 @@ export function PersonView(props) {
                 return;
             }
             setPodRoot(pod);
-            if (await doesProfileExist(pod)[0]) {
+            if ((await doesProfileExist(pod))[0]) {
                 setProfileExists(true);
             }
-            if (await doesPostsDirExist(pod)[0]) {
+            if ((await doesPostsDirExist(pod))[0]) {
                 setPostsExist(true);
             }
             setLoading(false);
