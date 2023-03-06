@@ -21,7 +21,6 @@ async function sendConnectionRequest(webId, podRootDir, person) {
         createErrorNotification(error);
         return false;
     }
-    console.log("valid notif dir");
     error = await createConnectionRequest({webId: webId, socialPod: podRootDir, msg: "Hello."}, personPod);
     if (error) {
         createErrorNotification(error);
@@ -41,9 +40,7 @@ async function handleCreatePerson(webId, podRootDir, person, closePopup, updateP
         success = await sendConnectionRequest(webId, podRootDir, person);
     }
     if (success) {
-        console.log("here")
         if (await handleCreateAPerson(podRootDir, person)) {
-            console.log("here2")
             closePopup();
             updatePeople();
         }

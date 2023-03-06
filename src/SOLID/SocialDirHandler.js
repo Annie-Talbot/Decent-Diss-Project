@@ -19,12 +19,9 @@ async function datasetExists(datasetUrl) {
     } catch (error) {
         if (error instanceof FetchError) {
             if (error.statusCode == 404) {
-                console.log("No pre-existing " + datasetUrl + " directory found.")
                 return false;
             }
         }
-        console.log("An unknown error occured whilst checking if the dataset, " + 
-            datasetUrl + ", exists . Please contact support. Error: " + error);
         return false;
     }
     
@@ -105,7 +102,6 @@ export async function findUsersSocialPod(webId) {
     } catch (error) {
         return [false, null, simplifyError(error, "This user has no associated pods.")];
     }
-    console.log(podList);
 
     for (let i = 0; i < podList.length; i++) {
         try {

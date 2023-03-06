@@ -21,7 +21,6 @@ export default async function loginHandler(solidProvider, appName) {
                 clientName: appName
               });
         } catch (error) {
-            console.log(error)
             const validUrl = /.*Invalid URL.*/;
             let errorMsg = '';
             if (validUrl.test(solidProvider)) {

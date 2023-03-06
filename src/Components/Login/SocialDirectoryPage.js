@@ -38,7 +38,6 @@ export class SocialDirectoryPage extends React.Component {
     async componentDidMount() {
         const [success, socialRoot, error] = await findUsersSocialPod(this.app.webId);
         if (error) {
-            console.log("encountered error, not sure how to handle")
             createErrorNotification(error);
             this.setState(prevState => (
                 {...prevState, 
@@ -47,7 +46,6 @@ export class SocialDirectoryPage extends React.Component {
             return;
         }
         if (!success) {
-            console.log("No pods w/ social, bah");
             this.setState(prevState => (
                 {...prevState, 
                 loading: false,
@@ -57,8 +55,6 @@ export class SocialDirectoryPage extends React.Component {
             return;
         }
         // valid social directory found, go to profile
-        console.log("yay all good");
-        console.log(socialRoot);
         this.setState(prevState => (
             {...prevState, 
             loading: false,

@@ -24,7 +24,6 @@ export function NotificationList(props) {
 
     useEffect(() => {
         fetchNotifications(props.podRootDir).then(([notifs, errors]) => {
-            console.log(notifs);
             if (errors) {
                 errors.forEach((error) => createErrorNotification(error));
             }

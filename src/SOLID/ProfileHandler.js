@@ -15,16 +15,12 @@ export async function doesProfileExist(podRootDir) {
             podRootDir + PROFILE_DATASET, 
             { fetch: fetch }
         )
-        console.log("success with dataset");
         const thing = getThing(dataset, podRootDir + PROFILE_THING);
         if (thing == null) {
-            console.log("failure with thing")
             return [false, null]
         }
-        console.log("success with thing")
         return [true, null];
     } catch (error) {
-        console.log("hit error");
         let e = simplifyError(error, "Whilst checking if profile exists.");
         if (e.code == 404) {
             return [false, null];
@@ -49,7 +45,6 @@ export async function createSampleProfile(podRootDir) {
         );
         await delay(500);
         let access = await setReadAccess(podRootDir + PROFILE_DATASET, null);
-        console.log(access);
         return null;
     } catch (error) {
         return simplifyError(error);
@@ -148,7 +143,6 @@ export async function updateProfile(podRootUrl, profile) {
     }
     let profileThing = getThing(profileDataset, podRootUrl +  PROFILE_THING, 
                                     { fetch: fetch });
-    console.log(profileThing);
     if (profileThing == null) {
         profileThing = createThing({ name: "profile" });
     } 

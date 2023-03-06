@@ -24,7 +24,6 @@ export async function setReadAccess(resourceUrl, agentID) {
         }
         return access;
     } catch (e) {
-        console.log(e);
         return simplifyError(e, "Whilst setting read access.");
     }
 }

@@ -29,7 +29,6 @@ export const GROUPS_DATASET = "groups"
 
 export function simplifyError(error, context) {
     if (error instanceof FetchError) {
-        console.log(error)
         return {
             code: error.statusCode, 
             title: error.statusText, 
@@ -104,7 +103,6 @@ export async function deleteDirectory(dirUrl) {
     if (error) {
         return [false, error];
     }
-    console.log(childUrls);
     for (let i = 0; i < childUrls.length; i++) {
         try {
             let res = await getSolidDataset(
@@ -203,15 +201,5 @@ export async function isValidWebID(webId) {
         return true;
     } catch {
         return false;
-    }
-}
-
-export async function getaccess(podroot) {
-    try {
-        const access = await universalAccess.getPublicAccess(podroot + NOTIFICATIONS_DIR);
-        console.log(access);
-
-    } catch (e) {
-        console.log(e)
     }
 }

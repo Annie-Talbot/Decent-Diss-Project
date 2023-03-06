@@ -13,7 +13,6 @@ function People(props) {
 
     useEffect(() => {
         fetchPeople(props.podRootDir).then(([peoples, errors]) => {
-            console.log(peoples);
             if (errors) {
                 errors.forEach((error) => createErrorNotification(error));
             }

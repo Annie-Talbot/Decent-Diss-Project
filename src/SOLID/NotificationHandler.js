@@ -18,7 +18,6 @@ export async function findSocialPodFromWebId(webId) {
     let podUrls;
     try {
         podUrls = await getPodUrlAll(webId, { fetch: fetch });
-        console.log(podUrls)
     } catch (e) {
         const error = simplifyError(e, "Whilst attempting to validate WebID: " + webId);
         if (error.code === 404) {
@@ -49,7 +48,6 @@ export async function findSocialPodFromWebId(webId) {
 }
 
 export async function doesNotificationsDirExist(podRootDir) {
-    console.log("check");
     try {
         await getSolidDataset(
             podRootDir + NOTIFICATIONS_DIR, 
@@ -76,7 +74,6 @@ export async function createNotificationsDir(podRootDir) {
 
 
 export async function createConnectionRequest(senderDetails, recieverPodRoot) {
-    console.log("creating request");
     //senderDetails = {webId, msg, socialPod}
     let notifDataset = createSolidDataset();
     let notifThing = buildThing(createThing({name: "this"}))
@@ -99,7 +96,6 @@ export async function createConnectionRequest(senderDetails, recieverPodRoot) {
         );
     } catch (e) {
         let error = simplifyError(e, "Whilst creating connection request notification.");
-        console.log(error);
         if (error.code === 404) {
             // Not found
             return {title: "User has no notifications directory", 
