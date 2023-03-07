@@ -26,8 +26,8 @@ class LoginPage extends React.Component {
         }
     }
 
-    async handleLogin(loginController) {     
-        const errMsg = await SolidLoginHandler(loginController.state.solidProvider, "Decent");
+    handleLogin(loginController) {     
+        const errMsg = SolidLoginHandler(loginController.state.solidProvider, "Decent");
         if (errMsg !== '') {
             loginController.setState(prevState => (
                 {...prevState, 

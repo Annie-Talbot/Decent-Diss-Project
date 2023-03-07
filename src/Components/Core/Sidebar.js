@@ -8,6 +8,12 @@ import { AppStates } from './Constants/AppStates';
  */
 const data = [
     { 
+        icon: <IconFlipFlops size={16} />, 
+        color: 'rouge', 
+        label: 'Feed', 
+        state:AppStates.Feed 
+    },
+    { 
         icon: <IconHome size={16} />, 
         color: 'blue', 
         label: 'Posts', 

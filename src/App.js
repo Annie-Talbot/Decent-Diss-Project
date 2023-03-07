@@ -11,6 +11,7 @@ import ProfilePage from './Components/Profile/ProfilePage';
 import { NotificationsProvider } from '@mantine/notifications';
 import { ConnectionsPage } from './Components/Connections/ConnectionsPage';
 import { SocialDirectoryPage } from './Components/Login/SocialDirectoryPage';
+import { FeedPage } from './Components/Feed/FeedPage';
 
 
 /**
@@ -40,6 +41,8 @@ class App extends React.Component {
             content.push(<ProfilePage podRootDir={this.podRootDir}/>);
         } else if (this.state.currPage === AppStates.Connections) {
             content.push(<ConnectionsPage app={this}/>);
+        } else if (this.state.currPage === AppStates.Feed) {
+            content.push(<FeedPage podRootDir={this.podRootDir}/>);
         } else {
             this.setState(prevState => (
                 {...prevState, 

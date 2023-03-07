@@ -8,5 +8,6 @@ export const AppStates = {
     LogIn: "Log In",
     Profile: "Profile",
     Connections: "Connections",
-    FindSocialDirectory: "Your Social Directory"
+    FindSocialDirectory: "Your Social Directory",
+    Feed: "Feed"
 }
