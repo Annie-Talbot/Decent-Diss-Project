@@ -3,7 +3,7 @@ import { buildThing, createSolidDataset, createThing, getBoolean, getDatetime,
     saveSolidDatasetInContainer, setThing } from "@inrupt/solid-client";
 import { RDF } from "@inrupt/vocab-common-rdf";
 import { createEmptyDataset, delay, deleteDataset, getChildUrlsList, NOTIFICATIONS_DIR, 
-    NOTIFICATIONS_THING, simplifyError, SOCIAL_ROOT } from "./Utils";
+    NOTIFICATIONS_THING, POSTS_DIR, POST_DETAILS, simplifyError, SOCIAL_ROOT } from "./Utils";
 import { fetch } from "@inrupt/solid-client-authn-browser";
 import { SOCIAL_SOLID } from "./SolidTerms";
 import { setPublicAppendAccess } from "./AccessHandler";
@@ -79,9 +79,9 @@ export async function createConnectionRequest(senderDetails, recieverPodRoot) {
     let notifDataset = createSolidDataset();
     let notifThing = buildThing(createThing({name: "this"}))
         .addUrl(RDF.type, SOCIAL_SOLID.ConnReq)
-        .addUrl(SOCIAL_SOLID.NotifSenderWebId, senderDetails.webId)
+        .addUrl(SOCIAL_SOLID.SenderWebId, senderDetails.webId)
         .addStringNoLocale(SOCIAL_SOLID.NotifMessage, senderDetails.msg)
-        .addUrl(SOCIAL_SOLID.NotifSenderPodRoot, senderDetails.socialPod)
+        .addUrl(SOCIAL_SOLID.SenderPodRoot, senderDetails.socialPod)
         .addUrl(SOCIAL_SOLID.SupportedApplications, SOCIAL_SOLID.Decent)
         .addBoolean(SOCIAL_SOLID.HasBeenRead, false)
         .addDatetime(SOCIAL_SOLID.DatetimeCreated, new Date(Date.now()))
@@ -117,7 +117,7 @@ export async function createConnectionRequest(senderDetails, recieverPodRoot) {
 
 function getConnectionRequestNotification(notifThing) {
     // Sender web id
-    const webId = getUrl(notifThing, SOCIAL_SOLID.NotifSenderWebId, { fetch: fetch });
+    const webId = getUrl(notifThing, SOCIAL_SOLID.SenderWebId, { fetch: fetch });
     if (webId == null) {
         return [null, {
             code: 0,
@@ -127,7 +127,7 @@ function getConnectionRequestNotification(notifThing) {
     }
 
     // Sender Pod root directory
-    const pod = getUrl(notifThing, SOCIAL_SOLID.NotifSenderPodRoot, { fetch: fetch });
+    const pod = getUrl(notifThing, SOCIAL_SOLID.SenderPodRoot, { fetch: fetch });
     if (pod == null) {
         return [null, {
             code: 0,

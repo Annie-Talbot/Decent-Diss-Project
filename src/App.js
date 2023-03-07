@@ -42,7 +42,7 @@ class App extends React.Component {
         } else if (this.state.currPage === AppStates.Connections) {
             content.push(<ConnectionsPage app={this}/>);
         } else if (this.state.currPage === AppStates.Feed) {
-            content.push(<FeedPage podRootDir={this.podRootDir}/>);
+            content.push(<FeedPage podRootDir={this.podRootDir} webId={this.webId} />);
         } else {
             this.setState(prevState => (
                 {...prevState, 

@@ -18,6 +18,8 @@ export const PROFILE_THING = "social/profile#me";
 export const CONNECTIONS_DIR = "social/connections/"
 export const NOTIFICATIONS_DIR = "social/notifications/"
 export const NOTIFICATIONS_THING = "#this"
+export const FEED_DIR = "social/feed/"
+export const FEED_THING = "#this"
 
 export function GetPostDatasetUrl(postDir, postName) {return postDir + postName;}
 export const POST_DETAILS = "#details";

@@ -30,6 +30,43 @@ export async function createPostsDir(podRootDir) {
     await setReadAccess(podRootDir + POSTS_DIR, null);
 }
 
+
+async function getPostFromThing(postThing) {
+    // Title
+    const postTitle = getStringNoLocale(postThing, TITLE);
+    // Date
+    const postDatetime = getDatetime(postThing, DATE_CREATED, { fetch: fetch });
+    // these are the only required attributes so return error if it doesn't exist
+    if (!postTitle) {
+        return [null, {
+            code: 0,
+            title: "Post has no title or datetime predicate, this is required.",
+            description: "",
+        }]
+    }
+    // Text
+    const postText = getStringNoLocale(postThing, SCHEMA_INRUPT.text, { fetch: fetch });
+    // Image
+    const postImageLocation = getUrl(postThing, SCHEMA_INRUPT.image, { fetch: fetch });
+    let postImg = null;
+    if (postImageLocation) {
+        const [image, error] = await getImage(postImageLocation);
+        if (error) {
+            return [null, error]
+        }
+        postImg = URL.createObjectURL(image);
+    }
+    // TODO: Missing author details as need some utility functions to do that
+
+    let post = {
+        title: postTitle,
+        text: postText,
+        datetime: postDatetime.toLocaleString(),
+        image: postImg,
+    };
+    return [post, null];
+}
+
 /**
  * This function retrieves all information about a post and returns
  * it as a local dictionary for displaying.
@@ -62,42 +99,14 @@ async function getPost(postDir, postName) {
             description: errContext,
         }]
     }
-    // Title
-    const postTitle = getStringNoLocale(postThing, TITLE);
-    // Date
-    const postDatetime = getDatetime(postThing, DATE_CREATED, { fetch: fetch });
-    // these are the only required attributes so return error if it doesn't exist
-    if (!postTitle) {
-        return [null, {
-            code: 0,
-            title: "Post has no title or datetime predicate, this is required.",
-            description: errContext,
-        }]
+    
+    let [post, error] = await getPostFromThing(postThing);
+    if (error) {
+        return [null, error]
     }
-    // Text
-    const postText = getStringNoLocale(postThing, SCHEMA_INRUPT.text, { fetch: fetch });
-    // Image
-    const postImageLocation = getUrl(postThing, SCHEMA_INRUPT.image, { fetch: fetch });
-    let postImg = null;
-    if (postImageLocation) {
-        const [image, error] = await getImage(postImageLocation);
-        if (error) {
-            return [null, error]
-        }
-        postImg = URL.createObjectURL(image);
-    }
-    // TODO: Missing author details as need some utility functions to do that
-
-    let post = {
-        title: postTitle,
-        text: postText,
-        datetime: postDatetime.toLocaleString(),
-        image: postImg,
-        dir: postDir,
-        name: postName,
-    };
+    post["dir"] = postDir;
+    post["name"] = postName;
     return [post, null];
-
 }
 
 /**
@@ -223,4 +232,41 @@ export async function createPost(post) {
         await setAllReadAccess([postDirUrl, postImgUrl, postDatasetUrl], accessList);
     }
     return [true, null];
+}
+
+export async function fetchPost(postUrl) {
+    const postRegex = new RegExp('.*/' + POSTS_DIR + '(.*)/');
+    const postName = postUrl.match(postRegex)[1];
+    console.log(postName);
+    let postDataset;
+    try {
+        postDataset = await getSolidDataset(
+            postUrl + postName, 
+            { fetch: fetch }  // fetch function from authenticated session
+        );
+    } catch (e) {
+        let error = simplifyError(e, "Whilst fetching post data.");
+        if (error.code === 404) {
+            // Not found
+            return {title: "Post URL does not exist", 
+                description: "Cannot load post."};
+        }
+        if (error.code === 403) {
+            // Unauthorised
+            return {title: "No access to this post", 
+                description: "Cannot load post."};
+        }
+        return {title: "Cannot fetch post", 
+            description: error.description};
+    }
+
+    const postThing = getThing(postDataset, postUrl + postName + POST_DETAILS, { fetch: fetch });
+    if (!postThing) {
+        return [null, {
+            title: "Post has no #details Thing",
+            description: "Cannot load post.",
+        }]
+    }
+    return getPostFromThing(postThing);
+
 }
