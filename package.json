@@ -6,6 +6,7 @@
     "@emotion/react": "^11.10.5",
     "@inrupt/solid-client": "^1.24.0",
     "@inrupt/solid-client-authn-browser": "^1.13.0",
+    "@inrupt/solid-client-notifications": "^1.1.2",
     "@inrupt/solid-ui-react": "^2.8.2",
     "@inrupt/vocab-common-rdf": "^1.0.5",
     "@mantine/core": "^5.10.1",

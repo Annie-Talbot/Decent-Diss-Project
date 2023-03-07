@@ -1,10 +1,10 @@
 import React from 'react';
-import { ActionIcon, Button, Center, Group, Paper, Skeleton, Stack, Title} from '@mantine/core';
+import { ActionIcon, Button, Center, Group, Paper} from '@mantine/core';
 import { Profile } from './Profile';
 import { IconArrowBack } from '@tabler/icons';
-import { createErrorNotification } from '../Core/Notifications/ErrorNotification';
 import { createSampleProfile, doesProfileExist } from '../../SOLID/ProfileHandler';
 import { PageLoader } from '../Core/PageLoader';
+import { createConnectionRequest } from '../../SOLID/NotificationHandler';
 
 
 class ProfilePage extends React.Component {
@@ -20,6 +20,13 @@ class ProfilePage extends React.Component {
     render() {
         return (
             <Paper p="sm" shadow="xs">
+                <Button onClick={() => createConnectionRequest({
+                            webId: "https://id.inrupt.com/at698",
+                            msg: "Hi, this is at698. Add me to your contacts!",
+                            socialPod: this.podRootDir
+                        }, this.podRootDir)}>
+                        create notification
+                    </Button>
                 <PageLoader
                     checkFunction={doesProfileExist}
                     createFunction={createSampleProfile}

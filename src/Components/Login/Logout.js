@@ -15,6 +15,9 @@ class Logout extends React.Component {
     async handleLogout(app) {
         await logout();
         console.log("Logged out");
+        this.podRootDir = '';
+        this.webId = '';
+        this.notificationSocket = null;
         app.setState(prevState => (
             {...prevState, 
             currPage: AppStates.LogIn, 

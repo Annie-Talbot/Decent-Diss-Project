@@ -25,12 +25,6 @@ const data = [
         label: 'Connections',
         state:AppStates.Connections 
     },
-    { 
-        icon: <IconFlipFlops size={16} />, 
-        color: 'pink', 
-        label: 'Notifications', 
-        state: AppStates.Notifications 
-    },
 ];
 
 /**

@@ -1,51 +1,39 @@
-import { Skeleton, Stack } from "@mantine/core";
-import { createErrorNotification } from "../Core/Notifications/ErrorNotification";
-import { useState, useEffect } from "react";
+import { Stack, ThemeIcon, Text } from "@mantine/core";
 import { Notification } from "./Notification";
-import { deleteNotification, fetchNotifications } from "../../SOLID/NotificationHandler";
-import { createPlainNotification } from "../Core/Notifications/PlainNotification";
+import { IconBeach } from "@tabler/icons";
 
-async function handleDeleteNotification(notifUrl, notifIndex, notifications, setNotifications) {
-    const error = await deleteNotification(notifUrl);
-    if (error) {
-        createErrorNotification(error);
-        return;
-    }
-    createPlainNotification({title: "Success", description: "Successfully deleted notification!"});
-    let list = [...notifications];
-    list.splice(notifIndex, 1);
-    setNotifications(list);
+function EmptyNotifications() {
+    return (
+        <Stack align="center" justify="center">
+            <ThemeIcon 
+            variant="light"
+            size="xl">
+                <IconBeach />
+            </ThemeIcon>
+            <Text size={"lg"}>No notifications</Text>
+        </Stack>
+    );
 }
 
 
 export function NotificationList(props) {
-    const [loading, setLoading] = useState(true);
-    const [notifications, setNotifications] = useState([]);
-
-    useEffect(() => {
-        fetchNotifications(props.podRootDir).then(([notifs, errors]) => {
-            if (errors) {
-                errors.forEach((error) => createErrorNotification(error));
-            }
-            setNotifications(notifs);
-            setLoading(false);
-        })
-        
-    }, [props.podRootDir]);
-
+    console.log(props.notifications)
     return (
-        <Skeleton visible={loading}>
-            <Stack spacing="sm">
-                {notifications.map((notif, index) => (
-                    <Notification 
-                        key={index} 
-                        notification={notif} 
-                        delete={() => handleDeleteNotification(notif.url, index, 
-                            notifications, setNotifications)}
-                        podRootDir={props.podRootDir}
-                    />
-                ))}
-            </Stack>
-        </Skeleton>
+        <>
+            {props.notifications.length > 0 ?
+                <Stack spacing="xs">
+                    {props.notifications.map((notif, index) => (
+                        <Notification 
+                            key={index} 
+                            notification={notif} 
+                            delete={() => props.deleteNotification(notif.url)}
+                            podRootDir={props.podRootDir}
+                        />
+                    ))}
+                </Stack>
+            :
+                <EmptyNotifications />
+            }
+        </>
     );
 }

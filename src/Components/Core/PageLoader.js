@@ -1,6 +1,7 @@
 import { Button, Center, Skeleton, Stack, Title } from "@mantine/core";
 import { createErrorNotification } from "./Notifications/ErrorNotification";
 import { useState, useEffect } from "react";
+import { MissingPodStructure } from "./MissingPodStructure";
 
 
 
@@ -39,24 +40,12 @@ export function PageLoader(props) {
         } else {
             // pod structure does not exist
             content = (
-                <Center>
-                    <Stack>
-                        <Title order={4} >
-                            No {props.podStructureRequired} found. Create a new one?
-                        </Title>
-                        <Button onClick={async() => {
-                            const error = await props.createFunction(props.podRootDir);
-                            if (error) {
-                                createErrorNotification(error);
-                                return;
-                            }
-                            setPodStructureExists(true);
-                        }}>
-                            Create {props.podStructureRequired}.
-                        </Button>
-                    </Stack>
-                </Center>
-            )
+                <MissingPodStructure
+                    podRootDir={props.podRootDir}
+                    podStructureRequired={props.podStructureRequired}
+                    createFunction={props.createFunction}
+                    setExists={setPodStructureExists}
+                />);
         }
     } else {
         // pod structure exists

@@ -7,6 +7,7 @@ import { createEmptyDataset, delay, deleteDataset, getChildUrlsList, NOTIFICATIO
 import { fetch } from "@inrupt/solid-client-authn-browser";
 import { SOCIAL_SOLID } from "./SolidTerms";
 import { setPublicAppendAccess } from "./AccessHandler";
+import { WebsocketNotification } from "@inrupt/solid-client-notifications";
 
 export const NOTIFICATIONS_TYPES = {
     ConnectionRequest: 0,
@@ -138,7 +139,7 @@ function getConnectionRequestNotification(notifThing) {
     // Message
     let msg;
     try{
-        msg = getStringNoLocale(notifThing, SOCIAL_SOLID.msg, { fetch: fetch });
+        msg = getStringNoLocale(notifThing, SOCIAL_SOLID.NotifMessage, { fetch: fetch });
         if (msg == null) {
             msg = "";
         }
@@ -246,5 +247,24 @@ export async function fetchNotifications(podRootDir) {
 
 
 export async function deleteNotification(notifUrl) {
-    return await deleteDataset(notifUrl)[1];
+    let error = await deleteDataset(notifUrl)[1];
+    await delay(500);
+    return error;
+}
+
+
+export async function createNotificationSocket(podRootDir, changeHandler) {
+    let socket;
+    try {
+        socket = new WebsocketNotification(
+            podRootDir + NOTIFICATIONS_DIR,
+            { fetch: fetch }
+        );
+        socket.on("message", changeHandler);
+        socket.connect();
+    } catch (e) {
+        socket.disconnect();
+        return [null, simplifyError(e, "Trying to create notification listener.")];
+    }
+    return [socket, null];
 }

@@ -14,7 +14,19 @@ export const AppTheme = {
             '#344a35', 
             '#1d2d1f', 
             '#031103'
-          ]
+          ],
+          rouge: [
+            '#ffebe6',
+            '#efcec4',
+            '#dfb0a0',
+            '#d18c7a',
+            '#c36355',
+            '#aa433c',
+            '#852e2f',
+            '#5f2024',
+            '#3a1117',
+            '#190004',
+          ],
         },
         primaryColor: 'sage',
         primaryShade: 4,

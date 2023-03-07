@@ -10,8 +10,8 @@ import { AppTheme } from './Components/Core/Constants/AppTheme';
 import ProfilePage from './Components/Profile/ProfilePage';
 import { NotificationsProvider } from '@mantine/notifications';
 import { ConnectionsPage } from './Components/Connections/ConnectionsPage';
-import { NotificationsPage } from './Components/Notifications/NotificationsPage';
 import { SocialDirectoryPage } from './Components/Login/SocialDirectoryPage';
+
 
 /**
  * App Component represents the entire app, it uses it's 
@@ -40,9 +40,7 @@ class App extends React.Component {
             content.push(<ProfilePage podRootDir={this.podRootDir}/>);
         } else if (this.state.currPage === AppStates.Connections) {
             content.push(<ConnectionsPage app={this}/>);
-        } else if (this.state.currPage === AppStates.Notifications) {
-            content.push(<NotificationsPage app={this}/>);
-        }  else {
+        } else {
             this.setState(prevState => (
                 {...prevState, 
                 currPage: AppStates.LogIn,

@@ -64,7 +64,7 @@ export class SocialDirectoryPage extends React.Component {
         return;
     }
 
-    loadSocialDirectory(app, podRootDir) {
+    async loadSocialDirectory(app, podRootDir) {
         app.podRootDir = podRootDir;
         app.setState(prevState => ({
             ...prevState,
