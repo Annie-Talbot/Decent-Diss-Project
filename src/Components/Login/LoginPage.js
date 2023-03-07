@@ -86,8 +86,6 @@ class LoginPage extends React.Component {
         // loggedIn is true. Should not be here.
     }
 
-    // content.push((<SocialDirErrorPopup app={this} loadSocialDirectory={this.socialDirCreated}/>));
-
     render() {
         return (
             <>
@@ -139,8 +137,6 @@ class LoginPage extends React.Component {
                                 <Button>Create a POD</Button>
                             </a>
                         </Group>
-                        
-                        
                     </Stack>
                 </Paper>
             </>

@@ -25,7 +25,7 @@ export function PeopleSearcher(props) {
     return (
         <Skeleton visible={loading}>
             <Grid grow justify="space-between" align="flex-end">
-                <Grid.Col span={10} grow>
+                <Grid.Col span={10}>
                     <Select
                         label="Search"
                         searchable

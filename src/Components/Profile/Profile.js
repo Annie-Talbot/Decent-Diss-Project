@@ -39,6 +39,7 @@ export function Profile(props)  {
     // Profile Picture
     dataDisplay.push((
         <ProfilePic 
+            key="profilePic"
             pic={profile.profilePic} 
             editing={props.editing}
             update={(newPic) => setProfile(profile => (
@@ -54,6 +55,7 @@ export function Profile(props)  {
     // Username
     dataDisplay.push((
         <Username 
+            key="username"
             name={profile.name} 
             editing={props.editing} 
             update={(newName) => setProfile(profile => (
@@ -65,6 +67,7 @@ export function Profile(props)  {
     // Description
     dataDisplay.push((
         <Description 
+            key="description"
             description={profile.description} 
             editing={props.editing}
             update={(newDescription) => setProfile(profile => (
@@ -79,6 +82,7 @@ export function Profile(props)  {
     ));
     dataDisplay.push((
         <Birthday 
+            key="birthday"
             birthday={profile.birthday} 
             editing={props.editing}
             update={(newBirthday) => setProfile(profile => (

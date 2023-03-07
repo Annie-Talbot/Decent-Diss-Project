@@ -26,7 +26,7 @@ function People(props) {
         <Skeleton visible={loading}>
             <Stack style={{gap: "2px"}}>
                 <Grid grow align="center">
-                    <Grid.Col span={10} grow>
+                    <Grid.Col span={10}>
                         <Select
                             label="Search"
                             searchable

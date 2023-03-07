@@ -107,7 +107,7 @@ export class ConnectionsPage extends React.Component {
         let content = [];
         if (this.state.currView === ViewStates.Main) {
             content.push((
-                <>
+                <div key="main-state">
                     <CreatePersonForm 
                         opened={this.state.createPersonOpened}
                         toggleOpened={() => this.toggleCreatePersonPopup(this)}
@@ -123,7 +123,7 @@ export class ConnectionsPage extends React.Component {
                         podRootDir={this.podRootDir}
                     />
                     <Grid grow>
-                        <Grid.Col span={4} grow gutter="sm">
+                        <Grid.Col span={4} gutter="sm">
                             <Paper shadow="xs" p="md" withBorder>
                                 <Stack>
                                     <Group position="apart">
@@ -161,11 +161,11 @@ export class ConnectionsPage extends React.Component {
                             </Paper>
                         </Grid.Col>
                     </Grid>
-                </>
+                </div>
             ));
         } else if (this.state.currView === ViewStates.PersonView) {
             content.push((
-                <Stack justify="flex-start" spacing="xs">
+                <Stack key="person-state" justify="flex-start" spacing="xs">
                     <Grid grow align="flex-end" justify="space-between">
                         <Grid.Col span={1}>
                             <ActionIcon onClick={() => {this.back(this)}} >
@@ -182,7 +182,7 @@ export class ConnectionsPage extends React.Component {
             ));
         } else if (this.state.currView === ViewStates.GroupView) {
             content.push((
-                <Stack justify="flex-start" spacing="xs">
+                <Stack key="group-state" justify="flex-start" spacing="xs">
                     <Grid grow align="flex-end" justify="space-between">
                         <Grid.Col span={1}>
                             <ActionIcon onClick={() => {this.back(this)}} >

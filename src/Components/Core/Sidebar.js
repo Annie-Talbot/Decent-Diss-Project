@@ -35,7 +35,8 @@ const data = [
  * display.
  * @returns The Component to be placed into the Sidebar.
  */
-function SideBarItem({icon, label, color, state}, app) {
+function SideBarItem(props) {
+    const {icon, label, color, state} = props.item;
     return (
         <UnstyledButton
             sx={(theme) => ({
@@ -52,8 +53,8 @@ function SideBarItem({icon, label, color, state}, app) {
             })}
             key={label}
             onClick={() => {
-                if (app.state.loggedIn !== false && app.podRootDir !== '') {
-                    app.setState(prevState => (
+                if (props.app.state.loggedIn !== false && props.app.podRootDir !== '') {
+                    props.app.setState(prevState => (
                         {...prevState, 
                         currPage: state,
                     }))
@@ -78,7 +79,9 @@ function SideBar(props) {
     return (
         <Navbar height={600} p="xs" width={{ base: 300 }}>
             {data.map((item) => (
-                <Navbar.Section mt="md">{SideBarItem(item, props.app)}</Navbar.Section>
+                <Navbar.Section key={"navsection-" + item.label} mt="md">
+                    <SideBarItem item={item} app={props.app}/>
+                </Navbar.Section>
             ))}
         </Navbar>
     );

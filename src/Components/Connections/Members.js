@@ -22,7 +22,7 @@ export function Members(props) {
             {props.members.length > 0 ?
                 <Stack>
                     {props.members.map((person, index) => (
-                        <Grid grow justify="center" align="space-between">
+                        <Grid key={index} grow justify="center" align="space-between">
                             <Grid.Col span={1}>
                                 <ActionIcon 
                                 style={{width: "100%", height: "100%"}}
