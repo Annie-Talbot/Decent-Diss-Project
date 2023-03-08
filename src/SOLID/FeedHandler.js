@@ -1,5 +1,5 @@
 import { buildThing, createSolidDataset, createThing, getDatetime, getSolidDataset, getThing, getUrl, getUrlAll, saveSolidDatasetInContainer, setThing } from "@inrupt/solid-client";
-import { createEmptyDataset, delay, FEED_DIR, FEED_THING, getChildUrlsList, simplifyError } from "./Utils";
+import { createEmptyDataset, delay, deleteDataset, FEED_DIR, FEED_THING, getChildUrlsList, simplifyError } from "./Utils";
 import { setPublicAppendAccess } from "./AccessHandler";
 import { fetch } from "@inrupt/solid-client-authn-browser";
 import { SOCIAL_SOLID } from "./SolidTerms";
@@ -178,4 +178,8 @@ export async function fetchFeedItems(podRootDir) {
         feedItems.push(feedItem);
     }
     return [feedItems, errorList];
+}
+
+export async function deleteFeedItem(feedItemUrl) {
+    return await deleteDataset(feedItemUrl);
 }

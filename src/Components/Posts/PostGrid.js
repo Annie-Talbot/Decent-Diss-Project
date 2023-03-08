@@ -1,4 +1,4 @@
-import { SimpleGrid, Skeleton } from "@mantine/core";
+import { Center, SimpleGrid, Skeleton } from "@mantine/core";
 import { deletePost, fetchPosts } from "../../SOLID/PostHandler";
 import { createErrorNotification } from "../Core/Notifications/ErrorNotification";
 import {Post} from "./Post";
@@ -34,15 +34,19 @@ export function PostGrid(props) {
             if (props.authorised) errors.forEach(error => createErrorNotification(error));
             setLoading(false);
         })
-    }, []);
+    }, [props.podRootDir, props.authorised]);
 
     const postComponents = postList.map((post, index) => {
-        return (<Post
-            key={index}
-            authorised={props.authorised}
-            post={post}
-            deletePost={() => handleDeletePost(post, postList, setPostList)} 
-            />)
+        return (
+            <Center>
+                <Post
+                    author={props.author}
+                    key={index}
+                    authorised={props.authorised}
+                    post={post}
+                    deletePost={() => handleDeletePost(post, postList, setPostList)} 
+                />
+            </Center>)
         });
 
     return (
@@ -50,7 +54,6 @@ export function PostGrid(props) {
             {postList.length > 0? 
                 <SimpleGrid 
                     cols={3}
-                    
                     breakpoints={[
                         { maxWidth: 1600, cols: 2, spacing: 'sm' },
                         { maxWidth: 1200, cols: 1, spacing: 'sm' },

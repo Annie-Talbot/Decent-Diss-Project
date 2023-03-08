@@ -30,6 +30,7 @@ function EmptyPosts(props) {
 export class PostsPage extends React.Component {
     constructor(props) {
         super(props);
+        this.webId = props.webId;
         this.podRootDir = props.podRootDir;
         this.state = {
             createPostOpened: false,
@@ -76,6 +77,7 @@ export class PostsPage extends React.Component {
                         />
                     <ScrollArea offsetScrollbars style={{gridRow: "1", gridColumn: "1"}}>
                         <PostGrid
+                            author={{webId: this.webId, nickname: "Myself"}}
                             key={this.state.postgridKey}
                             authorised={true}
                             podRootDir={this.podRootDir}

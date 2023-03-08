@@ -36,7 +36,7 @@ class App extends React.Component {
         } else if (this.state.currPage === AppStates.FindSocialDirectory) {
             content.push(<SocialDirectoryPage app={this}/>);
         } else if (this.state.currPage === AppStates.Posts) {
-            content.push(<PostsPage podRootDir={this.podRootDir}/>);
+            content.push(<PostsPage webId={this.webId} podRootDir={this.podRootDir}/>);
         } else if (this.state.currPage === AppStates.Profile) {
             content.push(<ProfilePage podRootDir={this.podRootDir}/>);
         } else if (this.state.currPage === AppStates.Connections) {

@@ -1,4 +1,4 @@
-import { Center, Paper, Skeleton, Stack, Text, ThemeIcon } from "@mantine/core";
+import { Center, Grid, Paper, Skeleton, Stack, Text, ThemeIcon } from "@mantine/core";
 import { IconBeach } from "@tabler/icons";
 import { useState, useEffect } from "react";
 import { FEED_ITEM_TYPES, fetchFeedItems } from "../../SOLID/FeedHandler";
@@ -33,6 +33,7 @@ export function FeedItemList(props) {
     return (
         <Skeleton visible={loading}>
             {feedItems.length > 0?
+            <Grid grow justify="center" align="flex-start">
                 <Stack>
                     {feedItems.map((feedItem, index) => {
                         if (feedItem.type === FEED_ITEM_TYPES.PostAlert) {
@@ -50,6 +51,7 @@ export function FeedItemList(props) {
                         }
                         })}
                 </Stack>
+                </Grid>
             :
                 <EmptyFeed />
             }

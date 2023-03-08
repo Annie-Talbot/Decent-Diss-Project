@@ -157,3 +157,23 @@ export async function fetchPeopleFromList(podRootDir, peopleUrlList) {
     return [people, errors];
 
 }
+
+
+export async function findPerson(podRootDir, webId) {
+    let [people, errors] = await fetchPeople(podRootDir);
+    if (people.length === 0) {
+        return {
+            webId: webId,
+            nickname: "",
+        };
+    }
+    
+    let person = people.find(p => p.webId === webId);
+    if (person === null) {
+        return {
+            webId: webId,
+            nickname: "",
+        };
+    }
+    return person;
+}

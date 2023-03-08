@@ -1,15 +1,19 @@
 import { Card, Text, Image, Badge, Menu, ActionIcon, Stack, Grid, Title } from '@mantine/core';
 import { IconEdit, IconDotsVertical, IconTrash } from '@tabler/icons';
+import {Person} from '../Connections/Person';
 
 export function Post(props) {
     return (
         <Card shadow="sm" p="lg" radius="md" withBorder style={{"maxWidth": 600}}>
+            <Card.Section style={{"height": 55}} withBorder>
+                <Person person={props.author}/>
+            </Card.Section>
             {props.post.image? 
-                <Card.Section withBorder >
+                <Card.Section style={{"height": 300}} withBorder >
                     <Image
                             radius="md"
                             fit="contain"
-                            height={160}
+                            height={300}
                             src={props.post.image}
                         />
                 </Card.Section>
