@@ -65,6 +65,7 @@ export function PostLoader(props) {
                     author={person}
                     post={post}
                     authorised={false}
+                    viewPerson={() => props.viewPerson(person)}
                 />
             </div>
                 

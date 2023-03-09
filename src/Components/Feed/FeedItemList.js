@@ -41,6 +41,7 @@ export function FeedItemList(props) {
                                 key={index}
                                 feedItem={feedItem}
                                 podRootDir={props.podRootDir}
+                                viewPerson={props.viewPerson}
                             />);
                         } else {
                             return (<Paper shadow="sm" withBorder>

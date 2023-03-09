@@ -1,43 +1,15 @@
 import React from 'react';
-import { Title, Paper, Button, ScrollArea, Container} from '@mantine/core';
+import { Title, Paper, Stack, ActionIcon, ScrollArea, Container, Grid, Divider} from '@mantine/core';
 import { PageLoader } from '../Core/PageLoader';
-import { createFeedDir, createPostAlert, doesFeedDirExist } from '../../SOLID/FeedHandler';
-import { findSocialPodFromWebId} from '../../SOLID/NotificationHandler'
-import { createErrorNotification } from '../Core/Notifications/ErrorNotification';
+import { createFeedDir, doesFeedDirExist } from '../../SOLID/FeedHandler';
 import { FeedItemList } from './FeedItemList';
+import { IconArrowBack } from '@tabler/icons';
+import { PersonView } from '../Connections/PersonView';
 
-
-async function sendPostAlert(recieverWebId, senderWebId, postUrl) {
-    // Check we can send a post alert first.
-    let [personPod, error] = await findSocialPodFromWebId(recieverWebId);
-    if (error) {
-        createErrorNotification(error);
-        return false;
-    }
-    error = await createPostAlert(personPod, {webId: senderWebId, postUrl: postUrl});
-    if (error) {
-        createErrorNotification(error);
-        return false;
-    }
-    return true;
-}
-
-
-function callback(entries, observer) {
-    entries.forEach((entry) => {
-        console.log("Intersection registered.");
-        console.log(entry);
-        observer.unobserve(entry.target);
-    });
-}
-
-function createObserver(observer, targets) {
-    return (event) => {
-        console.log("here")
-        observer = new IntersectionObserver(callback, {root: null, threshold: [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]});
-        targets = document.getElementsByClassName("target");
-        targets.forEach((target) => observer.observe(target));
-    }
+const FeedViewStates = {
+    Feed: 0,
+    Person: 1,
+    Settings: 2,
 }
 
 /**
@@ -48,10 +20,71 @@ export class FeedPage extends React.Component {
     constructor(props) {
         super(props);
         this.podRootDir = props.podRootDir;
-        this.webId = props.webId;
+        this.webId = props.webId
+        this.state = {
+            view: FeedViewStates.Feed,
+            backHistory: [],
+            viewPerson: {}
+        }
+    }
+
+    viewPerson(feedPage, person) {
+        let list = feedPage.state.backHistory;
+        list.push(FeedViewStates.Feed);
+        feedPage.setState(prevState => ({
+            ...prevState,
+            viewPerson: person,
+            backHistory: list,
+            view: FeedViewStates.Person
+        }))
+    }
+    
+    back(feedPage) {
+        let list = feedPage.state.backHistory;
+        const newState = list.pop();
+        feedPage.setState(prevState => ({
+            ...prevState,
+            backHistory: list,
+            view: newState
+        }))
     }
 
     render() {
+        let content;
+        if (this.state.view === FeedViewStates.Feed) {
+            content = (<Container style={{width: "100%", height: "100%"}}>
+                <ScrollArea h="85vh">
+                    <FeedItemList 
+                        podRootDir={this.podRootDir} 
+                        viewPerson={(person) => this.viewPerson(this, person)}
+                    />
+                </ScrollArea>
+            </Container>);
+        } else if (this.state.view === FeedViewStates.Person) {
+            content = (
+                <Paper shadow="md" p="sm">
+                    <Stack justify="flex-start" spacing="xs">
+                        <Grid grow align="flex-end" justify="space-between">
+                            <Grid.Col span={1}>
+                                <ActionIcon onClick={() => {this.back(this)}} >
+                                    <IconArrowBack />
+                                </ActionIcon>
+                            </Grid.Col>
+                            <Grid.Col span={8}>
+                                <Title align="right" order={4}>{this.state.viewPerson.webId}</Title>
+                            </Grid.Col>
+                        </Grid>
+                        <Divider h="md"/>
+                        <PersonView person={this.state.viewPerson} />
+                    </Stack>
+                </Paper>
+            )
+        } else {
+            this.setState({
+                view: FeedViewStates.Feed,
+                backHistory: []
+            });
+        }
         return (
             <PageLoader 
                 checkFunction={doesFeedDirExist}
@@ -59,15 +92,7 @@ export class FeedPage extends React.Component {
                 podRootDir={this.podRootDir}
                 podStructureRequired="feed directory"
             >
-                {/* <Button onClick={() => sendPostAlert(this.webId, this.webId, 
-                            "https://storage.inrupt.com/c70793cd-0e87-4e30-b52b-337414d0f121/social/posts/g32NuICFHY/")}>
-                            create post alert
-                </Button> */}
-                <Container style={{width: "100%", height: "100%"}}>
-                    <ScrollArea h="85vh">
-                        <FeedItemList podRootDir={this.podRootDir} observer={this.observer}/>
-                    </ScrollArea>
-                </Container>      
+                {content}
             </PageLoader>
         );
     }

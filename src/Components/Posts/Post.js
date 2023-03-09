@@ -6,7 +6,7 @@ export function Post(props) {
     return (
         <Card shadow="sm" p="lg" radius="md" withBorder style={{"maxWidth": 600}}>
             <Card.Section style={{"height": 55}} withBorder>
-                <Person person={props.author}/>
+                <Person person={props.author} viewPerson={props.viewPerson} />
             </Card.Section>
             {props.post.image? 
                 <Card.Section style={{"height": 300}} withBorder >
