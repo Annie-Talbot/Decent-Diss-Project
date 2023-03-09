@@ -7,10 +7,10 @@ import { POSTS_DIR } from "../../SOLID/Utils";
 import { createErrorNotification } from "../Core/Notifications/ErrorNotification";
 import { createPlainNotification } from "../Core/Notifications/PlainNotification";
 
-async function handleCreatePost(post, connections, closePopup, updatePosts) {
+async function handleCreatePost(podRootDir, webId, post, connections, closePopup, updatePosts) {
     const agents = post.agentAccess.map((index) => connections[parseInt(index)])
     post["agentAccess"] = agents;
-    const [success, error] = await createPost(post);
+    const [success, error] = await createPost(podRootDir, webId, post);
     if (!success) {
         createErrorNotification(error);
         return;
@@ -25,7 +25,6 @@ export function CreatePostForm(props) {
     const [connections, setConnections] = useState([]);
     const [connectionIndexes, setConnectionIndexes] = useState([]);
     const [post, setPost] = useState({
-        dir: props.podRootDir + POSTS_DIR,
         title: "",
         text: "",
         image: null,
@@ -119,7 +118,10 @@ export function CreatePostForm(props) {
                     variant="filled"
                     size="xl"
                     onClick={() => {
-                        handleCreatePost(post, 
+                        handleCreatePost(
+                            props.podRootDir,
+                            props.webId,
+                            post, 
                             connections, 
                             props.toggleOpened, 
                             props.updatePosts);

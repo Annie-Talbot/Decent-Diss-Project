@@ -4,6 +4,8 @@ import { setPublicAppendAccess } from "./AccessHandler";
 import { fetch } from "@inrupt/solid-client-authn-browser";
 import { SOCIAL_SOLID } from "./SolidTerms";
 import { RDF } from "@inrupt/vocab-common-rdf";
+import { fetchPeople } from "./Connections/PeopleHandler";
+import { findSocialPodFromWebId } from "./NotificationHandler"
 
 
 export const FEED_ITEM_TYPES = {
@@ -182,4 +184,34 @@ export async function fetchFeedItems(podRootDir) {
 
 export async function deleteFeedItem(feedItemUrl) {
     return await deleteDataset(feedItemUrl);
+}
+
+
+export async function createPostAlerts(postUrl, podRootDir, webId, recipientList) {
+    let recipientPodRoots = [];
+    if (recipientList) {
+        // Get pod roots for only specific contacts
+        for (let i = 0; i < recipientList.length; i ++) {
+            let [podRoot, error] = await findSocialPodFromWebId(recipientList[i]);
+            if (podRoot) {
+                recipientPodRoots.push(podRoot);
+            }
+        }
+    } else {
+        // Get pod roots for all contacts
+        let [people, errors] = await fetchPeople(podRootDir);
+        for (let i = 0; i < people.length; i ++) {
+            let [podRoot, error] = await findSocialPodFromWebId(people[i].webId);
+            if (podRoot) {
+                recipientPodRoots.push(podRoot);
+            }
+        }
+    }
+    console.log(recipientPodRoots);
+    recipientPodRoots.forEach(async (podRoot) => {
+        let beep = await createPostAlert(podRoot, {webId: webId, postUrl: postUrl});
+        console.log(beep);
+    });
+    
+    return;
 }

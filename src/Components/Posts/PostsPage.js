@@ -74,6 +74,7 @@ export class PostsPage extends React.Component {
                         toggleOpened={() => this.toggleCreatePostPopup(this)}
                         updatePosts={() => this.updatePosts(this)}
                         podRootDir={this.podRootDir}
+                        webId={this.webId}
                         />
                     <ScrollArea offsetScrollbars style={{gridRow: "1", gridColumn: "1"}}>
                         <PostGrid

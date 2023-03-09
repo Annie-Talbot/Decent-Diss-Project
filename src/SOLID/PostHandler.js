@@ -3,6 +3,7 @@ import { fetch } from '@inrupt/solid-client-authn-browser'
 import { SCHEMA_INRUPT } from "@inrupt/vocab-common-rdf";
 import { GetPostDatasetUrl, POST_DETAILS, getChildUrlsList, deleteDirectory, simplifyError, makeId, createEmptyDataset, DATE_CREATED, TITLE, getImage, POSTS_DIR, delay } from "./Utils";
 import { getAllAgentWebIDs, setAllPublicReadAccess, setAllReadAccess, setReadAccess } from './AccessHandler'
+import { createPostAlerts } from "./FeedHandler";
 
 export async function doesPostsDirExist(podRootDir) {
     try {
@@ -159,7 +160,7 @@ export async function deletePost(postDir) {
     return await deleteDirectory(postDir);
 }
 
-export async function createPost(post) {
+export async function createPost(podRootDir, webId, post) {
     // Find valid ID
     let validId = false;
     let id;
@@ -167,7 +168,7 @@ export async function createPost(post) {
         id = makeId(10);
         try {
             await getSolidDataset(
-                post.dir + id + "/",
+                podRootDir + POSTS_DIR + id + "/",
                 {fetch: fetch}
             )
         } catch (error) {
@@ -180,7 +181,7 @@ export async function createPost(post) {
         }
     }
     // Create post directory
-    const postDirUrl = post.dir + id + "/";
+    const postDirUrl = podRootDir + POSTS_DIR + id + "/";
     let dataset;
     let error;
     [dataset, error] = await createEmptyDataset(postDirUrl);
@@ -188,7 +189,7 @@ export async function createPost(post) {
         return [false, error];
     }
 
-    // create image first because we need the url it is saved at.
+    // Create image first because we need the url it is saved at.
     let imgFile;
     try {
         imgFile = await saveFileInContainer(
@@ -218,18 +219,24 @@ export async function createPost(post) {
         await saveSolidDatasetAt(
             postDatasetUrl,
             postDataset,
-            { fetch: fetch }             // fetch from authenticated Session
+            { fetch: fetch }
           );
     } catch(error) {
         return [false, simplifyError(error, "Encountered whilst trying to create post dataset.")]
     }
+    
     if (post.publicAccess) {
+        // Set access
         await setAllPublicReadAccess([postDirUrl, postImgUrl, postDatasetUrl]);
+        // Create post alerts for feed
+        await createPostAlerts(postDirUrl, podRootDir, webId, null);
     } else {
         // Generate list of agents who will have read access
         let accessList = await getAllAgentWebIDs(post.agentAccess);
         // Set access for post directory, image file, and post dataset
         await setAllReadAccess([postDirUrl, postImgUrl, postDatasetUrl], accessList);
+        // Create post alerts for feed
+        await createPostAlerts(postDirUrl, podRootDir, webId, accessList);
     }
     return [true, null];
 }
