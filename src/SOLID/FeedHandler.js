@@ -1,11 +1,13 @@
-import { buildThing, createSolidDataset, createThing, getDatetime, getSolidDataset, getThing, getUrl, getUrlAll, saveSolidDatasetInContainer, setThing } from "@inrupt/solid-client";
+import { buildThing, createSolidDataset, createThing, getDatetime, getSolidDataset, 
+    getThing, getUrl, getUrlAll, saveSolidDatasetInContainer, setThing } from "@inrupt/solid-client";
 import { createEmptyDataset, delay, deleteDataset, FEED_DIR, FEED_THING, getChildUrlsList, simplifyError } from "./Utils";
-import { setPublicAppendAccess } from "./AccessHandler";
+import { getAllAgentsWithAppendAccess, setAppendAccess } from "./AccessHandler";
 import { fetch } from "@inrupt/solid-client-authn-browser";
 import { SOCIAL_SOLID } from "./SolidTerms";
 import { RDF } from "@inrupt/vocab-common-rdf";
 import { fetchPeople } from "./Connections/PeopleHandler";
 import { findSocialPodFromWebId } from "./NotificationHandler"
+import { fetchPeopleFromList } from "./Connections/PeopleHandler";
 
 
 export const FEED_ITEM_TYPES = {
@@ -34,7 +36,6 @@ export async function createFeedDir(podRootDir) {
         return error;
     }
     await delay(500);
-    await setPublicAppendAccess(podRootDir + FEED_DIR);
 }
 
 
@@ -207,11 +208,49 @@ export async function createPostAlerts(postUrl, podRootDir, webId, recipientList
             }
         }
     }
-    console.log(recipientPodRoots);
     recipientPodRoots.forEach(async (podRoot) => {
         let beep = await createPostAlert(podRoot, {webId: webId, postUrl: postUrl});
         console.log(beep);
     });
     
     return;
+}
+
+export async function fetchPeopleWithFeedAppendAccess(podRootDir) {
+    let [accessList, error] = await getAllAgentsWithAppendAccess(podRootDir + FEED_DIR);
+    if (error) {
+        return [[], error];
+    }
+    let [people, errors] = await fetchPeople(podRootDir);
+    for (let i = 0; i < accessList.length; i++) {
+        let person = people.find(p => p.webId === accessList[i].webId);
+        if (person) {
+            console.log("Adjusted person");
+            accessList[i] = person;
+        }
+    }
+
+    return [accessList, null]
+}
+
+export async function followPerson(podRootDir, webId) {
+    return await setAppendAccess(podRootDir + FEED_DIR, webId, true);
+}
+
+export async function revokeFollowPerson(podRootDir, webId) {
+    return await setAppendAccess(podRootDir + FEED_DIR, webId, false)
+}
+
+export async function followGroup(podRootDir, group) {
+    let [people, errors] = await fetchPeopleFromList(podRootDir, group.members);
+    if (people.length === 0) {
+        return [{title: "Group has no people.", description: "No one has been followed."}];
+    }
+    errors = [];
+    for (let i = 0; i < people.length; i++) {
+        let e = await followPerson(podRootDir, people[i].webId);
+        if (e) errors.push(e);
+    }
+
+    return errors;
 }

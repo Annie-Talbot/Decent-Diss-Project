@@ -32,7 +32,7 @@ export function Person(props) {
                 onClick={props.viewPerson}>
                 <Stack justify="flex-start" style={{width: "80%", gap: "0px"}}>
                         <Title order={5}>
-                            {person.nickname}
+                            {person.nickname? person.nickname : "Unnamed"}
                         </Title>
                     <Text c="dimmed" style={{textIndent: "20px",}}>{person.webId}</Text>
                 </Stack>

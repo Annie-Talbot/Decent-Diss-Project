@@ -1,10 +1,12 @@
 import React from 'react';
-import { Title, Paper, Stack, ActionIcon, ScrollArea, Container, Grid, Divider} from '@mantine/core';
+import { Title, Paper, Stack, ActionIcon, ScrollArea, Container, Grid, Divider, Button, Center} from '@mantine/core';
 import { PageLoader } from '../Core/PageLoader';
 import { createFeedDir, doesFeedDirExist } from '../../SOLID/FeedHandler';
 import { FeedItemList } from './FeedItemList';
-import { IconArrowBack } from '@tabler/icons';
+import { IconArrowBack, IconSettings } from '@tabler/icons';
 import { PersonView } from '../Connections/PersonView';
+import { AppendSettings } from './AppendSettings';
+import { SettingsButton } from './SettingsButton';
 
 const FeedViewStates = {
     Feed: 0,
@@ -29,44 +31,51 @@ export class FeedPage extends React.Component {
     }
 
     viewPerson(feedPage, person) {
-        let list = feedPage.state.backHistory;
-        list.push(FeedViewStates.Feed);
         feedPage.setState(prevState => ({
             ...prevState,
             viewPerson: person,
-            backHistory: list,
             view: FeedViewStates.Person
+        }))
+    }
+
+    viewSettings(feedPage) {
+        feedPage.setState(prevState => ({
+            ...prevState,
+            view: FeedViewStates.Settings
         }))
     }
     
     back(feedPage) {
-        let list = feedPage.state.backHistory;
-        const newState = list.pop();
         feedPage.setState(prevState => ({
             ...prevState,
-            backHistory: list,
-            view: newState
+            view: FeedViewStates.Feed
         }))
     }
 
     render() {
         let content;
         if (this.state.view === FeedViewStates.Feed) {
-            content = (<Container style={{width: "100%", height: "100%"}}>
+            content = (
+                <>
+                <Grid justify="flex-end">
+                    <Grid.Col span={1}>
+                        <SettingsButton onClick={() => this.viewSettings(this)}/>
+                    </Grid.Col>
+                </Grid>
                 <ScrollArea h="85vh">
                     <FeedItemList 
                         podRootDir={this.podRootDir} 
                         viewPerson={(person) => this.viewPerson(this, person)}
                     />
                 </ScrollArea>
-            </Container>);
+                </>
+            );
         } else if (this.state.view === FeedViewStates.Person) {
             content = (
-                <Paper shadow="md" p="sm">
                     <Stack justify="flex-start" spacing="xs">
                         <Grid grow align="flex-end" justify="space-between">
                             <Grid.Col span={1}>
-                                <ActionIcon onClick={() => {this.back(this)}} >
+                                <ActionIcon onClick={() => this.back(this)} >
                                     <IconArrowBack />
                                 </ActionIcon>
                             </Grid.Col>
@@ -77,7 +86,13 @@ export class FeedPage extends React.Component {
                         <Divider h="md"/>
                         <PersonView person={this.state.viewPerson} />
                     </Stack>
-                </Paper>
+            )
+        } else if (this.state.view === FeedViewStates.Settings) {
+            content = (
+                <AppendSettings
+                    back={() => this.back(this)}
+                    podRootDir={this.podRootDir}
+                />
             )
         } else {
             this.setState({
@@ -92,7 +107,9 @@ export class FeedPage extends React.Component {
                 podRootDir={this.podRootDir}
                 podStructureRequired="feed directory"
             >
-                {content}
+                <Paper shadow="md" p="md">
+                    {content}
+                </Paper>
             </PageLoader>
         );
     }

@@ -1,5 +1,6 @@
-import { universalAccess } from "@inrupt/solid-client";
+import { access, universalAccess } from "@inrupt/solid-client";
 import { fetch } from "@inrupt/solid-client-authn-browser";
+import { fetchPeopleFromList } from "./Connections/PeopleHandler";
 import { simplifyError } from "./Utils";
 
 /**
@@ -34,18 +35,22 @@ export const ACCESS_AGENT_TYPE = {
 }
 
 
-export async function getAllAgentWebIDs(agentList) {
+export async function getAllAgentWebIDs(podRootDir, agentList) {
     let webIds = [];
-    agentList.forEach((agent) => {
+    let agent;
+    for (let i = 0; i < agentList.length; i++) {
+        agent = agentList[i];
         if (agent.type === ACCESS_AGENT_TYPE.Person) {
-            console.log("Encountered person agent. Added to list.")
+            console.log("Encountered person agent. Added to list.");
             webIds.push(agent.webId)
         } else if (agent.type === ACCESS_AGENT_TYPE.Group) {
-            console.log("Encountered group agent. No handling for this yet.")
+            console.log("Encountered group agent.");
+            let [people, errors] = await fetchPeopleFromList(podRootDir, agent.members);
+            people.forEach((p) => webIds.push(p.webId));
         } else {
             console.log("Encountered unknown type of agent. ID: " + agent.webId)
         }
-    });
+    };
     return webIds;
 }
 
@@ -77,5 +82,43 @@ export async function getAgentAccess(webId, resourceUrl) {
         return [access, null];
     } catch (e) {
         return [null, simplifyError(e, "Whlist checking the access for this agent.")];
+    }
+}
+
+export async function getAllAgentsWithAppendAccess(resourceUrl) {
+    let fetchedAccessList;
+    try {
+        fetchedAccessList = await universalAccess.getAgentAccessAll(
+            resourceUrl,
+            {fetch:fetch}
+        )
+    } catch (e) {
+        return [[], simplifyError(e, "Whilst fetching access for the " + resourceUrl + " resource.")];
+    }
+    let accessList= [];
+    for (const [agent, agentAccess] of Object.entries(fetchedAccessList)) {
+        if (agent !== "http://www.w3.org/ns/solid/acp#PublicAgent") {
+            if (agentAccess.append === true) {
+                accessList.push({webId: agent, nickname: ""});
+            }
+        }
+    }
+    return [accessList, null];
+}
+
+
+export async function setAppendAccess(resourceUrl, agentWebId, appendAccess) {
+    try {
+        let access = await universalAccess.setAgentAccess(
+            resourceUrl, 
+            agentWebId, 
+            {append: appendAccess},
+            {fetch: fetch});
+        if (access === null) {
+            return {title: "Could not set access", description: ""};
+        }
+        return null;
+    } catch(e) {
+        return simplifyError(e, "Whilst attempting to set append access for agent " + agentWebId);
     }
 }

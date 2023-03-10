@@ -5,7 +5,7 @@ import { useState, useEffect } from "react";
 import { addMember, fetchGroupDetailed, removeMember } from "../../SOLID/Connections/GroupHandler";
 import { createErrorNotification } from "../Core/Notifications/ErrorNotification";
 import { Members } from "./Members";
-import { PeopleSearcher } from "./PeopleSearcher";
+import { PeopleSearcher } from "./../Feed/Searchers";
 
 async function handleAddMember(podRootDir, groupUrl, personUrl, updateGroup) {
     const error = await addMember(podRootDir, groupUrl, personUrl);

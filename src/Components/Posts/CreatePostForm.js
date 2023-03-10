@@ -1,6 +1,7 @@
 import { ActionIcon, MultiSelect, Center, FileInput, Modal, Space, Textarea, TextInput, Checkbox, Title } from "@mantine/core";
 import { IconRocket } from "@tabler/icons";
 import { useState, useEffect } from "react";
+import { ACCESS_AGENT_TYPE } from "../../SOLID/AccessHandler";
 import { fetchAllConnections } from "../../SOLID/Connections/ConnectionHandler";
 import { createPost } from "../../SOLID/PostHandler";
 import { POSTS_DIR } from "../../SOLID/Utils";
@@ -36,7 +37,12 @@ export function CreatePostForm(props) {
         fetchAllConnections(props.podRootDir).then(([connects, errors]) => {
             errors.forEach((e) => createErrorNotification(e));
             setConnections(connects);
-            setConnectionIndexes(connects.map((c, i) => ({value: i.toString(), label: c.nickname})));
+            setConnectionIndexes(connects.map((c, i) => {
+                console.log(c);
+                if (c.type === ACCESS_AGENT_TYPE.Person) return {value: i.toString(), label: c.nickname};
+                if (c.type === ACCESS_AGENT_TYPE.Group) return {value: i.toString(), label: c.name};
+                return {value: i.toString(), label: "Unknown connection"};
+            }));
         })
     }, [props.podRootDir]);
 
@@ -94,7 +100,7 @@ export function CreatePostForm(props) {
                 value={post.publicAccess}
                 onChange={(event) => setPost({
                     ...post,
-                    publicAccess: event.currentTarget.value === true? 0: 1,
+                    publicAccess: event.target.checked,
                 })}
             />
             {connections.length > 0 &&
@@ -104,11 +110,10 @@ export function CreatePostForm(props) {
                     label="Who would you like to give access to"
                     placeholder="Pick all that you like"
                     value={post.agentAccess}
-                    onChange={(event) => {
-                        setPost(
+                    onChange={(event) => setPost(
                         {...post, 
                             agentAccess: event}
-                    ); }}
+                    )}
                 />
             }
             <Space h="md"/>

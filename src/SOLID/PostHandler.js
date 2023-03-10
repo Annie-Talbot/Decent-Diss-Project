@@ -232,7 +232,7 @@ export async function createPost(podRootDir, webId, post) {
         await createPostAlerts(postDirUrl, podRootDir, webId, null);
     } else {
         // Generate list of agents who will have read access
-        let accessList = await getAllAgentWebIDs(post.agentAccess);
+        let accessList = await getAllAgentWebIDs(podRootDir, post.agentAccess);
         // Set access for post directory, image file, and post dataset
         await setAllReadAccess([postDirUrl, postImgUrl, postDatasetUrl], accessList);
         // Create post alerts for feed

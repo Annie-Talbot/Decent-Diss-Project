@@ -4,6 +4,7 @@ import { CONNECTIONS_DIR, delay, makeId, createEmptyDataset, PEOPLE_DATASET, sim
 import { fetch } from '@inrupt/solid-client-authn-browser';
 import { RDF, SCHEMA_INRUPT, VCARD } from '@inrupt/vocab-common-rdf';
 import { ACCESS_AGENT_TYPE } from '../AccessHandler';
+import { followPerson } from '../FeedHandler';
 
 export async function doesPeopleDatasetExist(podRootDir) {
     try {
@@ -67,6 +68,9 @@ export async function createPerson(podRootDir, person) {
         error.title = "Could no save the person";
         return error;
     }
+
+    // start following them
+    await followPerson(podRootDir, person.webId);
     return null;
 }
 
