@@ -1,7 +1,8 @@
-import { Button, Center, Skeleton, Stack, Title } from "@mantine/core";
+import { Button, Center, Text, Skeleton, Stack, ThemeIcon, Title } from "@mantine/core";
 import { createErrorNotification } from "./Notifications/ErrorNotification";
 import { useState, useEffect } from "react";
 import { MissingPodStructure } from "./MissingPodStructure";
+import { IconExclamationCircle } from "@tabler/icons";
 
 
 
@@ -27,16 +28,24 @@ export function PageLoader(props) {
             setPodStructureExists(true);
             setLoading(false);
         });
-    }, [props.podRootDir, props.checkFunction]);
+    }, [props]);
 
     let content;
     if (!podStructureExists) {
         if (podError) {
             // Error occured
-            content = (<Center>
-                <Title order={4}>An error occured whilst attempting to fetch your
-                    {props.podStructureRequired}. Refresh and try again, or contact support.</Title>
-            </Center>);
+            content = (
+                <Stack align="center" justify="center" style={{height: "100%"}}>
+                    <ThemeIcon 
+                    variant="light"
+                    size="xl">
+                        <IconExclamationCircle />
+                    </ThemeIcon>
+                    <Title order={4}>An error occured whilst attempting to fetch your
+                    {" " + props.podStructureRequired}. </Title>
+                    <Text>Refresh and try again, or contact support.</Text>
+                </Stack>
+            );
         } else {
             // pod structure does not exist
             content = (

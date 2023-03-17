@@ -1,5 +1,5 @@
-import { Card, Text, Image, Badge, Menu, ActionIcon, Stack, Grid, Title } from '@mantine/core';
-import { IconEdit, IconDotsVertical, IconTrash } from '@tabler/icons';
+import { Card, Text, Image, Badge, Menu, ActionIcon, Stack, Grid, Title, Group } from '@mantine/core';
+import { IconEdit, IconDotsVertical, IconTrash, IconHandLittleFinger, IconHeart } from '@tabler/icons';
 import {Person} from '../Connections/Person';
 
 export function Post(props) {
@@ -55,6 +55,20 @@ export function Post(props) {
                 }
             </Grid>
             {props.post.text? <Text size="md">{props.post.text}</Text>: <></>}
+            {!props.authorised &&
+                <Card.Section style={{"height": 50}} >
+                    <Group position='center' align='center' p="sm">
+                        <ActionIcon 
+                            color="pink" 
+                            size="lg" 
+                            title='Send like'
+                            onClick={props.sendLike}
+                        >
+                            <IconHeart/>
+                        </ActionIcon>
+                    </Group>
+                </Card.Section>
+            }
         </Card>
     );
 }

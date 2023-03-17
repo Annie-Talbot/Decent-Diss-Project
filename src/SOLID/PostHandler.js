@@ -1,9 +1,10 @@
-import { buildThing, createSolidDataset, createThing, getDatetime, getFile, getSolidDataset, getSourceUrl, getStringNoLocale, getThing, getUrl, saveFileInContainer, saveSolidDatasetAt, setThing } from "@inrupt/solid-client";
+import { buildThing, createSolidDataset, createThing, getDatetime, getFile, getSolidDataset, getSourceUrl, getStringNoLocale, getThing, getUrl, getUrlAll, saveFileInContainer, saveSolidDatasetAt, setThing } from "@inrupt/solid-client";
 import { fetch } from '@inrupt/solid-client-authn-browser'
 import { SCHEMA_INRUPT } from "@inrupt/vocab-common-rdf";
 import { GetPostDatasetUrl, POST_DETAILS, getChildUrlsList, deleteDirectory, simplifyError, makeId, createEmptyDataset, DATE_CREATED, TITLE, getImage, POSTS_DIR, delay } from "./Utils";
 import { getAllAgentWebIDs, setAllPublicReadAccess, setAllReadAccess, setReadAccess } from './AccessHandler'
 import { createPostAlerts } from "./FeedHandler";
+import { SOCIAL_SOLID } from "./SolidTerms";
 
 export async function doesPostsDirExist(podRootDir) {
     try {
@@ -57,8 +58,7 @@ async function getPostFromThing(postThing) {
         }
         postImg = URL.createObjectURL(image);
     }
-    // TODO: Missing author details as need some utility functions to do that
-
+    
     let post = {
         title: postTitle,
         text: postText,

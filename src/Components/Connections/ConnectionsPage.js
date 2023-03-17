@@ -21,6 +21,7 @@ export class ConnectionsPage extends React.Component {
     constructor(props) {
         super(props);
         this.podRootDir = props.app.podRootDir;
+        this.webId = props.app.webId;
         this.state = {
             currView: ViewStates.Main,
             createPersonOpened: false,
@@ -173,11 +174,11 @@ export class ConnectionsPage extends React.Component {
                             </ActionIcon>
                         </Grid.Col>
                         <Grid.Col span={8}>
-                            <Title align="right" order={2}>{this.viewPersonObject.webId}</Title>
+                            <Title align="right" order={2}>Viewing: {this.viewPersonObject.webId}</Title>
                         </Grid.Col>
                     </Grid>
                     <Divider h="md"/>
-                    <PersonView person={this.viewPersonObject} />
+                    <PersonView person={this.viewPersonObject} webId={this.webId}/>
                 </Stack>
             ));
         } else if (this.state.currView === ViewStates.GroupView) {

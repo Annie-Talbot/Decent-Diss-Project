@@ -18,10 +18,6 @@ async function handleDeleteNotification(notifUrl, updateNotifications) {
     updateNotifications();
 }
 
-function handleNotificationRecieve(event, updateNotifications) {
-    updateNotifications()
-}
-
 async function updateNotifications(podRootDir, setNotifications, setAlert) {
     let [notifs, errors] = await fetchNotifications(podRootDir);
     errors.forEach(e => {
@@ -37,7 +33,6 @@ export function Notifications(props) {
     const [notifications, setNotifications] = useState([]);
     const [exists, setExists] = useState(false);
     const [error, setError] = useState("");
-    const [socket, setSocket] = useState(null);
 
     useEffect(() => {
         doesNotificationsDirExist(props.podRootDir).then(async ([success, e]) => {
@@ -56,12 +51,9 @@ export function Notifications(props) {
             setAlert(notifs.length);
             setNotifications(notifs);
             // Set up socket
-            let s;
-            [s, e] = await createNotificationSocket(props.podRootDir, (event) => 
-                handleNotificationRecieve(event, () => updateNotifications(props.podRootDir, 
-                    setNotifications, setAlert)));
+            e = await createNotificationSocket(props.podRootDir, () => updateNotifications(props.podRootDir, 
+                    setNotifications, setAlert));
             if (e) createErrorNotification(e);
-            setSocket(s);
         })
     }, [props.podRootDir]);
 

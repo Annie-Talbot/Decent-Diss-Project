@@ -5,6 +5,18 @@ import {Post} from "./Post";
 import { useState, useEffect } from "react";
 import { POSTS_DIR } from "../../SOLID/Utils";
 import { createPlainNotification } from "../Core/Notifications/PlainNotification";
+import { sendLike } from "../../SOLID/NotificationHandler";
+
+async function handleSendLike(senderWebId, post, author) {
+    console.log(post);
+    let error = await sendLike(senderWebId, post.dir, author.webId);
+    if (error) {
+        createErrorNotification(error);
+        return;
+    }
+    createPlainNotification({title: "Sent like!"})
+}
+
 
 async function handleDeletePost(post, posts, setPostList) {
     const [success, error] = await deletePost(post.dir);
@@ -44,7 +56,8 @@ export function PostGrid(props) {
                     key={index}
                     authorised={props.authorised}
                     post={post}
-                    deletePost={() => handleDeletePost(post, postList, setPostList)} 
+                    deletePost={() => handleDeletePost(post, postList, setPostList)}
+                    sendLike={() => handleSendLike(props.webId, post, props.author)}
                 />
             </Center>)
         });

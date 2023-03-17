@@ -38,7 +38,7 @@ class App extends React.Component {
         } else if (this.state.currPage === AppStates.Posts) {
             content.push(<PostsPage webId={this.webId} podRootDir={this.podRootDir}/>);
         } else if (this.state.currPage === AppStates.Profile) {
-            content.push(<ProfilePage podRootDir={this.podRootDir}/>);
+            content.push(<ProfilePage podRootDir={this.podRootDir} webId={this.webId}/>);
         } else if (this.state.currPage === AppStates.Connections) {
             content.push(<ConnectionsPage app={this}/>);
         } else if (this.state.currPage === AppStates.Feed) {

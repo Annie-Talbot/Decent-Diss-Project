@@ -42,6 +42,7 @@ export function FeedItemList(props) {
                                 feedItem={feedItem}
                                 podRootDir={props.podRootDir}
                                 viewPerson={props.viewPerson}
+                                webIs={props.webId}
                             />);
                         } else {
                             return (<Paper shadow="sm" withBorder>

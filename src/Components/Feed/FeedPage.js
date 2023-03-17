@@ -63,7 +63,8 @@ export class FeedPage extends React.Component {
                     </Grid.Col>
                 </Grid>
                 <ScrollArea h="85vh">
-                    <FeedItemList 
+                    <FeedItemList
+                        webId={this.webId}
                         podRootDir={this.podRootDir} 
                         viewPerson={(person) => this.viewPerson(this, person)}
                     />
@@ -84,7 +85,7 @@ export class FeedPage extends React.Component {
                             </Grid.Col>
                         </Grid>
                         <Divider h="md"/>
-                        <PersonView person={this.state.viewPerson} />
+                        <PersonView person={this.state.viewPerson} webId={this.webId}/>
                     </Stack>
             )
         } else if (this.state.view === FeedViewStates.Settings) {

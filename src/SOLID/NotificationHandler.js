@@ -89,28 +89,7 @@ export async function createConnectionRequest(senderDetails, recieverPodRoot) {
     
     notifDataset = setThing(notifDataset, notifThing);
 
-    try {
-        await saveSolidDatasetInContainer(
-            recieverPodRoot + NOTIFICATIONS_DIR,
-            notifDataset,
-            { fetch: fetch }
-        );
-    } catch (e) {
-        let error = simplifyError(e, "Whilst creating connection request notification.");
-        if (error.code === 404) {
-            // Not found
-            return {title: "User has no notifications directory", 
-                description: "Cannot send a notification to them."};
-        }
-        if (error.code === 403) {
-            // Unauthorised
-            return {title: "No access to this user's notifications directory", 
-                description: "You may have been blocked."};
-        }
-        return {title: "Cannot add to notifications directory", 
-            description: error.description};
-    }
-    return null;
+    return await sendNotification(notifDataset, recieverPodRoot);
 }
 
 
@@ -253,18 +232,83 @@ export async function deleteNotification(notifUrl) {
 }
 
 
+function connectSocket(socket, updateFunction) {
+    socket.on("message", updateFunction);
+    socket.on("close", function(e) {
+      console.log('Socket is closed. Reconnect will be attempted in 1 second.', e.reason);
+      setTimeout(function() {
+        connectSocket(updateFunction);
+      }, 1000);
+    });
+  
+    socket.on("error", function(err) {
+      console.error('Socket encountered error: ', err.message, 'Closing socket');
+      socket.disconnect();
+    });
+  }
+
 export async function createNotificationSocket(podRootDir, changeHandler) {
-    let socket;
+    var socket;
     try {
         socket = new WebsocketNotification(
             podRootDir + NOTIFICATIONS_DIR,
             { fetch: fetch }
         );
-        socket.on("message", changeHandler);
-        socket.connect();
     } catch (e) {
-        socket.disconnect();
-        return [null, simplifyError(e, "Trying to create notification listener.")];
+        return simplifyError(e, "Trying to create notification listener.");
     }
-    return [socket, null];
+    connectSocket(socket, changeHandler);
+    return null;
+}
+
+async function sendNotification(notifDataset, recieverPodRoot) {
+    try {
+        await saveSolidDatasetInContainer(
+            recieverPodRoot + NOTIFICATIONS_DIR,
+            notifDataset,
+            { fetch: fetch }
+        );
+    } catch (e) {
+        let error = simplifyError(e, "Whilst creating connection request notification.");
+        if (error.code === 404) {
+            // Not found
+            return {title: "User has no notifications directory", 
+                description: "Cannot send a notification to them."};
+        }
+        if (error.code === 403) {
+            // Unauthorised
+            return {title: "No access to this user's notifications directory", 
+                description: "You may have been blocked."};
+        }
+        return {title: "Cannot add to notifications directory", 
+            description: error.description};
+    }
+    return null;
+}
+
+
+export async function createLikeNotification(senderWebId, postUrl, recieverPodRoot) {
+    console.log(senderWebId);
+    console.log(postUrl);
+    // //senderDetails = {webId, msg, socialPod}
+    let notifDataset = createSolidDataset();
+    let notifThing = buildThing(createThing({name: "this"}))
+        .addUrl(RDF.type, SOCIAL_SOLID.Like)
+        .addUrl(SOCIAL_SOLID.SenderWebId, senderWebId)
+        .addUrl(SOCIAL_SOLID.PostContainer, postUrl)
+        .addUrl(SOCIAL_SOLID.SupportedApplications, SOCIAL_SOLID.Decent)
+        .addDatetime(SOCIAL_SOLID.DatetimeCreated, new Date(Date.now()))
+        .build();
+    
+    notifDataset = setThing(notifDataset, notifThing);
+
+    return await sendNotification(notifDataset, recieverPodRoot);
+}
+
+export async function sendLike(senderWebId, postUrl, recieverWebId) {
+    let [recieverPodRoot, error] = await findSocialPodFromWebId(recieverWebId);
+    if (error) {
+        return error;
+    }
+    return await createLikeNotification(senderWebId, postUrl, recieverPodRoot);
 }

@@ -3,10 +3,9 @@ import { Profile } from "../Profile/Profile";
 import React from "react";
 import { useState, useEffect } from "react";
 import { PostGrid } from "../Posts/PostGrid";
-import { findSocialPodFromWebId } from "../../SOLID/NotificationHandler";
+import { findSocialPodFromWebId, sendLike } from "../../SOLID/NotificationHandler";
 import { doesProfileExist } from "../../SOLID/ProfileHandler";
 import { doesPostsDirExist } from "../../SOLID/PostHandler";
-
 
 export function PersonView(props) {
     const [loading, setLoading] = useState(true);
@@ -65,6 +64,7 @@ export function PersonView(props) {
                         </Title>
                         {postsExist ?
                             <PostGrid
+                                webId={props.webId}
                                 author={props.person}
                                 podRootDir={podRoot}
                                 authorised={false}

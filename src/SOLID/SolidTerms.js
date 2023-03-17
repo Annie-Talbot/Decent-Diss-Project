@@ -11,4 +11,5 @@ export const SOCIAL_SOLID = {
     DatetimeCreated: "https://www.solid_social_terms.co.uk/terms#datetime_created",
     PostAlert: "https://www.solid_social_terms.co.uk/terms#post_alert",
     PostContainer: "https://www.solid_social_terms.co.uk/terms#post_container",
+    Like: "https://www.solid_social_terms.co.uk/terms#like",
 }

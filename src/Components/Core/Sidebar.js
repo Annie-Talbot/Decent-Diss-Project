@@ -83,7 +83,7 @@ function SideBarItem(props) {
  */
 function SideBar(props) {
     return (
-        <Navbar height={600} p="xs" width={{ base: 300 }}>
+        <Navbar height={400} p="xs" width={{ base: 220 }}>
             {data.map((item) => (
                 <Navbar.Section key={"navsection-" + item.label} mt="md">
                     <SideBarItem item={item} app={props.app}/>
