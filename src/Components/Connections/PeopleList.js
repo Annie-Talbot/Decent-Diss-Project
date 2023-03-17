@@ -1,10 +1,23 @@
 import { ActionIcon, Grid, Select, Skeleton, Stack } from "@mantine/core";
-import { createPeopleDataset, doesPeopleDatasetExist, fetchPeople } from "../../SOLID/Connections/PeopleHandler";
+import { createPeopleDataset, deletePerson, doesPeopleDatasetExist, fetchPeople } from "../../SOLID/Connections/PeopleHandler";
 import { createErrorNotification } from "../Core/Notifications/ErrorNotification";
 import { Person } from "./Person";
 import { useState, useEffect } from "react";
 import { PageLoader } from "../Core/PageLoader";
 import { IconCircleChevronsRight } from "@tabler/icons";
+import { createPlainNotification } from "../Core/Notifications/PlainNotification"
+
+
+
+async function handleDeletePerson(podRootDir, person, update) {
+    let error = await deletePerson(podRootDir, person.url);
+    if (error) {
+        createErrorNotification(error);
+        return;
+    }
+    createPlainNotification({title: "Successfully deleted"});
+    update();
+}
 
 function People(props) {
     const [loading, setLoading] = useState(true);
@@ -25,7 +38,7 @@ function People(props) {
     return (
         <Skeleton visible={loading}>
             <Stack style={{gap: "2px"}}>
-                <Grid grow align="center">
+                <Grid grow align="flex-end" >
                     <Grid.Col span={10}>
                         <Select
                             label="Search"
@@ -49,6 +62,8 @@ function People(props) {
                         viewPerson={() => props.viewPerson(person)}
                         key={index} 
                         person={person}
+                        authorised={props.authorised}
+                        delete={() => handleDeletePerson(props.podRootDir, person, props.update)}
                     />))}
             </Stack>
         </Skeleton>
@@ -56,6 +71,7 @@ function People(props) {
 }
 
 export function PeopleList(props) {
+    const [key, setKey] = useState(0);
 
     return (
         <PageLoader
@@ -64,8 +80,13 @@ export function PeopleList(props) {
             podRootDir={props.podRootDir}
             podStructureRequired="people dataset"
         >
-            <People podRootDir={props.podRootDir} viewPerson={props.viewPerson} />
-            
+            <People 
+                key={key}
+                podRootDir={props.podRootDir}
+                viewPerson={props.viewPerson}
+                update={() => setKey(key + 1)}
+                authorised={props.authorised}
+            />
         </PageLoader>
     );
 }

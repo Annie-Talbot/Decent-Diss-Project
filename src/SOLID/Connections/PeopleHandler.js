@@ -1,5 +1,5 @@
 import { asUrl, buildThing, createThing, getSolidDataset, getStringNoLocale, 
-    getThing, getThingAll, getUrl, saveSolidDatasetAt, setThing } from '@inrupt/solid-client';
+    getThing, getThingAll, getUrl, removeThing, saveSolidDatasetAt, setThing } from '@inrupt/solid-client';
 import { CONNECTIONS_DIR, delay, makeId, createEmptyDataset, PEOPLE_DATASET, simplifyError } from '../Utils';
 import { fetch } from '@inrupt/solid-client-authn-browser';
 import { RDF, SCHEMA_INRUPT, VCARD } from '@inrupt/vocab-common-rdf';
@@ -180,4 +180,28 @@ export async function findPerson(podRootDir, webId) {
         };
     }
     return person;
+}
+
+
+export async function deletePerson(podRootDir, personUrl) {
+    // Get person thing
+    let [dataset, error] = await getPeopleDataset(podRootDir);
+    if (error) return error;
+    let personThing = getThing(dataset, personUrl);
+    if (personThing === null) {
+        return {title: "Could not load person: " + personUrl, 
+            description: "Thing does not exist."};
+    }
+    // remove person thing
+    dataset = removeThing(dataset, personThing);
+    // save dataset
+    try {
+        await saveSolidDatasetAt(
+            podRootDir + CONNECTIONS_DIR + PEOPLE_DATASET,
+            dataset,
+            {fetch: fetch});
+    } catch(e) {
+        return simplifyError(e, "An error occured whilst deleting Person.");
+    }
+    return null;
 }

@@ -1,4 +1,5 @@
-import { Button, Group, Modal, Space, TextInput } from "@mantine/core";
+import { ActionIcon, Button, Center, Group, Modal, Space, TextInput } from "@mantine/core";
+import { IconCirclePlus } from "@tabler/icons-react";
 import { useState } from "react";
 import { createGroup } from "../../SOLID/Connections/GroupHandler";
 import { createPerson } from "../../SOLID/Connections/PeopleHandler";
@@ -44,13 +45,19 @@ export function CreateGroupForm(props) {
                 withAsterisk
             />
             <Space h="md" />
-            <Button
-                onClick={() => {
-                    handleCreateGroup(props.podRootDir, group, props.close, props.updateGroups);
-                }}
-            >
-                Create Group
-            </Button>
+            <Center>
+                <ActionIcon
+                    size="xl"
+                    color="sage"
+                    variant="filled"
+                    onClick={() => {
+                        handleCreateGroup(props.podRootDir, group, props.close, props.updateGroups);
+                    }}
+                >
+                    <IconCirclePlus size={36} />
+                </ActionIcon>
+            </Center>
+            
         </Modal>
     );
 }

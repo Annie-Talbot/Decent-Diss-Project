@@ -1,5 +1,4 @@
 import { Paper, Button, Group, Stack, ActionIcon, Title, Divider, Grid } from "@mantine/core";
-import { IconArrowBack } from "@tabler/icons";
 import React from 'react';
 import { CONNECTIONS_DIR, PEOPLE_DATASET } from "../../SOLID/Utils";
 import { CreatePersonForm } from "./CreatePersonForm";
@@ -10,6 +9,7 @@ import { createConnectionsDir, doesConnectionsDirExist } from "../../SOLID/Conne
 import { GroupsList } from "./GroupList";
 import { CreateGroupForm } from "./CreateGroupForm";
 import { GroupView } from "./GroupView";
+import { IconUserPlus, IconArrowBack, IconHomePlus  } from "@tabler/icons-react";
 
 export const ViewStates = {
     Main: 0,
@@ -129,15 +129,20 @@ export class ConnectionsPage extends React.Component {
                                 <Stack>
                                     <Group position="apart">
                                         <Title order={2}> People </Title>
-                                        <Button
-                                            onClick={() => this.toggleCreatePersonPopup(this)}>
-                                                Create a Person
-                                        </Button>
+                                        <ActionIcon 
+                                            size={"xl"} 
+                                            variant="light"
+                                            onClick={() => this.toggleCreatePersonPopup(this)}
+                                            color="sage"
+                                        >
+                                            <IconUserPlus/>
+                                        </ActionIcon>
                                     </Group>
                                     <PeopleList 
                                         key={this.state.peoplelistKey}
                                         podRootDir={this.podRootDir}
                                         viewPerson={(person) => this.viewPerson(this, person, ViewStates.Main)}
+                                        authorised={true}
                                     />
                                 </Stack>
                             </Paper>
@@ -147,16 +152,21 @@ export class ConnectionsPage extends React.Component {
                                 <Stack>
                                     <Group position="apart">
                                         <Title order={2}> Groups </Title>
-                                        <Button
-                                            onClick={() => this.toggleCreateGroupPopup(this)}>
-                                                Create a Group
-                                        </Button>
+                                        <ActionIcon 
+                                            size={"xl"} 
+                                            variant="light"
+                                            onClick={() => this.toggleCreateGroupPopup(this)}
+                                            color="sage"
+                                        >
+                                            <IconHomePlus/>
+                                        </ActionIcon>
                                     </Group>
                                     <GroupsList 
                                         host={this}
                                         key={this.state.groupslistKey}
                                         podRootDir={this.podRootDir}
                                         viewGroup={(person) => this.viewGroup(this, person, ViewStates.Group)}
+                                        authorised={true}
                                     />
                                 </Stack>
                             </Paper>

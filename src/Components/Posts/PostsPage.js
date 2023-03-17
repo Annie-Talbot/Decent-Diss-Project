@@ -1,10 +1,11 @@
 import React from 'react';
-import { Button, Center, Divider, ScrollArea, Stack, Text, ThemeIcon, Skeleton} from '@mantine/core';
+import { Button, Center, Divider, ScrollArea, Stack, Text, ThemeIcon, Skeleton, ActionIcon} from '@mantine/core';
 import { IconBeach } from '@tabler/icons';
 import { PostGrid } from './PostGrid';
 import { CreatePostForm } from './CreatePostForm';
 import { createPostsDir, doesPostsDirExist } from '../../SOLID/PostHandler';
 import { PageLoader } from '../Core/PageLoader';
+import { IconSquareRoundedPlusFilled } from '@tabler/icons-react';
 
 
 function EmptyPosts(props) {
@@ -89,10 +90,13 @@ export class PostsPage extends React.Component {
                         <Stack spacing="xs">
                             <Divider my="md"/>
                             <Center>
-                                <Button
-                                onClick={() => this.toggleCreatePostPopup(this)}>
-                                    Create a Post
-                                </Button>
+                                <ActionIcon
+                                    size="xl"
+                                    color="sage"
+                                    onClick={() => this.toggleCreatePostPopup(this)}
+                                >
+                                    <IconSquareRoundedPlusFilled size={57}/>
+                                </ActionIcon>
                             </Center>
                         </Stack>
                     </div>

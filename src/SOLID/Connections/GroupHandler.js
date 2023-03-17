@@ -1,4 +1,4 @@
-import { addUrl, asUrl, buildThing, createThing, getSolidDataset, getStringNoLocale, getThing, getThingAll, getUrl, getUrlAll, removeUrl, saveSolidDatasetAt, setThing } from "@inrupt/solid-client";
+import { addUrl, asUrl, buildThing, createThing, getSolidDataset, getStringNoLocale, getThing, getThingAll, getUrl, getUrlAll, removeThing, removeUrl, saveSolidDatasetAt, setThing } from "@inrupt/solid-client";
 import { fetch } from "@inrupt/solid-client-authn-browser";
 import { FOAF, RDF } from "@inrupt/vocab-common-rdf";
 import { ACCESS_AGENT_TYPE } from "../AccessHandler";
@@ -216,5 +216,29 @@ export async function removeMember(podRootDir, groupUrl, personUrl) {
         return simplifyError(error, "Could not save group with new member added.");
     }
     await delay(500);
+    return null;
+}
+
+
+export async function deleteGroup(podRootDir, groupUrl) {
+    // Get person thing
+    let [dataset, error] = await getGroupsDataset(podRootDir);
+    if (error) return error;
+    let groupThing = getThing(dataset, groupUrl);
+    if (groupThing === null) {
+        return {title: "Could not load group: " + groupThing, 
+            description: "Thing does not exist."};
+    }
+    // remove person thing
+    dataset = removeThing(dataset, groupThing);
+    // save dataset
+    try {
+        await saveSolidDatasetAt(
+            podRootDir + CONNECTIONS_DIR + GROUPS_DATASET,
+            dataset,
+            {fetch: fetch});
+    } catch(e) {
+        return simplifyError(e, "An error occured whilst deleting Group.");
+    }
     return null;
 }
