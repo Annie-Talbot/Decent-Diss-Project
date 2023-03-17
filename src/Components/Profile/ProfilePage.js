@@ -5,7 +5,7 @@ import { IconArrowBack } from '@tabler/icons';
 import { createSampleProfile, doesProfileExist } from '../../SOLID/ProfileHandler';
 import { PageLoader } from '../Core/PageLoader';
 import { createConnectionRequest } from '../../SOLID/NotificationHandler';
-import { IconClipboardCopy, IconShare2 } from '@tabler/icons-react';
+import { IconClipboardCopy, IconEdit, IconEditCircle, IconShare2 } from '@tabler/icons-react';
 import { createPlainNotification } from '../Core/Notifications/PlainNotification';
 import { ShareButton } from '../Core/ShareButton';
 
@@ -43,6 +43,7 @@ class ProfilePage extends React.Component {
                             <IconArrowBack />
                         </ActionIcon>
                         : <div></div>}
+                        <Title order={3}>Your Profile</Title>
                         <Group position='flex-end'>
                             <Title order={3}>WebID: </Title>
                             <Text>{this.webId}</Text>
@@ -56,14 +57,17 @@ class ProfilePage extends React.Component {
                     />
                     <Center>
                         {!this.state.editing &&
-                            <Button
+                            <ActionIcon
+                                size="xl"
+                                variant="filled"
+                                color="sage"
                                 onClick={() => this.setState(prevState => ({
-                                ...prevState,
-                                editing: true,
-                                }))
-                            }>
-                                Edit
-                            </Button>
+                                    ...prevState,
+                                    editing: true,
+                                    }))}
+                            >
+                                <IconEdit size={30}/>
+                            </ActionIcon>
                         }
                     </Center>
                 </PageLoader>

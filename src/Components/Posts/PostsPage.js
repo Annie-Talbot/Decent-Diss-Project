@@ -1,5 +1,5 @@
 import React from 'react';
-import { Button, Center, Divider, ScrollArea, Stack, Text, ThemeIcon, Skeleton, ActionIcon} from '@mantine/core';
+import { Button, Center, Divider, ScrollArea, Stack, Text, ThemeIcon, Skeleton, ActionIcon, Title, Paper, Group} from '@mantine/core';
 import { IconBeach } from '@tabler/icons';
 import { PostGrid } from './PostGrid';
 import { CreatePostForm } from './CreatePostForm';
@@ -10,7 +10,7 @@ import { IconSquareRoundedPlusFilled } from '@tabler/icons-react';
 
 function EmptyPosts(props) {
     return (
-        <Stack align="center" justify="center" style={{height: "100%"}}>
+        <Stack align="center" justify="center" style={{height: "100%", marginTop: 64, marginBottom: 64}}>
             <ThemeIcon 
             variant="light"
             size="xl">
@@ -60,10 +60,7 @@ export class PostsPage extends React.Component {
     render() {
 
         return (
-            <div style={{height: "90vh",
-            display: "grid", 
-            gridTemplateRows: "calc(100% - 100px) 100px",
-            gridTemplateColumns: "100%"}}>
+            <Paper shadow="md" p="md" withBorder >
                 <PageLoader 
                     checkFunction={doesPostsDirExist}
                     createFunction={createPostsDir}
@@ -76,32 +73,37 @@ export class PostsPage extends React.Component {
                         updatePosts={() => this.updatePosts(this)}
                         podRootDir={this.podRootDir}
                         webId={this.webId}
-                        />
-                    <ScrollArea offsetScrollbars style={{gridRow: "1", gridColumn: "1"}}>
-                        <PostGrid
-                            author={{webId: this.webId, nickname: "Myself"}}
-                            key={this.state.postgridKey}
-                            authorised={true}
-                            podRootDir={this.podRootDir}
-                            emptyComponent={<EmptyPosts/>}
-                            />             
-                    </ScrollArea>
-                    <div style={{gridRow: "2", gridColumn: "1"}}>
-                        <Stack spacing="xs">
-                            <Divider my="md"/>
-                            <Center>
-                                <ActionIcon
-                                    size="xl"
-                                    color="sage"
-                                    onClick={() => this.toggleCreatePostPopup(this)}
-                                >
-                                    <IconSquareRoundedPlusFilled size={57}/>
-                                </ActionIcon>
-                            </Center>
-                        </Stack>
-                    </div>
+                    />
+                    <Stack>
+                        <Group position="apart" 
+                            style={{
+                                height: "24px", 
+                                marginBottom: "20px", 
+                                paddingRight: 20,
+                                paddingLeft: 20,
+                            }}
+                        >
+                            <Title>Your Posts</Title>
+                            <ActionIcon
+                                size="xl"
+                                color="sage"
+                                onClick={() => this.toggleCreatePostPopup(this)}
+                            >
+                                <IconSquareRoundedPlusFilled size={57}/>
+                            </ActionIcon>
+                        </Group>
+                        <ScrollArea offsetScrollbars style={{gridRow: "1", gridColumn: "1"}}>
+                            <PostGrid
+                                author={{webId: this.webId, nickname: "Myself"}}
+                                key={this.state.postgridKey}
+                                authorised={true}
+                                podRootDir={this.podRootDir}
+                                emptyComponent={<EmptyPosts/>}
+                                />             
+                        </ScrollArea>
+                    </Stack>
                 </PageLoader>
-            </div>
+            </Paper>
         );
     }
 }

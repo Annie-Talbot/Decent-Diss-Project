@@ -1,5 +1,5 @@
 import React from 'react';
-import { Title, Paper, Stack, ActionIcon, ScrollArea, Container, Grid, Divider, Button, Center} from '@mantine/core';
+import { Title, Paper, Stack, ActionIcon, ScrollArea, Container, Grid, Divider, Button, Center, Group} from '@mantine/core';
 import { PageLoader } from '../Core/PageLoader';
 import { createFeedDir, doesFeedDirExist } from '../../SOLID/FeedHandler';
 import { FeedItemList } from './FeedItemList';
@@ -56,25 +56,31 @@ export class FeedPage extends React.Component {
         let content;
         if (this.state.view === FeedViewStates.Feed) {
             content = (
-                <>
-                <Grid justify="flex-end">
-                    <Grid.Col span={1}>
+                <Stack>
+                    <Group position="apart" 
+                        style={{
+                            height: "24px", 
+                            marginBottom: "20px", 
+                            paddingRight: 20,
+                            paddingLeft: 20,
+                        }}
+                    >
+                        <Title>Feed</Title>
                         <SettingsButton onClick={() => this.viewSettings(this)}/>
-                    </Grid.Col>
-                </Grid>
-                <ScrollArea h="85vh">
-                    <FeedItemList
-                        webId={this.webId}
-                        podRootDir={this.podRootDir} 
-                        viewPerson={(person) => this.viewPerson(this, person)}
-                    />
-                </ScrollArea>
-                </>
+                    </Group>
+                    <ScrollArea h="85vh">
+                        <FeedItemList
+                            webId={this.webId}
+                            podRootDir={this.podRootDir} 
+                            viewPerson={(person) => this.viewPerson(this, person)}
+                        />
+                    </ScrollArea>
+                </Stack>
             );
         } else if (this.state.view === FeedViewStates.Person) {
             content = (
                     <Stack justify="flex-start" spacing="xs">
-                        <Grid grow align="flex-end" justify="space-between">
+                        <Grid grow align="flex-end" justify="space-between" height={24}>
                             <Grid.Col span={1}>
                                 <ActionIcon onClick={() => this.back(this)} >
                                     <IconArrowBack />

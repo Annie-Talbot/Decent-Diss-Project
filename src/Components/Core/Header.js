@@ -30,11 +30,6 @@ export function AppHeader(props) {
                 </Group>
                
             </Grid.Col>
-            <Grid.Col span={4}>
-                <Center>
-                    <Title order={1}>{props.app.state.currPage}</Title>
-                </Center>
-            </Grid.Col>
             <Grid.Col span={3}>
                 <Center style={{ width: 320}} >
                     <ShareButton webId={props.app.webId}/>
