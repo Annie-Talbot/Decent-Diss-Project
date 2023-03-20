@@ -30,14 +30,15 @@ export const GROUPS_DATASET = "groups"
 
 export function simplifyError(error, context) {
     if (error instanceof FetchError) {
-        return {
-            code: error.statusCode, 
-            title: error.statusText, 
-            description: context
+        let title = '';
+        if (error.statusCode) {
+            title = error.statusCode + ' ' + error.statusText;
+        } else {
+            title = error.statusText;
         }
+        return {title: title, description: context};
     } else {
         return {
-            code: -1, 
             title: "Unknown error: " + error, 
             description: context,
         }

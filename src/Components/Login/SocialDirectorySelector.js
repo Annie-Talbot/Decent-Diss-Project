@@ -9,9 +9,9 @@ function PodButton(props) {
     return (
         <Button
             onClick={async () => {
-                const error = await createSocialDirectory(props.pod)
-                if (error) {
-                    createErrorNotification(error);
+                const result = await createSocialDirectory(props.pod)
+                if (!result.success) {
+                    createErrorNotification(result.error);
                     return;
                 }
                 props.setPod();
@@ -28,7 +28,7 @@ export function SocialDirectorySelector(props) {
     const [error, setError] = useState(false);
 
     useEffect(() => {
-        findUsersSocialPod(props.user.webId).then(([success, fetchedPod, error]) => {
+        findUsersSocialPod(props.user.webId).then(({success, fetchedPod, error}) => {
             if (error) {
                 // An error occured
                 createErrorNotification(error);
