@@ -11,13 +11,13 @@ const data = [
         icon: <IconFlipFlops size={16} />, 
         color: 'rouge', 
         label: 'Feed', 
-        state:AppStates.Feed 
+        state: AppStates.Feed 
     },
     { 
         icon: <IconHome size={16} />, 
         color: 'blue', 
         label: 'Posts', 
-        state:AppStates.Posts 
+        state: AppStates.Posts 
     },
     { 
         icon: <IconUser size={16} />, 
@@ -29,7 +29,7 @@ const data = [
         icon: <IconAffiliate size={16} />, 
         color: 'violet', 
         label: 'Connections',
-        state:AppStates.Connections 
+        state: AppStates.Connections 
     },
 ];
 
@@ -58,14 +58,7 @@ function SideBarItem(props) {
             },
             })}
             key={label}
-            onClick={() => {
-                if (props.app.state.loggedIn !== false && props.app.podRootDir !== '') {
-                    props.app.setState(prevState => (
-                        {...prevState, 
-                        currPage: state,
-                    }))
-                }
-            }}
+            onClick={() => props.redirect(state)}
         >
             <Group>
             <ThemeIcon color={color} variant="light">
@@ -86,7 +79,10 @@ function SideBar(props) {
         <Navbar height={400} p="xs" width={{ base: 220 }}>
             {data.map((item) => (
                 <Navbar.Section key={"navsection-" + item.label} mt="md">
-                    <SideBarItem item={item} app={props.app}/>
+                    <SideBarItem 
+                        item={item} 
+                        redirect={props.redirect}
+                    />
                 </Navbar.Section>
             ))}
         </Navbar>

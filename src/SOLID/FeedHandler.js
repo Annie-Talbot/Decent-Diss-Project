@@ -22,7 +22,7 @@ export async function doesFeedDirExist(podRootDir) {
         )
         return [true, null];
     } catch (error) {
-        let e = simplifyError(error, "Whilst checking if notifications directory exists.");
+        let e = simplifyError(error, "Whilst checking if feed directory exists.");
         if (e.code === 404) {
             return [false, null];
         }

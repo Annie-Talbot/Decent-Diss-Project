@@ -1,6 +1,9 @@
-import { ActionIcon, ThemeIcon, Stack, Container, Grid, Group, List, Paper, Stepper, Title, Text, Image, HoverCard } from "@mantine/core";
-import { IconArrowBack, IconArrowLeft, IconArrowRight, IconCircleCheck, IconQuestionMark } from "@tabler/icons";
+import { ActionIcon, ThemeIcon, Stack, Container, Group, List, 
+    Paper, Stepper, Title, Text, Image, HoverCard, Grid } from "@mantine/core";
+import { IconArrowLeft, IconArrowRight, IconCircleCheck, 
+    IconQuestionMark, IconArrowBack } from "@tabler/icons";
 import { useState } from "react";
+import logo from './../../assets/Logo.png'
 import agree from './../../assets/Sign_up_agree.png'
 import signup from './../../assets/sign_up_button.png'
 import credentials from './../../assets/sign_up_details.png'
@@ -13,17 +16,24 @@ export function SignUpGuide(props) {
     const prevStep = () => setActive((current) => (current > 0 ? current - 1 : current));
   
     return (
-        <Paper shadow="xs" p="md">
-            <Grid grow align="center" justify="flex-start">
-                <Grid.Col span={1}>
-                    <ActionIcon onClick={props.back} >
-                        <IconArrowBack />
-                    </ActionIcon>
-                </Grid.Col>
-                <Grid.Col span={8}>
-                    <Title align="right" order={2}>Sign Up Guide</Title>
-                </Grid.Col>
-            </Grid>
+        <Paper m='lg' shadow="xs" p="md">
+            <Stack align='center'>
+                <Grid style={{width: "100%"}}>
+                    <Grid.Col span={2}>
+                        <ActionIcon onClick={props.back} >
+                            <IconArrowBack />
+                        </ActionIcon>
+                    </Grid.Col>
+                    <Grid.Col span={8}>
+                        <Group position='center'>
+                            <Image width={80} height={120} fit='contain' src={logo}/>
+                            <Title align="center" order={2}>Sign Up Guide</Title>
+                        </Group>
+                    </Grid.Col>
+                    <Grid.Col span={2}>
+
+                    </Grid.Col>
+                </Grid>
             <Container p="lg">
                 <Stepper active={active} onStepClick={setActive} breakpoint="sm">
                 <Stepper.Step label="First step" description="Accept in-development warning">
@@ -133,7 +143,7 @@ export function SignUpGuide(props) {
                     </ActionIcon>
                 </Group>
             </Container>
-            
+            </Stack>
         </Paper>
     );
   }

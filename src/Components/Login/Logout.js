@@ -1,35 +1,16 @@
 import React from 'react';
-import { logout } from '@inrupt/solid-client-authn-browser';
 import { Button } from '@mantine/core';
-import { AppStates } from '../Core/Constants/AppStates';
+import { logoutHandler } from '../../SOLID/LoginHandler';
 
 /**
  * A React Class component.
  */
-class Logout extends React.Component {
-    constructor(props) {
-        super(props);
-        this.app = props.app;
+export function LogoutButton(props) {
+    let handleLogout = async function () {
+        await logoutHandler();
+        props.logout();
     }
-
-    async handleLogout(app) {
-        await logout();
-        console.log("Logged out");
-        this.podRootDir = '';
-        this.webId = '';
-        this.notificationSocket = null;
-        app.setState(prevState => (
-            {...prevState, 
-            currPage: AppStates.LogIn, 
-            loggedIn: false
-        }));
-    }
-
-    render() {
-        return (
-            <Button onClick={() => this.handleLogout(this.app)}>Logout</Button>
-        );
-    }
+    return (
+        <Button onClick={() => handleLogout()}>Logout</Button>
+    );
 }
-
-export default Logout;

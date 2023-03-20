@@ -1,9 +1,8 @@
 import React from "react";
-import Logout from '../Login/Logout';
-import { Title, Group, Center, Space, Text, Button, Grid } from '@mantine/core';
+import { LogoutButton } from '../Login/Logout';
+import { Group, Center, Space, Grid, Header } from '@mantine/core';
 import { Logo } from "./Constants/Logo";
 import { Notifications } from "../Notifications/Notifications";
-import { AppStates } from "./Constants/AppStates";
 import { ShareButton } from "./ShareButton";
 
 /**
@@ -13,37 +12,28 @@ import { ShareButton } from "./ShareButton";
  * some attributes.
  */
 export function AppHeader(props) {
-
     return (
-        <Grid justify="space-between" align="flex-end" sx={{ height: '100%' }} px={20}>
-            {props.app.state.currPage == AppStates.LogIn? 
-                <Grid.Col span={12}>
-                    <Center>
+        <Header height={60} p="xs">
+            <Grid justify="space-between" align="flex-end" sx={{ height: '100%' }} px={20}>
+                <Grid.Col span={2}>
+                    <Group position="left">
                         <Logo />
+                    </Group>
+                
+                </Grid.Col>
+                <Grid.Col span={3}>
+                    <Center style={{ width: 320}} >
+                        <ShareButton webId={props.user.webId}/>
+                        <Space w="md"/>
+                        {/* {props.user.loggedIn !== false && props.user.podRootDir !== '' && 
+                            <Notifications podRootDir={props.user.podRootDir}/>
+                        } */}
+                        <Space w="md"/>
+                        {props.user.loggedIn && <LogoutButton logout={props.logout} />}
                     </Center>
                 </Grid.Col>
-            :
-            <>
-            <Grid.Col span={2}>
-                <Group position="left">
-                    <Logo />
-                </Group>
-               
-            </Grid.Col>
-            <Grid.Col span={3}>
-                <Center style={{ width: 320}} >
-                    <ShareButton webId={props.app.webId}/>
-                    <Space w="md"/>
-                    {props.app.state.loggedIn !== false && props.app.podRootDir !== '' && 
-                        <Notifications podRootDir={props.app.podRootDir}/>
-                    }
-                    <Space w="md"/>
-                    {props.app.state.loggedIn && <Logout app={props.app} />}
-                </Center>
-            </Grid.Col>
-            </>
-            }
-        </Grid>
+            </Grid>
+        </Header>
     );
 }
 

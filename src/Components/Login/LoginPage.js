@@ -1,10 +1,9 @@
-import React from 'react';
-import { Paper, Title, Text, Stack, Divider, Button, Group, TextInput, LoadingOverlay, Modal, Center, Grid, ActionIcon } from '@mantine/core';
-import SolidLoginHandler from '../../SOLID/LoginHandler';
-import { AppStates } from '../Core/Constants/AppStates';
-import { getDefaultSession, handleIncomingRedirect } from '@inrupt/solid-client-authn-browser';
-import { IconArrowBack } from '@tabler/icons';
+import { useEffect, useState } from 'react';
+import { Paper, Title, Text, Stack, Divider, Button, Group, 
+    TextInput, LoadingOverlay, Image, Grid } from '@mantine/core';
+import { loginHandler, getSession } from '../../SOLID/LoginHandler';
 import { SignUpGuide } from './SignUpGuide';
+import logo from '../../assets/Logo.png'
 
 
 
@@ -23,142 +22,99 @@ const PageStates = {
  * @return {string} errMsg The message corresponding to the error recieved.
  * If no error, then the function returns ''.
  */
-class LoginPage extends React.Component {
-    constructor(props) {
-        super(props);
-        this.app = props.app;
-        this.state = {
-            solidProvider: '',
-            solidProviderError: '',
-            loading: true,
-            display: PageStates.Main
+function LoginPage(props) {
+    const [solidProvider, setSolidProvider] = useState("");
+    const [solidProviderError, setSolidProviderError] = useState("");
+    const [loading, setLoading] = useState(true);
+    const [display, setDisplay] = useState(PageStates.Main);
+
+    let handleLogin = async function () {     
+        const result = await loginHandler(solidProvider, "Decent");
+        if (!result.success) {
+            setSolidProviderError(result.error);
         }
     }
 
-    handleLogin(loginController) {     
-        const errMsg = SolidLoginHandler(loginController.state.solidProvider, "Decent");
-        if (errMsg !== '') {
-            loginController.setState(prevState => (
-                {...prevState, 
-                solidProviderError: errMsg,
-            }));
-        }
-    }
-
-    back(loginPage) {
-        loginPage.setState(prevState => ({
-            ...prevState,
-            display: PageStates.Main
-        }))
-    }
-
-    inruptLogin(loginController) {
-        loginController.setState(prevState => (
-            {...prevState, 
-                solidProvider: "https://login.inrupt.com",
-        }));
-    }
-
-    handleInputChange(event) {
-        this.setState(prevState => (
-            {...prevState, 
-                solidProvider: event.target.value,
-        }));
-    }
-
-    socialDirCreated(app) {
-        app.setState(prevState => (
-            {...prevState, 
-            socialDir: true,
-            currPage: AppStates.Profile,
-        }))
-    }
-
-    async componentDidMount() {
-        // Check if we are in the correct state, or if 
-        // something has changed e.g. Just been logged in
-        if (this.app.state.loggedIn === false) {
-            // Check if we've just returned from log in redirect
-            await handleIncomingRedirect();
-            if (getDefaultSession().info.isLoggedIn) {
-                // User has just logged in
-                this.app.webId = getDefaultSession().info.webId;
-                // set app state to loggedIn and page to social directory page.
-                this.app.setState(prevState => ({
-                    ...prevState,
-                    loggedIn: true,
-                    currPage: AppStates.FindSocialDirectory
-                }))
+    useEffect(() => {
+        // Check if we've just returned from log in redirect
+        getSession().then((result) => {
+            if (result.loggedIn) {
+                props.setUser(result);
+                props.redirect();
                 return;
             }
-            // Still not logged in
-            this.setState(prevState => (
-                {...prevState, 
-                loading: false,
-            }));
+            // Not logged in, display the log in page
+            setLoading(false);
             return;
-        }
-        console.log("oh no");
-        // loggedIn is true. Should not be here.
+        });
+    }, [props]);
+
+    if (display === PageStates.SignUp) {
+        return (<SignUpGuide back={() => setDisplay(PageStates.Main)}/>);
     }
 
-    render() {
-        if (this.state.display === PageStates.SignUp) {
-            return (<SignUpGuide back={() => this.back(this)}/>);
-        }
+    return (
+        <>
+            <LoadingOverlay visible={loading} overlayBlur={2}/>
+            <Grid  p={200} grow>
+            <Grid.Col span={6}>
+                <Stack align='center' >
+                    <Title>Welcome to Decent!</Title>
+                    <Image maw={240} mx="auto" src={logo}/>
+                </Stack>
+                
+            </Grid.Col>
+            <Grid.Col span={6}>
+                <Paper p='lg' shadow='sm' withBorder>
+                <Stack align="center" justify="center" spacing="sm" style={{width: "500px"}}>
+                        <Title order={3}>
+                            Log In
+                        </Title>
+                        <Grid align="flex-end" justify="space-between" style={{width: "100%"}}>
+                            <Grid.Col span={10}>
+                                <TextInput
+                                    placeholder="http://login.inrupt.com/"
+                                    label="Solid Identity Provider"
+                                    size="md"
+                                    withAsterisk
+                                    value={solidProvider}
+                                    onChange={(e) => setSolidProvider(e.currentTarget.value)}
+                                    error={solidProviderError}
+                                />
+                            </Grid.Col>
+                            <Grid.Col span={2}>
+                                <Button  color="blue" onClick={() => setSolidProvider(
+                                    "https://login.inrupt.com"
+                                )}>Inrupt</Button>
+                            </Grid.Col>
 
-        return (
-            <>
-                <LoadingOverlay visible={this.state.loading} overlayBlur={2}/>
-                <Center>
-                    <Paper shadow="xs" p="md">
-                        <Stack align="center" justify="center" spacing="sm" style={{width: "500px"}}>
-                            <Title order={2}>Welcome to Decent!</Title>
-                            <Title order={3}>
-                                Log In
-                            </Title>
-                            <Grid align="flex-end" justify="space-between" style={{width: "100%"}}>
-                                <Grid.Col span={10}>
-                                    <TextInput
-                                        placeholder="http://login.inrupt.com/"
-                                        label="Solid Identity Provider"
-                                        size="md"
-                                        withAsterisk
-                                        value={this.state.solidProvider}
-                                        onChange={this.handleInputChange}
-                                        error={this.state.solidProviderError}
-                                    />
-                                </Grid.Col>
-                                <Grid.Col span={2}>
-                                    <Button  color="blue" onClick={() => {this.inruptLogin(this)}}>Inrupt</Button>
-                                </Grid.Col>
-
-                            </Grid>
-                            <Group position="center" spacing="sm">
-                                <Button onClick={() => {this.handleLogin(this)}}>Log in</Button>
-                            </Group>
-                            <Divider my="sm"/>
-                            <Group position="apart" spacing="sm">
-                                <Text>
-                                    No POD? Unsure?
-                                </Text>
-                                <Button onClick={() => {
-                                    window.open("https://start.inrupt.com/profile", 
-                                        "signup", "popup=true");
-                                    this.setState(prevState => ({
-                                        ...prevState,
-                                        display: PageStates.SignUp
-                                    }))
-                                }}>
-                                    Sign up
-                                </Button>
-                            </Group>
-                        </Stack>
-                    </Paper>
-                </Center>
-            </>
-        );
-    }
+                        </Grid>
+                        <Group position="center" spacing="sm">
+                            <Button onClick={() => handleLogin(this)}>Log in</Button>
+                        </Group>
+                        <Divider my="sm"/>
+                        <Group position="apart" spacing="sm">
+                            <Text>
+                                No POD? Unsure?
+                            </Text>
+                            <Button onClick={() => {
+                                window.open("https://start.inrupt.com/profile", 
+                                    "signup", "popup=true");
+                                setDisplay(PageStates.SignUp);
+                            }}>
+                                Sign up
+                            </Button>
+                        </Group>
+                    </Stack>
+                </Paper>
+            </Grid.Col>
+        </Grid>
+        </>
+    );
 }
+
+
+
+
 
 export default LoginPage;
