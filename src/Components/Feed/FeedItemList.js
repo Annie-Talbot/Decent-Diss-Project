@@ -23,12 +23,12 @@ export function FeedItemList(props) {
     const [feedItems, setFeedItems] = useState([]);
 
     useEffect(() => {
-        fetchFeedItems(props.podRootDir).then(([fetchedItems, errors]) => {
+        fetchFeedItems(props.user.podRootDir).then(([fetchedItems, errors]) => {
             errors.forEach(e => createErrorNotification(e));
             setFeedItems(fetchedItems);
             setLoading(false);
         })
-    }, [props.podRootDir]);
+    }, [props]);
 
     return (
         <Skeleton visible={loading}>
@@ -40,9 +40,8 @@ export function FeedItemList(props) {
                             return (<PostLoader
                                 key={index}
                                 feedItem={feedItem}
-                                podRootDir={props.podRootDir}
+                                user={props.user}
                                 viewPerson={props.viewPerson}
-                                webIs={props.webId}
                             />);
                         } else {
                             return (<Paper shadow="sm" withBorder>

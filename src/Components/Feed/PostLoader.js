@@ -42,7 +42,7 @@ export function PostLoader(props) {
             if (error) setError(error.title);
             if (fetchedPost) setPost(fetchedPost);
         }).then(async () => {
-            setPerson(await findPerson(props.podRootDir, props.feedItem.senderWebId));
+            setPerson(await findPerson(props.user.podRootDir, props.feedItem.senderWebId));
             setLoading(false);
         }).then(() => {
             observer = new IntersectionObserver((entries) => 
@@ -58,7 +58,7 @@ export function PostLoader(props) {
             if (target.current) observer.unobserve(target.current);
             observer.disconnect();
           };
-    }, [props.feedItem.postContainer]);
+    }, [props]);
     return (
         <Skeleton visible={loading} >
             {error?
@@ -78,7 +78,7 @@ export function PostLoader(props) {
                     post={post}
                     authorised={false}
                     viewPerson={() => props.viewPerson(person)}
-                    sendLike={() => sendLike(props.webId, post, person)}
+                    sendLike={() => sendLike(props.user.webId, post, person)}
                 />
             </div>
                 

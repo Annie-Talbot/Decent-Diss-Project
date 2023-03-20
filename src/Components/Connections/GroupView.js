@@ -82,7 +82,7 @@ export class GroupView extends React.Component {
     constructor(props) {
         super(props)
         this.groupUrl = props.groupUrl;
-        this.podRootDir = props.podRootDir;
+        this.podRootDir = props.user.podRootDir;
         this.viewPerson = props.viewPerson;
         this.state = {
             groupKey: 0

@@ -2,13 +2,13 @@ import React from 'react';
 import './css/App.css';
 import LoginPage from './Components/Login/LoginPage';
 import SideBar from './Components/Core/Sidebar'
-import { AppShell, Modal } from '@mantine/core';
+import { AppShell } from '@mantine/core';
 import AppHeader from './Components/Core/Header';
 import { PostsPage } from './Components/Posts/PostsPage';
 import { AppStates } from './Components/Core/Constants/AppStates';
-import ProfilePage from './Components/Profile/ProfilePage';
+import { ProfilePage } from './Components/Profile/ProfilePage';
 import { ConnectionsPage } from './Components/Connections/ConnectionsPage';
-import { SocialDirectoryPage, SocialDirectorySelector } from './Components/Login/SocialDirectorySelector';
+import { SocialDirectorySelector } from './Components/Login/SocialDirectorySelector';
 import { FeedPage } from './Components/Feed/FeedPage';
 
 
@@ -69,13 +69,13 @@ class App extends React.Component {
         }
         
         if (this.state.currPage === AppStates.Posts) {
-            content.push(<PostsPage webId={this.webId} podRootDir={this.podRootDir}/>);
+            content.push(<PostsPage user={this.state.user}/>);
         } else if (this.state.currPage === AppStates.Profile) {
-            content.push(<ProfilePage podRootDir={this.podRootDir} webId={this.webId}/>);
+            content.push(<ProfilePage user={this.state.user}/>);
         } else if (this.state.currPage === AppStates.Connections) {
-            content.push(<ConnectionsPage app={this}/>);
+            content.push(<ConnectionsPage user={this.state.user}/>);
         } else if (this.state.currPage === AppStates.Feed) {
-            content.push(<FeedPage podRootDir={this.podRootDir} webId={this.webId} />);
+            content.push(<FeedPage user={this.state.user} />);
         }
         
         console.log(this.state.user)

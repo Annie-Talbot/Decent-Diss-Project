@@ -1,4 +1,4 @@
-import { Text, Title, Grid, Center, ActionIcon } from "@mantine/core";
+import { Text, Title, Grid, Center, Group, ActionIcon } from "@mantine/core";
 import { DatePicker } from "@mantine/dates";
 import { IconCake, IconTrash } from "@tabler/icons";
 
@@ -7,8 +7,11 @@ export function Birthday(props) {
         if (!props.editing) {
             return (
                 <div style={{width: "100%"}}>
-                    <Title order={4}>Birthday: </Title>
-                    <Text style={{ marginLeft: "10px"}}>{props.birthday.toISOString().slice(0, 10)}</Text>
+                    <Group spacing='xs'>
+                        <IconCake />
+                        <Title order={4}>Birthday: </Title>
+                    </Group>
+                    <Text style={{ marginLeft: "50px"}}>{props.birthday.toISOString().slice(0, 10)}</Text>
                 </div>
             );
         } else {
@@ -19,7 +22,7 @@ export function Birthday(props) {
                         value={props.birthday}
                         inputFormat="MM/DD/YYYY"
                         placeholder="Your birthdate"
-                        label= "birthday"
+                        label= "Birthday"
                         icon={<IconCake/>}
                         onChange={(event) => props.update(event)}
                     />

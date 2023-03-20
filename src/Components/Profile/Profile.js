@@ -2,12 +2,13 @@ import { ProfilePic } from "./ProfilePic";
 import { Username } from "./Username";
 import { useState, useEffect } from "react";
 import { Description } from "./Description"
-import { Button, Center, Group, Skeleton, Stack } from "@mantine/core";
+import { ActionIcon, Button, Center, Group, Skeleton, Stack } from "@mantine/core";
 import {getProfile, updateProfile} from "../../SOLID/ProfileHandler";
 import { ProfileAdditions } from "./ProfileAdditions";
 import { Birthday } from "./Birthday";
 import { createErrorNotification } from "../Core/Notifications/ErrorNotification";
 import { createPlainNotification } from "../Core/Notifications/PlainNotification";
+import { IconSquareRoundedCheckFilled } from "@tabler/icons-react";
 
 
 
@@ -97,27 +98,27 @@ export function Profile(props)  {
     ));
     return (
         <Skeleton visible={loading}>
-            <Stack style={{ marginLeft: "2%", padding: "10px"}}>
-                {props.editing &&
-                    <Group>
-                        <ProfileAdditions 
-                            profile={profile}
-                            appendToProfile={(attribute, startingValue) => {
-                                let copy = {...profile};
-                                copy[attribute] = startingValue;
-                                setProfile(copy);
-                            }}
-                        />
-                        
-                    </Group>
-                    
-                }
+            <Stack style={{ marginLeft: "2%", padding: "20px"}}>
                 {dataDisplay}
                 {props.editing &&
                     <Center>
-                        <Button onClick={() => saveProfileChanges(props.userPod, profile)}>
-                            Save
-                        </Button>
+                        <Group spacing='lg'>
+                            <ProfileAdditions 
+                                profile={profile}
+                                appendToProfile={(attribute, startingValue) => {
+                                    let copy = {...profile};
+                                    copy[attribute] = startingValue;
+                                    setProfile(copy);
+                                }}
+                            />
+                            <ActionIcon
+                                size="xl"
+                                color="sage"
+                                onClick={() => saveProfileChanges(props.userPod, profile)}
+                            >
+                                <IconSquareRoundedCheckFilled size={57}/>
+                            </ActionIcon>
+                        </Group>
                     </Center>
                 }
             </Stack>

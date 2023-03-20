@@ -1,5 +1,5 @@
 import React from 'react';
-import { Button, Center, Divider, ScrollArea, Stack, Text, ThemeIcon, Skeleton, ActionIcon, Title, Paper, Group} from '@mantine/core';
+import { ScrollArea, Stack, Text, ThemeIcon, ActionIcon, Title, Paper, Group} from '@mantine/core';
 import { IconBeach } from '@tabler/icons';
 import { PostGrid } from './PostGrid';
 import { CreatePostForm } from './CreatePostForm';
@@ -8,7 +8,7 @@ import { PageLoader } from '../Core/PageLoader';
 import { IconSquareRoundedPlusFilled } from '@tabler/icons-react';
 
 
-function EmptyPosts(props) {
+function EmptyPosts() {
     return (
         <Stack align="center" justify="center" style={{height: "100%", marginTop: 64, marginBottom: 64}}>
             <ThemeIcon 
@@ -17,7 +17,6 @@ function EmptyPosts(props) {
                 <IconBeach />
             </ThemeIcon>
             <Text size={"lg"}>Looks like you have no posts...</Text>
-            <Text>To create one, press the button below.</Text>
         </Stack>
     );
     }
@@ -31,8 +30,7 @@ function EmptyPosts(props) {
 export class PostsPage extends React.Component {
     constructor(props) {
         super(props);
-        this.webId = props.webId;
-        this.podRootDir = props.podRootDir;
+        this.user = props.user;
         this.state = {
             createPostOpened: false,
             postgridKey: 0,
@@ -64,15 +62,14 @@ export class PostsPage extends React.Component {
                 <PageLoader 
                     checkFunction={doesPostsDirExist}
                     createFunction={createPostsDir}
-                    podRootDir={this.podRootDir}
+                    podRootDir={this.user.podRootDir}
                     podStructureRequired="posts directory"
                 >
                     <CreatePostForm 
                         opened={this.state.createPostOpened}
                         toggleOpened={() => this.toggleCreatePostPopup(this)}
                         updatePosts={() => this.updatePosts(this)}
-                        podRootDir={this.podRootDir}
-                        webId={this.webId}
+                        user={this.user}
                     />
                     <Stack>
                         <Group position="apart" 
@@ -94,10 +91,10 @@ export class PostsPage extends React.Component {
                         </Group>
                         <ScrollArea offsetScrollbars style={{gridRow: "1", gridColumn: "1"}}>
                             <PostGrid
-                                author={{webId: this.webId, nickname: "Myself"}}
+                                author={{webId: this.user.webId, nickname: "Myself"}}
                                 key={this.state.postgridKey}
                                 authorised={true}
-                                podRootDir={this.podRootDir}
+                                user={this.user}
                                 emptyComponent={<EmptyPosts/>}
                                 />             
                         </ScrollArea>

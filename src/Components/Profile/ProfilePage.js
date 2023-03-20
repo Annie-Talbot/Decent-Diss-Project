@@ -1,79 +1,61 @@
-import React from 'react';
-import { ActionIcon, Text, Button, Center, Group, Paper, Title, Divider} from '@mantine/core';
+import React, { useState } from 'react';
+import { ActionIcon, Text, Center, Group, Paper, Title, Divider} from '@mantine/core';
 import { Profile } from './Profile';
 import { IconArrowBack } from '@tabler/icons';
 import { createSampleProfile, doesProfileExist } from '../../SOLID/ProfileHandler';
 import { PageLoader } from '../Core/PageLoader';
-import { createConnectionRequest } from '../../SOLID/NotificationHandler';
-import { IconClipboardCopy, IconEdit, IconEditCircle, IconShare2 } from '@tabler/icons-react';
-import { createPlainNotification } from '../Core/Notifications/PlainNotification';
-import { ShareButton } from '../Core/ShareButton';
+import { IconEdit } from '@tabler/icons-react';
 
 
+export function ProfilePage(props) {
+    const [editing, setEditing] = useState(false);
 
-
-class ProfilePage extends React.Component {
-    constructor(props) {
-        super(props);
-        this.podRootDir = props.podRootDir;
-        this.webId = props.webId;
-
-        this.state = {
-            editing: false,
-        }
-    }
-
-    render() {
         return (
-            <Paper p="sm" shadow="xs">
+            <Center>
+            <Paper p="sm" shadow="xs" style={{minWidth: 800}}>
                 <PageLoader
                     checkFunction={doesProfileExist}
                     createFunction={createSampleProfile}
-                    podRootDir={this.podRootDir}
+                    podRootDir={props.user.podRootDir}
                     podStructureRequired="profile"
                 >
-                    <Group position="apart" style={{height: "24px", marginBottom: "5px", paddingRight: 20}}>
-                        {this.state.editing ?
+                    <Group position='apart' align='flex-end'
+                        style={{
+                            height: "24px", 
+                            marginBottom: "20px", 
+                            paddingRight: 20,
+                            paddingLeft: 20,
+                        }}
+                    >  
+                        <Group spacing='md'>
                             <ActionIcon
-                            onClick={() => {this.setState(prevState => (
-                                {...prevState, 
-                                    editing: false,
-                                }))}}
+                                size='lg'
+                                disabled={!editing}
+                                onClick={() => setEditing(false)}
                             >
-                            <IconArrowBack />
-                        </ActionIcon>
-                        : <div></div>}
-                        <Title order={3}>Your Profile</Title>
-                        <Group position='flex-end'>
-                            <Title order={3}>WebID: </Title>
-                            <Text>{this.webId}</Text>
+                                <IconArrowBack />
+                            </ActionIcon>
+                            <Title>Your Profile</Title>
                         </Group>
-                        
-                    </Group>
-                    <Divider m="md" h="sm"/>
-                    <Profile 
-                        userPod={this.podRootDir} 
-                        editing={this.state.editing}
-                    />
-                    <Center>
-                        {!this.state.editing &&
+                        {!editing ?
                             <ActionIcon
-                                size="xl"
+                                size="lg"
                                 variant="filled"
                                 color="sage"
-                                onClick={() => this.setState(prevState => ({
-                                    ...prevState,
-                                    editing: true,
-                                    }))}
+                                onClick={() => setEditing(true)}
                             >
-                                <IconEdit size={30}/>
+                                <IconEdit size={26}/>
                             </ActionIcon>
+                        :
+                            <div></div>
                         }
-                    </Center>
+                    </Group>
+                    <Profile 
+                        userPod={props.user.podRootDir} 
+                        editing={editing}
+                    />
                 </PageLoader>
             </Paper>
+            </Center>
         );
     }
-}
-
-export default ProfilePage;

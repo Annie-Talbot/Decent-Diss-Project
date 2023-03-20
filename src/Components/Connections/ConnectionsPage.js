@@ -20,8 +20,7 @@ export const ViewStates = {
 export class ConnectionsPage extends React.Component {
     constructor(props) {
         super(props);
-        this.podRootDir = props.app.podRootDir;
-        this.webId = props.app.webId;
+        this.user = props.user;
         this.state = {
             currView: ViewStates.Main,
             createPersonOpened: false,
@@ -112,16 +111,14 @@ export class ConnectionsPage extends React.Component {
                     <CreatePersonForm 
                         opened={this.state.createPersonOpened}
                         toggleOpened={() => this.toggleCreatePersonPopup(this)}
-                        datasetUrl={this.podRootDir + CONNECTIONS_DIR + PEOPLE_DATASET}
                         updatePeople={() => this.updatePeople(this)}
-                        webId={this.props.app.webId}
-                        pod={this.podRootDir}
+                        user={this.user}
                     />
                     <CreateGroupForm 
                         opened={this.state.createGroupOpened}
                         close={() => this.toggleCreateGroupPopup(this)}
                         updateGroups={() => this.updateGroups(this)}
-                        podRootDir={this.podRootDir}
+                        user={this.user.podRootDir}
                     />
                     <Grid grow>
                         <Grid.Col span={4} gutter="sm">
@@ -140,7 +137,7 @@ export class ConnectionsPage extends React.Component {
                                     </Group>
                                     <PeopleList 
                                         key={this.state.peoplelistKey}
-                                        podRootDir={this.podRootDir}
+                                        podRootDir={this.user.podRootDir}
                                         viewPerson={(person) => this.viewPerson(this, person, ViewStates.Main)}
                                         authorised={true}
                                     />
@@ -164,7 +161,7 @@ export class ConnectionsPage extends React.Component {
                                     <GroupsList 
                                         host={this}
                                         key={this.state.groupslistKey}
-                                        podRootDir={this.podRootDir}
+                                        podRootDir={this.user.podRootDir}
                                         viewGroup={(person) => this.viewGroup(this, person, ViewStates.Group)}
                                         authorised={true}
                                     />
@@ -188,7 +185,7 @@ export class ConnectionsPage extends React.Component {
                         </Grid.Col>
                     </Grid>
                     <Divider h="md"/>
-                    <PersonView person={this.viewPersonObject} webId={this.webId}/>
+                    <PersonView person={this.viewPersonObject} user={this.user}/>
                 </Stack>
             ));
         } else if (this.state.currView === ViewStates.GroupView) {
@@ -207,7 +204,7 @@ export class ConnectionsPage extends React.Component {
                     <Divider h="md"/>
                     <GroupView 
                         groupUrl={this.viewGroupObject.url}
-                        podRootDir={this.podRootDir}
+                        user={this.user}
                         viewPerson={(person) => this.viewPerson(this, person, ViewStates.GroupView)}
                     />
                 </Stack>
@@ -225,7 +222,7 @@ export class ConnectionsPage extends React.Component {
                 <PageLoader
                     checkFunction={doesConnectionsDirExist}
                     createFunction={createConnectionsDir}
-                    podRootDir={this.podRootDir}
+                    podRootDir={this.user.podRootDir}
                     podStructureRequired="connections directory"
                 >
                     {content}

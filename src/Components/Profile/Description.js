@@ -1,13 +1,16 @@
-import { Text, Textarea, Title, Grid, Center, ActionIcon } from "@mantine/core";
-import { IconTrash } from "@tabler/icons";
+import { Text, Textarea, Title, Grid, Center, ActionIcon, Group } from "@mantine/core";
+import { IconKarate, IconTrash } from "@tabler/icons-react";
 
 export function Description(props) {
     if (props.description != null) {
         if (!props.editing) {
             return (
                 <div style={{width: "100%"}}>
-                    <Title order={4}>Description: </Title>
-                    <Text style={{ marginLeft: "10px"}}>{props.description}</Text>
+                    <Group spacing='xs'>
+                        <IconKarate />
+                        <Title order={4}>Description: </Title>
+                    </Group>
+                    <Text style={{ marginLeft: "50px"}}>{props.description}</Text>
                 </div>
             );
         } else {
@@ -15,6 +18,7 @@ export function Description(props) {
                 <Grid grow>
                 <Grid.Col span={10}>
                     <Textarea
+                        icon={<IconKarate/>}
                         value={props.description}
                         onChange={(event) => props.update(event.currentTarget.value)}
                         placeholder="Hi, I'm Jared, I'm 19, and I never learned how to read."

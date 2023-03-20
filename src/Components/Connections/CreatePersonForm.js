@@ -29,7 +29,7 @@ async function sendConnectionRequest(webId, podRootDir, person) {
     return true;
 }
 
-async function handleCreatePerson(webId, podRootDir, person, closePopup, updatePeople, sendConnReq) {
+async function handleCreatePerson(user, person, closePopup, updatePeople, sendConnReq) {
     if (!await isValidWebID(person.webId)) {
         createErrorNotification({title: "Invalid webID.", 
             description: "WebID is not a valid URL."});
@@ -37,10 +37,10 @@ async function handleCreatePerson(webId, podRootDir, person, closePopup, updateP
     }
     let success = true;
     if (sendConnReq) {
-        success = await sendConnectionRequest(webId, podRootDir, person);
+        success = await sendConnectionRequest(user.webId, user.podRootDir, person);
     }
     if (success) {
-        if (await handleCreateAPerson(podRootDir, person)) {
+        if (await handleCreateAPerson(user.podRootDir, person)) {
             closePopup();
             updatePeople();
         }
@@ -90,7 +90,7 @@ export function CreatePersonForm(props) {
             <Group>
                 <Button
                     onClick={() => {
-                        handleCreatePerson(props.webId, props.pod, 
+                        handleCreatePerson(props.user, 
                             person, props.toggleOpened, props.updatePeople, true);
                     }}
                 >
@@ -98,7 +98,7 @@ export function CreatePersonForm(props) {
                 </Button>
                 <Button
                     onClick={() => {
-                        handleCreatePerson(props.webId, props.pod, 
+                        handleCreatePerson(props.user, 
                             person, props.toggleOpened, props.updatePeople, false);
                     }}
                 >

@@ -8,10 +8,10 @@ import { POSTS_DIR } from "../../SOLID/Utils";
 import { createErrorNotification } from "../Core/Notifications/ErrorNotification";
 import { createPlainNotification } from "../Core/Notifications/PlainNotification";
 
-async function handleCreatePost(podRootDir, webId, post, connections, closePopup, updatePosts) {
+async function handleCreatePost(user, post, connections, closePopup, updatePosts) {
     const agents = post.agentAccess.map((index) => connections[parseInt(index)])
     post["agentAccess"] = agents;
-    const [success, error] = await createPost(podRootDir, webId, post);
+    const [success, error] = await createPost(user.podRootDir, user.webId, post);
     if (!success) {
         createErrorNotification(error);
         return;
@@ -34,17 +34,16 @@ export function CreatePostForm(props) {
     });
 
     useEffect(() => {
-        fetchAllConnections(props.podRootDir).then(([connects, errors]) => {
+        fetchAllConnections(props.user.podRootDir).then(([connects, errors]) => {
             errors.forEach((e) => createErrorNotification(e));
             setConnections(connects);
             setConnectionIndexes(connects.map((c, i) => {
-                console.log(c);
                 if (c.type === ACCESS_AGENT_TYPE.Person) return {value: i.toString(), label: c.nickname};
                 if (c.type === ACCESS_AGENT_TYPE.Group) return {value: i.toString(), label: c.name};
                 return {value: i.toString(), label: "Unknown connection"};
             }));
         })
-    }, [props.podRootDir]);
+    }, [props]);
 
     return (
         <Modal
@@ -124,8 +123,7 @@ export function CreatePostForm(props) {
                     size="xl"
                     onClick={() => {
                         handleCreatePost(
-                            props.podRootDir,
-                            props.webId,
+                            props.user,
                             post, 
                             connections, 
                             props.toggleOpened, 

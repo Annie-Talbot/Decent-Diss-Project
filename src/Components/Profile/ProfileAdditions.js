@@ -1,14 +1,24 @@
-import { Button, Menu } from "@mantine/core";
-import sample_pic from '../../assets/sample_profile_pic.svg'
+import { ActionIcon, Button, Menu } from "@mantine/core";
+import { IconSquareRoundedPlusFilled } from "@tabler/icons-react";
 
 
 export function ProfileAdditions(props) {
     return (
-        <Menu shadow="md" width={200}>
+        <Menu 
+            shadow="md" 
+            width={200}
+            trigger='hover'
+            position="top" 
+            offset={2} 
+            withArrow
+        >
             <Menu.Target>
-                <Button style={{width:"18%", marginLeft: "80%"}}>
-                    Add new attributes
-                </Button>
+                <ActionIcon
+                    size="xl"
+                    color="sage"
+                >
+                    <IconSquareRoundedPlusFilled size={57}/>
+                </ActionIcon>
             </Menu.Target>
             <Menu.Dropdown>
                 {props.profile.description == null && 

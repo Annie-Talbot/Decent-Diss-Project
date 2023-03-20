@@ -21,8 +21,7 @@ const FeedViewStates = {
 export class FeedPage extends React.Component {
     constructor(props) {
         super(props);
-        this.podRootDir = props.podRootDir;
-        this.webId = props.webId
+        this.user = props.user;
         this.state = {
             view: FeedViewStates.Feed,
             backHistory: [],
@@ -70,8 +69,7 @@ export class FeedPage extends React.Component {
                     </Group>
                     <ScrollArea h="85vh">
                         <FeedItemList
-                            webId={this.webId}
-                            podRootDir={this.podRootDir} 
+                            user={this.user}
                             viewPerson={(person) => this.viewPerson(this, person)}
                         />
                     </ScrollArea>
@@ -91,14 +89,14 @@ export class FeedPage extends React.Component {
                             </Grid.Col>
                         </Grid>
                         <Divider h="md"/>
-                        <PersonView person={this.state.viewPerson} webId={this.webId}/>
+                        <PersonView person={this.state.viewPerson} user={this.user}/>
                     </Stack>
             )
         } else if (this.state.view === FeedViewStates.Settings) {
             content = (
                 <AppendSettings
                     back={() => this.back(this)}
-                    podRootDir={this.podRootDir}
+                    podRootDir={this.user.podRootDir}
                 />
             )
         } else {
@@ -108,17 +106,17 @@ export class FeedPage extends React.Component {
             });
         }
         return (
-            <></>
-            // <PageLoader 
-            //     checkFunction={doesFeedDirExist}
-            //     createFunction={createFeedDir}
-            //     podRootDir={this.podRootDir}
-            //     podStructureRequired="feed directory"
-            // >
-            //     <Paper shadow="md" p="md">
-            //         {content}
-            //     </Paper>
-            // </PageLoader>
+            <PageLoader 
+                checkFunction={doesFeedDirExist}
+                createFunction={createFeedDir}
+                podRootDir={this.user.podRootDir}
+                podStructureRequired="feed directory"
+            >
+                
+                <Paper shadow="md" p="md">
+                    {content}
+                </Paper>
+            </PageLoader>
         );
     }
 }

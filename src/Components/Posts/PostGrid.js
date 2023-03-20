@@ -41,12 +41,12 @@ export function PostGrid(props) {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        fetchPosts(props.podRootDir).then(([posts, errors]) => {
+        fetchPosts(props.user.podRootDir).then(([posts, errors]) => {
             setPostList(posts);
             if (props.authorised) errors.forEach(error => createErrorNotification(error));
             setLoading(false);
         })
-    }, [props.podRootDir, props.authorised]);
+    }, [props]);
 
     const postComponents = postList.map((post, index) => {
         return (
@@ -57,7 +57,7 @@ export function PostGrid(props) {
                     authorised={props.authorised}
                     post={post}
                     deletePost={() => handleDeletePost(post, postList, setPostList)}
-                    sendLike={() => handleSendLike(props.webId, post, props.author)}
+                    sendLike={() => handleSendLike(props.user.webId, post, props.author)}
                 />
             </Center>)
         });
