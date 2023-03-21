@@ -1,10 +1,22 @@
-import { buildThing, createSolidDataset, createThing, getDatetime, getFile, getSolidDataset, getSourceUrl, getStringNoLocale, getThing, getUrl, getUrlAll, saveFileInContainer, saveSolidDatasetAt, setThing } from "@inrupt/solid-client";
+import { addStringNoLocale, addUrl, buildThing, createContainerInContainer, createSolidDataset, 
+    createThing, getDatetime, getSolidDataset, getSourceUrl, 
+    getStringNoLocale, getThing, getUrl, saveFileInContainer, 
+    saveSolidDatasetAt, saveSolidDatasetInContainer, setThing } from "@inrupt/solid-client";
 import { fetch } from '@inrupt/solid-client-authn-browser'
-import { SCHEMA_INRUPT } from "@inrupt/vocab-common-rdf";
-import { GetPostDatasetUrl, POST_DETAILS, getChildUrlsList, deleteDirectory, simplifyError, makeId, createEmptyDataset, DATE_CREATED, TITLE, getImage, POSTS_DIR, delay } from "./Utils";
-import { getAllAgentWebIDs, setAllPublicReadAccess, setAllReadAccess, setReadAccess } from './AccessHandler'
+import { RDF, SCHEMA_INRUPT } from "@inrupt/vocab-common-rdf";
+import { GetPostDatasetUrl, POST_DETAILS, getChildUrlsList, deleteDirectory,
+    simplifyError, makeId, createEmptyDataset, getImage, POSTS_DIR, delay, POST_ACCESS_THING, POST_ACCESS_DATASET, POST_DATASET, POST_THING } from "./Utils";
+import { setAllPublicReadAccess, setAllReadAccess, setReadAccess } from './AccessHandler'
 import { createPostAlerts } from "./FeedHandler";
 import { SOCIAL_SOLID } from "./SolidTerms";
+import { fetchPeople, fetchPeopleFromList } from "./Connections/PeopleHandler";
+
+export const POST_ACCESS_TYPES = {
+    Public: 0, // all users can see
+    Private: 1, // all people in your connections can see
+    Specific: 2 // only people in the groups specified can see
+}
+
 
 export async function doesPostsDirExist(podRootDir) {
     try {
@@ -15,7 +27,7 @@ export async function doesPostsDirExist(podRootDir) {
         return [true, null];
     } catch (error) {
         let e = simplifyError(error, "Whilst checking if posts directory exists.");
-        if (e.code == 404) {
+        if (e.code === 404) {
             return [false, null];
         }
         return [false, e];
@@ -35,9 +47,9 @@ export async function createPostsDir(podRootDir) {
 
 async function getPostFromThing(postThing) {
     // Title
-    const postTitle = getStringNoLocale(postThing, TITLE);
+    const postTitle = getStringNoLocale(postThing, SOCIAL_SOLID.PostTitle);
     // Date
-    const postDatetime = getDatetime(postThing, DATE_CREATED, { fetch: fetch });
+    const postDatetime = getDatetime(postThing, SOCIAL_SOLID.DatetimeCreated, { fetch: fetch });
     // these are the only required attributes so return error if it doesn't exist
     if (!postTitle) {
         return [null, {
@@ -75,10 +87,10 @@ async function getPostFromThing(postThing) {
  * @param {string} postUrl The URL where the post dataset is.
  * @returns {dict} A dictionary will post information in.
  */
-async function getPost(postDir, postName) {
+async function getPost(postDir) {
     const errContext = "Encountered whilst attempting to get post " +
-                            "data for " + postDir + postName;
-    const postDatasetUrl = GetPostDatasetUrl(postDir, postName)
+                            "data for " + postDir;
+    const postDatasetUrl = postDir + POST_DATASET
     let postDataset;
     try {
         postDataset = await getSolidDataset(
@@ -92,11 +104,11 @@ async function getPost(postDir, postName) {
 
     // Post information is found in the #details Thing at the dataset:
     // details Thing URL: https://provider/podname/social/posts/postname/postname#details
-    const postThing = getThing(postDataset, postDatasetUrl + POST_DETAILS, { fetch: fetch });
+    const postThing = getThing(postDataset, postDatasetUrl + POST_THING, { fetch: fetch });
     if (!postThing) {
         return [null, {
             code: 0,
-            title: "Post has no #details Thing.",
+            title: "Post has no #this Thing.",
             description: errContext,
         }]
     }
@@ -106,7 +118,6 @@ async function getPost(postDir, postName) {
         return [null, error]
     }
     post.url = postDir;
-    post.name = postName;
     return [post, null];
 }
 
@@ -134,12 +145,10 @@ export async function fetchPosts(podRootDir) {
     // post container URL: https://provider/podname/social/posts/postname/
     // post dataset URL: https://provider/podname/social/posts/postname/postname
 
-    const postRegex = new RegExp(podRootDir + POSTS_DIR + '(.*)/');
     let post;
     let errorList = [];
     for (const i in postUrlList) {
-        const postName = postUrlList[i].match(postRegex)[1];
-        [post, error] = await getPost(postUrlList[i], postName);
+        [post, error] = await getPost(postUrlList[i]);
         if (error) {
             errorList.push(error);
             continue;
@@ -160,61 +169,46 @@ export async function deletePost(postDir) {
     return await deleteDirectory(postDir);
 }
 
-export async function createPost(podRootDir, webId, post) {
-    // Find valid ID
-    let validId = false;
-    let id;
-    while (!validId) {
-        id = makeId(10);
-        try {
-            await getSolidDataset(
-                podRootDir + POSTS_DIR + id + "/",
-                {fetch: fetch}
-            )
-        } catch (error) {
-            error = simplifyError(error, "Ecountered whilst creating a new post ID.");
-            if (error.code == 404 || error.code == 401) {
-                validId = true;
-            } else {
-                return [false, error]
-            }
-        }
-    }
-    // Create post directory
-    const postDirUrl = podRootDir + POSTS_DIR + id + "/";
-    let dataset;
-    let error;
-    [dataset, error] = await createEmptyDataset(postDirUrl);
-    if (error) {
-        return [false, error];
-    }
+
+
+
+async function createPostDataset(postDirUrl, post) {
+    // Create post dataset
+    const postDatasetUrl = postDirUrl + POST_DATASET;
+    let urls = [postDatasetUrl];
+    let postDataset = createSolidDataset();
+    let postThing  = buildThing(createThing({ name: "this" }))
+        .addStringNoLocale(SOCIAL_SOLID.PostTitle, post.title)
+        .addDatetime(SOCIAL_SOLID.DatetimeCreated, new Date(Date.now()))
+        .build();
 
     // Create image first because we need the url it is saved at.
-    let imgFile;
-    try {
-        imgFile = await saveFileInContainer(
-        postDirUrl,
-        post.image,
-        { slug: post.image.name, 
-            contentType: post.image.type, 
-            fetch: fetch }
-        );
-    } catch (error) {
-        return [false, simplifyError(error, "Encountered whilst trying to save image file.")]
+    if (post.image) {
+        let imgFile;
+        try {
+            imgFile = await saveFileInContainer(
+            postDirUrl,
+            post.image,
+            { slug: post.image.name, 
+                contentType: post.image.type, 
+                fetch: fetch }
+            );
+        } catch (error) {
+            return [false, simplifyError(error, "Encountered whilst trying to save image file.")]
+        }
+        postThing = addUrl(postThing, SCHEMA_INRUPT.image, getSourceUrl(imgFile))
+        urls.push(getSourceUrl(imgFile));
     }
-    const postImgUrl = getSourceUrl(imgFile);
 
-    const postDatasetUrl = postDirUrl + id;
-    let postDataset = createSolidDataset();
-    let postThing  = buildThing(createThing({ name: "details" }))
-    .addStringNoLocale(TITLE, post.title)
-    .addStringNoLocale(SCHEMA_INRUPT.text, post.text)
-    .addDatetime(DATE_CREATED, new Date(Date.now()))
-    .addUrl(SCHEMA_INRUPT.image, postImgUrl)
-    .build();
+    if (post.text) {
+        postThing = addStringNoLocale(
+            postThing, 
+            SCHEMA_INRUPT.text, 
+            post.text);
+    }
+
     postDataset = setThing(postDataset, postThing);
-
-
+    console.log(postDatasetUrl)
     try {
         await saveSolidDatasetAt(
             postDatasetUrl,
@@ -222,33 +216,108 @@ export async function createPost(podRootDir, webId, post) {
             { fetch: fetch }
           );
     } catch(error) {
+        console.log(error);
         return [false, simplifyError(error, "Encountered whilst trying to create post dataset.")]
     }
-    
-    if (post.publicAccess) {
-        // Set access
-        await setAllPublicReadAccess([postDirUrl, postImgUrl, postDatasetUrl]);
-        // Create post alerts for feed
-        await createPostAlerts(postDirUrl, podRootDir, webId, null);
-    } else {
-        // Generate list of agents who will have read access
-        let accessList = await getAllAgentWebIDs(podRootDir, post.agentAccess);
-        // Set access for post directory, image file, and post dataset
-        await setAllReadAccess([postDirUrl, postImgUrl, postDatasetUrl], accessList);
-        // Create post alerts for feed
-        await createPostAlerts(postDirUrl, podRootDir, webId, accessList);
+    return [true, urls, null]
+}
+
+async function createPostAccessDataset(postDirUrl, post) {
+    let accessType;
+    if (post.accessType === POST_ACCESS_TYPES.Public) accessType = SOCIAL_SOLID.PublicAccess
+    else if (post.accessType === POST_ACCESS_TYPES.Private) accessType = SOCIAL_SOLID.PrivateAccess
+    else accessType = SOCIAL_SOLID.SpecificAccess
+
+    let accessDataset = createSolidDataset();
+    let accessThing  = buildThing(createThing({ name: "this" }))
+        .addUrl(RDF.type, accessType)
+        .build();
+    if (post.accessType === POST_ACCESS_TYPES.Specific) {
+        post.specificAcccess.forEach(group => {
+            accessThing = addUrl(accessThing,
+                SOCIAL_SOLID.AccessList,
+                group.url);
+        });
     }
+    accessDataset = setThing(accessDataset, accessThing);
+    try {
+        await saveSolidDatasetAt(
+            postDirUrl + POST_ACCESS_DATASET,
+            accessDataset,
+            { fetch: fetch }
+          );
+    } catch(error) {
+        return [false, simplifyError(error, "Encountered whilst trying to create post access dataset.")];
+    }
+    await setAllPublicReadAccess([postDirUrl + "access"], false);
+
+    return [true, null];
+}
+
+export async function createPost(podRootDir, webId, post) {
+    console.log(post)
+    // Create post directory
+    let postDir;
+    let error;
+    try {
+        postDir = await createContainerInContainer(
+            podRootDir + POSTS_DIR,
+            {fetch: fetch}
+        )
+    } catch (e) {
+        error = simplifyError(e, "Ecountered whilst creating a new post directory.");
+        return [false, error]
+    }
+    const postDirUrl = getSourceUrl(postDir);
+    console.log(postDirUrl);
+
+    // create post dataset
+    let success, postUrls;
+    [success, postUrls, error] = await createPostDataset(postDirUrl, post);
+    if (!success) {
+        return [false, error]
+    }
+    
+    // CREATE access document
+    [success, error] = await createPostAccessDataset(postDirUrl, post);
+    if (!success) {
+        return [false, error]
+    }
+
+    // create access list
+    postUrls.push(postDirUrl);
+    let accessList = [];
+    if (post.accessType === POST_ACCESS_TYPES.Specific) {
+        // fill recipient list with all member of groups
+        for (let i = 0; i < post.specificAcccess.length; i++) {
+            let group = post.specificAcccess[i];
+            let people = (await fetchPeopleFromList(podRootDir, group.members))[0];
+            people.forEach(person => accessList.push(person));
+        }
+    } else {
+        // fill recipient list with all people we know
+        let people = (await fetchPeople(podRootDir))[0];
+        people.forEach(person => accessList.push(person));
+    }
+
+    // Set access
+    if (post.accessType === POST_ACCESS_TYPES.Specific) {
+        await setAllPublicReadAccess(postUrls, true);
+    } else {
+        await setAllPublicReadAccess(postUrls, false);
+        await setAllReadAccess(postUrls, accessList.map(person => person.webId));
+    }
+
+    // Create post alerts for feed
+    await createPostAlerts(postDirUrl, podRootDir, webId, accessList);
     return [true, null];
 }
 
 export async function fetchPost(postUrl) {
-    const postRegex = new RegExp('.*/' + POSTS_DIR + '(.*)/');
-    const postName = postUrl.match(postRegex)[1];
-    console.log(postName);
     let postDataset;
     try {
         postDataset = await getSolidDataset(
-            postUrl + postName, 
+            postUrl + POST_DATASET, 
             { fetch: fetch }  // fetch function from authenticated session
         );
     } catch (e) {
@@ -267,7 +336,7 @@ export async function fetchPost(postUrl) {
             description: error.description};
     }
 
-    const postThing = getThing(postDataset, postUrl + postName + POST_DETAILS, { fetch: fetch });
+    const postThing = getThing(postDataset, postUrl + POST_DATASET + POST_THING, { fetch: fetch });
     if (!postThing) {
         return [null, {
             title: "Post has no #details Thing",

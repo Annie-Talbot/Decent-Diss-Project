@@ -52,11 +52,11 @@ export function PostLoader(props) {
                 threshold: [0.95],
                 margin: "60px 5px 5px 5px"
             });
-            if (target.current) observer.observe(target.current);
+            if (target.current && observer) observer.observe(target.current);
         });
         return () => {
-            if (target.current) observer.unobserve(target.current);
-            observer.disconnect();
+            if (target.current && observer) observer.unobserve(target.current);
+            if (observer) observer.disconnect();
           };
     }, [props]);
     return (
@@ -78,7 +78,7 @@ export function PostLoader(props) {
                     post={post}
                     authorised={false}
                     viewPerson={() => props.viewPerson(person)}
-                    sendLike={() => sendLike(props.user.webId, post, person)}
+                    sendLike={() => handleSendLike(props.user.webId, post, person)}
                 />
             </div>
                 

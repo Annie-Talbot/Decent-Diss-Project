@@ -22,7 +22,10 @@ export const FEED_DIR = "social/feed/"
 export const FEED_THING = "#this"
 
 export function GetPostDatasetUrl(postDir, postName) {return postDir + postName;}
-export const POST_DETAILS = "#details";
+export const POST_THING = "#this";
+export const POST_DATASET = 'post'
+export const POST_ACCESS_DATASET = 'access';
+export const POST_ACCESS_THING = '#this'
 
 export const PEOPLE_DATASET = "people"
 export const GROUPS_DATASET = "groups"

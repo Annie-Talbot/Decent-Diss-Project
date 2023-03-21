@@ -190,22 +190,11 @@ export async function deleteFeedItem(feedItemUrl) {
 
 export async function createPostAlerts(postUrl, podRootDir, webId, recipientList) {
     let recipientPodRoots = [];
-    if (recipientList) {
-        // Get pod roots for only specific contacts
-        for (let i = 0; i < recipientList.length; i ++) {
-            let [podRoot, error] = await findSocialPodFromWebId(recipientList[i]);
-            if (podRoot) {
-                recipientPodRoots.push(podRoot);
-            }
-        }
-    } else {
-        // Get pod roots for all contacts
-        let [people, errors] = await fetchPeople(podRootDir);
-        for (let i = 0; i < people.length; i ++) {
-            let [podRoot, error] = await findSocialPodFromWebId(people[i].webId);
-            if (podRoot) {
-                recipientPodRoots.push(podRoot);
-            }
+    // Get pod roots for only specific contacts
+    for (let i = 0; i < recipientList.length; i ++) {
+        let [podRoot, error] = await findSocialPodFromWebId(recipientList[i].webId);
+        if (podRoot) {
+            recipientPodRoots.push(podRoot);
         }
     }
     recipientPodRoots.forEach(async (podRoot) => {

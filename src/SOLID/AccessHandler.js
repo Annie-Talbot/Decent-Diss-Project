@@ -60,8 +60,8 @@ export async function setAllReadAccess(resourceUrls, agentList) {
     return errorList;
 }
 
-export async function setAllPublicReadAccess(resourceUrls) {
-    resourceUrls.forEach(async (res) => await setReadAccess(res, true));
+export async function setAllPublicReadAccess(resourceUrls, read) {
+    resourceUrls.forEach(async (res) => await setReadAccess(res, read));
 }
 
 export async function setPublicAppendAccess(resourceUrl) {

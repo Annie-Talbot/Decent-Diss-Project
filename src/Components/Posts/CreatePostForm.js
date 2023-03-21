@@ -1,47 +1,43 @@
-import { ActionIcon, MultiSelect, Center, FileInput, Modal, Space, Textarea, TextInput, Checkbox, Title } from "@mantine/core";
+import { ActionIcon, MultiSelect, Center, FileInput, Modal, Space, Textarea, TextInput, Checkbox, Title, Radio } from "@mantine/core";
 import { IconRocket } from "@tabler/icons";
 import { useState, useEffect } from "react";
-import { ACCESS_AGENT_TYPE } from "../../SOLID/AccessHandler";
-import { fetchAllConnections } from "../../SOLID/Connections/ConnectionHandler";
-import { createPost } from "../../SOLID/PostHandler";
-import { POSTS_DIR } from "../../SOLID/Utils";
+import { fetchGroups } from "../../SOLID/Connections/GroupHandler";
+import { createPost, POST_ACCESS_TYPES } from "../../SOLID/PostHandler";
 import { createErrorNotification } from "../Core/Notifications/ErrorNotification";
 import { createPlainNotification } from "../Core/Notifications/PlainNotification";
 
-async function handleCreatePost(user, post, connections, closePopup, updatePosts) {
-    const agents = post.agentAccess.map((index) => connections[parseInt(index)])
-    post.agentAccess = agents;
+async function handleCreatePost(user, post, groups, finalise) {
+    post.accessType = parseInt(post.accessType);
+    if (post.accessType === POST_ACCESS_TYPES.Specific) {
+        const agents = post.specificAccess.map((index) => groups[parseInt(index)])
+        post.specificAccess = agents;
+    }
+    
     const [success, error] = await createPost(user.podRootDir, user.webId, post);
     if (!success) {
         createErrorNotification(error);
         return;
     }
-    closePopup();
-    createPlainNotification({title: "Success!", description: "Successfully created post."})
-    updatePosts();
+    finalise();
 }
 
 
 export function CreatePostForm(props) {
-    const [connections, setConnections] = useState([]);
-    const [connectionIndexes, setConnectionIndexes] = useState([]);
+    const [groups, setGroups] = useState([]);
+    const [groupIndexes, setGroupIndexes] = useState([]);
     const [post, setPost] = useState({
         title: "",
         text: "",
         image: null,
-        agentAccess: [],
-        publicAccess: 0,
+        specificAccess: [],
+        accessType: POST_ACCESS_TYPES.Public.toString(),
     });
 
     useEffect(() => {
-        fetchAllConnections(props.user.podRootDir).then(([connects, errors]) => {
+        fetchGroups(props.user.podRootDir).then(([fetchedGroups, errors]) => {
             errors.forEach((e) => createErrorNotification(e));
-            setConnections(connects);
-            setConnectionIndexes(connects.map((c, i) => {
-                if (c.type === ACCESS_AGENT_TYPE.Person) return {value: i.toString(), label: c.nickname};
-                if (c.type === ACCESS_AGENT_TYPE.Group) return {value: i.toString(), label: c.name};
-                return {value: i.toString(), label: "Unknown connection"};
-            }));
+            setGroups(fetchedGroups);
+            setGroupIndexes(fetchedGroups.map((c, i) => ({value: i.toString(), label: c.name})));
         })
     }, [props]);
 
@@ -94,24 +90,31 @@ export function CreatePostForm(props) {
             />
             <Space h="md"/>
             <Center><Title c="grey" order={5}>Access Control</Title></Center>
-            <Checkbox
-                label="Public Access"
-                value={post.publicAccess}
-                onChange={(event) => setPost({
+            <Radio.Group
+                value={post.accessType}
+                onChange={(event) => {setPost({
                     ...post,
-                    publicAccess: event.target.checked,
-                })}
-            />
-            {connections.length > 0 &&
+                    accessType: event,
+                })}}
+                name="accessType"
+                label="Access Type"
+                description="Who you would like to be able to view this post"
+                withAsterisk
+            >
+                <Radio value={POST_ACCESS_TYPES.Public.toString()} label="Public" />
+                <Radio value={POST_ACCESS_TYPES.Private.toString()} label="Private" />
+                {groups.length > 0 && <Radio value={POST_ACCESS_TYPES.Specific.toString()} label="Specific" />}
+            </Radio.Group>
+            <Space h='md'/>
+            {post.accessType == POST_ACCESS_TYPES.Specific &&
                 <MultiSelect
-                    data={connectionIndexes}
-                    disabled={post.publicAccess}
-                    label="Who would you like to give access to"
-                    placeholder="Pick all that you like"
-                    value={post.agentAccess}
+                    data={groupIndexes}
+                    label="Group Selector"
+                    placeholder="Pick which groups you would like to view this post"
+                    value={post.specificAccess}
                     onChange={(event) => setPost(
                         {...post, 
-                            agentAccess: event}
+                            specificAccess: event}
                     )}
                 />
             }
@@ -125,9 +128,15 @@ export function CreatePostForm(props) {
                         handleCreatePost(
                             props.user,
                             post, 
-                            connections, 
-                            props.toggleOpened, 
-                            props.updatePosts);
+                            groups,
+                            () => {
+                                props.toggleOpened();
+                                createPlainNotification(
+                                    {title: "Success!", 
+                                    description: "Successfully created post."});
+                                props.updatePosts();
+                            });
+                        
                     }}
                 >
                     <IconRocket />
