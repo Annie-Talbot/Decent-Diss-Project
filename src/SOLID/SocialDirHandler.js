@@ -12,7 +12,7 @@ export async function createSocialDirectory(podRootDir) {
     // Main - public read access to directory and profile
     try {
         await createEmptyDataset(podRootDir + SOCIAL_ROOT);
-        await setReadAccess(podRootDir + SOCIAL_ROOT, null);
+        await setReadAccess(podRootDir + SOCIAL_ROOT, true, null);
     } catch (e) {
         return {success: false, error: simplifyError(e)};
     }

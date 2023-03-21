@@ -6,6 +6,7 @@ import { CreatePostForm } from './CreatePostForm';
 import { createPostsDir, doesPostsDirExist } from '../../SOLID/PostHandler';
 import { PageLoader } from '../Core/PageLoader';
 import { IconSquareRoundedPlusFilled } from '@tabler/icons-react';
+import { PageHeader } from '../Core/PageHeader';
 
 
 function EmptyPosts() {
@@ -19,7 +20,7 @@ function EmptyPosts() {
             <Text size={"lg"}>Looks like you have no posts...</Text>
         </Stack>
     );
-    }
+}
 
 
 
@@ -72,23 +73,19 @@ export class PostsPage extends React.Component {
                         user={this.user}
                     />
                     <Stack>
-                        <Group position="apart" 
-                            style={{
-                                height: "24px", 
-                                marginBottom: "20px", 
-                                paddingRight: 20,
-                                paddingLeft: 20,
-                            }}
-                        >
-                            <Title>Your Posts</Title>
-                            <ActionIcon
-                                size="xl"
-                                color="sage"
-                                onClick={() => this.toggleCreatePostPopup(this)}
-                            >
-                                <IconSquareRoundedPlusFilled size={57}/>
-                            </ActionIcon>
-                        </Group>
+                        <PageHeader
+                            title={'Your Posts'}
+                            actionButton={
+                                <ActionIcon
+                                    size="xl"
+                                    color="sage"
+                                    onClick={() => this.toggleCreatePostPopup(this)}
+                                >
+                                    <IconSquareRoundedPlusFilled size={57}/>
+                                </ActionIcon>
+                            }
+                            actionDisabled={false}
+                        />
                         <ScrollArea offsetScrollbars style={{gridRow: "1", gridColumn: "1"}}>
                             <PostGrid
                                 author={{webId: this.user.webId, nickname: "Myself"}}

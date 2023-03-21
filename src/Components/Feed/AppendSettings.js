@@ -4,7 +4,7 @@ import { AccessList } from "./AccessList"
 import { useState } from "react";
 import { PeopleSearcher, GroupSearcher } from "./Searchers";
 import { createErrorNotification } from "../Core/Notifications/ErrorNotification";
-import { followGroup, followPerson, revokeFollowPerson } from "../../SOLID/FeedHandler";
+import { fetchPeopleWithFeedAppendAccess, followGroup, followPerson, revokeFollowPerson } from "../../SOLID/FeedHandler";
 import { createPlainNotification } from "../Core/Notifications/PlainNotification";
 import { isValidWebID } from "../../SOLID/Utils";
 
@@ -78,18 +78,6 @@ export function AppendSettings(props) {
     const [accesslistKey, setAccesslistKey] = useState(0);
 
     return (
-        <Stack justify="flex-start" spacing="xs">
-            <Grid align="flex-end" justify="flex-start">
-                <Grid.Col span={1}>
-                    <ActionIcon onClick={props.back} >
-                        <IconArrowBack />
-                    </ActionIcon>
-                </Grid.Col>
-                <Grid.Col span={10}>
-                    <Title align="center" order={3}>Settings</Title>
-                </Grid.Col>
-            </Grid>
-            <Divider h="md"/>
             <Paper shadow="md" p="md" withBorder>
                 <Stack>
                 <Title order={2}>Following:</Title>
@@ -143,7 +131,7 @@ export function AppendSettings(props) {
                                     <Title order={3}>People you are following: </Title>
                                     <AccessList
                                         key={accesslistKey}
-                                        podRootDir={props.podRootDir}
+                                        fetchFunction={() => fetchPeopleWithFeedAppendAccess(props.podRootDir)}
                                         revoke={(webId) => handleRevokeFollow(props.podRootDir, webId,
                                             () => setAccesslistKey(accesslistKey + 1))}
                                     />
@@ -156,6 +144,5 @@ export function AppendSettings(props) {
                     
                 </Stack>
             </Paper>
-        </Stack>
     )
 }

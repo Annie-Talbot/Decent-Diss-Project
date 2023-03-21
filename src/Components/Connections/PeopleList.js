@@ -1,10 +1,10 @@
-import { ActionIcon, Grid, Select, Skeleton, Stack } from "@mantine/core";
+import { ActionIcon, Text, Grid, Select, Skeleton, Stack, ThemeIcon } from "@mantine/core";
 import { createPeopleDataset, deletePerson, doesPeopleDatasetExist, fetchPeople } from "../../SOLID/Connections/PeopleHandler";
 import { createErrorNotification } from "../Core/Notifications/ErrorNotification";
 import { Person } from "./Person";
 import { useState, useEffect } from "react";
 import { PageLoader } from "../Core/PageLoader";
-import { IconCircleChevronsRight } from "@tabler/icons";
+import { IconBeach, IconCircleChevronsRight } from "@tabler/icons-react";
 import { createPlainNotification } from "../Core/Notifications/PlainNotification"
 
 
@@ -17,6 +17,20 @@ async function handleDeletePerson(podRootDir, person, update) {
     }
     createPlainNotification({title: "Successfully deleted"});
     update();
+}
+
+
+function EmptyPeople() {
+    return (
+        <Stack align="center" justify="center" style={{height: "100%", marginTop: 48, marginBottom: 48}}>
+            <ThemeIcon 
+            variant="light"
+            size="xl">
+                <IconBeach />
+            </ThemeIcon>
+            <Text size={"lg"}>No people to see...</Text>
+        </Stack>
+    );
 }
 
 function People(props) {
@@ -57,14 +71,18 @@ function People(props) {
                         </ActionIcon>
                     </Grid.Col>
                 </Grid>
-                {people.map((person, index) => (
+                {people.length > 0?
+                    people.map((person, index) => (
                     <Person 
                         viewPerson={() => props.viewPerson(person)}
                         key={index} 
                         person={person}
                         authorised={props.authorised}
                         delete={() => handleDeletePerson(props.podRootDir, person, props.update)}
-                    />))}
+                    />))
+                :
+                    <EmptyPeople/>
+                }
             </Stack>
         </Skeleton>
     );

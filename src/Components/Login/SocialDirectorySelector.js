@@ -55,6 +55,7 @@ export function SocialDirectorySelector(props) {
             opened={props.opened}
             title="Finding your social information..."
             size='auto'
+            onClose={()=>{}}
         >
             <Skeleton visible={loading}>
                 <Center p='md'>

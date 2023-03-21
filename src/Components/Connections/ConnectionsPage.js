@@ -10,6 +10,7 @@ import { GroupsList } from "./GroupList";
 import { CreateGroupForm } from "./CreateGroupForm";
 import { GroupView } from "./GroupView";
 import { IconUserPlus, IconArrowBack, IconHomePlus  } from "@tabler/icons-react";
+import { PageHeader } from "../Core/PageHeader";
 
 export const ViewStates = {
     Main: 0,
@@ -118,7 +119,7 @@ export class ConnectionsPage extends React.Component {
                         opened={this.state.createGroupOpened}
                         close={() => this.toggleCreateGroupPopup(this)}
                         updateGroups={() => this.updateGroups(this)}
-                        user={this.user.podRootDir}
+                        user={this.user}
                     />
                     <Grid grow>
                         <Grid.Col span={4} gutter="sm">
@@ -174,34 +175,22 @@ export class ConnectionsPage extends React.Component {
         } else if (this.state.currView === ViewStates.PersonView) {
             content.push((
                 <Stack key="person-state" justify="flex-start" spacing="xs">
-                    <Grid grow align="flex-end" justify="space-between">
-                        <Grid.Col span={1}>
-                            <ActionIcon onClick={() => {this.back(this)}} >
-                                <IconArrowBack />
-                            </ActionIcon>
-                        </Grid.Col>
-                        <Grid.Col span={8}>
-                            <Title align="right" order={2}>Viewing: {this.viewPersonObject.webId}</Title>
-                        </Grid.Col>
-                    </Grid>
-                    <Divider h="md"/>
+                    <PageHeader
+                        back={() => {this.back(this)}}
+                        backDisabled={this.state.backButton.length === 0}
+                        title='Person View'
+                    />
                     <PersonView person={this.viewPersonObject} user={this.user}/>
                 </Stack>
             ));
         } else if (this.state.currView === ViewStates.GroupView) {
             content.push((
                 <Stack key="group-state" justify="flex-start" spacing="xs">
-                    <Grid grow align="flex-end" justify="space-between">
-                        <Grid.Col span={1}>
-                            <ActionIcon onClick={() => {this.back(this)}} >
-                                <IconArrowBack />
-                            </ActionIcon>
-                        </Grid.Col>
-                        <Grid.Col span={8}>
-                            <Title align="right" order={4}>{this.viewGroupObject.url}</Title>
-                        </Grid.Col>
-                    </Grid>
-                    <Divider h="md"/>
+                    <PageHeader
+                        back={() => {this.back(this)}}
+                        backDisabled={this.state.backButton.length === 0}
+                        title='Group View'
+                    />
                     <GroupView 
                         groupUrl={this.viewGroupObject.url}
                         user={this.user}

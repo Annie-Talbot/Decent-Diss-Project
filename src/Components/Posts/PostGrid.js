@@ -9,7 +9,7 @@ import { sendLike } from "../../SOLID/NotificationHandler";
 
 async function handleSendLike(senderWebId, post, author) {
     console.log(post);
-    let error = await sendLike(senderWebId, post.dir, author.webId);
+    let error = await sendLike(senderWebId, post.url, author.webId);
     if (error) {
         createErrorNotification(error);
         return;
@@ -19,7 +19,7 @@ async function handleSendLike(senderWebId, post, author) {
 
 
 async function handleDeletePost(post, posts, setPostList) {
-    const [success, error] = await deletePost(post.dir);
+    const [success, error] = await deletePost(post.url);
     if (!success) {
         createErrorNotification(error);
         return;

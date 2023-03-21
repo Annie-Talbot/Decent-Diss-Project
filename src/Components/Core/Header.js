@@ -14,25 +14,18 @@ import { ShareButton } from "./ShareButton";
 export function AppHeader(props) {
     return (
         <Header height={60} p="xs">
-            <Grid justify="space-between" align="flex-end" sx={{ height: '100%' }} px={20}>
-                <Grid.Col span={2}>
-                    <Group position="left">
-                        <Logo />
-                    </Group>
-                
-                </Grid.Col>
-                <Grid.Col span={3}>
-                    <Center style={{ width: 320}} >
-                        <ShareButton webId={props.user.webId}/>
-                        <Space w="md"/>
-                        {/* {props.user.loggedIn !== false && props.user.podRootDir !== '' && 
-                            <Notifications podRootDir={props.user.podRootDir}/>
-                        } */}
-                        <Space w="md"/>
-                        {props.user.loggedIn && <LogoutButton logout={props.logout} />}
-                    </Center>
-                </Grid.Col>
-            </Grid>
+            <Group position="apart" align="flex-end">
+                <Logo />
+                <Group spacing='2px'>
+                    <ShareButton webId={props.user.webId}/>
+                    <Space w="md"/>
+                    {props.user.loggedIn && props.user.podRootDir && 
+                        <Notifications user={props.user}/>
+                    }
+                    <Space w="md"/>
+                    {props.user.loggedIn && <LogoutButton logout={props.logout} />}
+                </Group>
+            </Group>
         </Header>
     );
 }

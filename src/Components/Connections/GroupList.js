@@ -1,4 +1,4 @@
-import { ActionIcon, Grid, Select, Skeleton, Stack } from "@mantine/core";
+import { ActionIcon, Text, Grid, Select, Skeleton, Stack, ThemeIcon } from "@mantine/core";
 import { createGroupsDataset, deleteGroup, doesGroupsDatasetExist, fetchGroups } from "../../SOLID/Connections/GroupHandler";
 import { createErrorNotification } from "../Core/Notifications/ErrorNotification";
 import { useState, useEffect } from "react";
@@ -6,6 +6,7 @@ import { PageLoader } from "../Core/PageLoader";
 import { IconCircleChevronsRight } from "@tabler/icons";
 import { GroupItem } from "./GroupItem";
 import { createPlainNotification } from "../Core/Notifications/PlainNotification";
+import { IconBeach } from "@tabler/icons-react";
 
 async function handleDeleteGroup(podRootDir, group, update){
     let error = await deleteGroup(podRootDir, group.url);
@@ -15,6 +16,19 @@ async function handleDeleteGroup(podRootDir, group, update){
     }
     createPlainNotification({title: "Successfully deleted"});
     update();
+}
+
+function EmptyGroups() {
+    return (
+        <Stack align="center" justify="center" style={{height: "100%", marginTop: 48, marginBottom: 48}}>
+            <ThemeIcon 
+            variant="light"
+            size="xl">
+                <IconBeach />
+            </ThemeIcon>
+            <Text size={"lg"}>No groups yet...</Text>
+        </Stack>
+    );
 }
 
 
@@ -59,15 +73,19 @@ function Groups(props) {
                         </ActionIcon>
                     </Grid.Col>
                 </Grid>
-                {groups.map((group, index) => (
-                    <GroupItem 
-                        key={index} 
-                        group={group}
-                        viewGroup={() => props.viewGroup(group)}
-                        people={props.people}
-                        authorised={props.authorised}
-                        delete={() => handleDeleteGroup(props.podRootDir, group, props.update)}
-                    />))}
+                {groups.length > 0? 
+                    groups.map((group, index) => (
+                        <GroupItem 
+                            key={index} 
+                            group={group}
+                            viewGroup={() => props.viewGroup(group)}
+                            people={props.people}
+                            authorised={props.authorised}
+                            delete={() => handleDeleteGroup(props.podRootDir, group, props.update)}
+                        />))
+                :
+                    <EmptyGroups/>
+                }
             </Stack>
         </Skeleton>
     );

@@ -1,12 +1,16 @@
-import { Center, Drawer, Text, ActionIcon, Indicator } from "@mantine/core";
+import { Center, Drawer, Stack, Group, Text, ActionIcon, Indicator } from "@mantine/core";
 import { createNotificationsDir, createNotificationSocket, deleteNotification, doesNotificationsDirExist, fetchNotifications } from "../../SOLID/NotificationHandler";
 import { createErrorNotification } from "../Core/Notifications/ErrorNotification";
 import { createPlainNotification } from "../Core/Notifications/PlainNotification";
 import { NotificationList } from "./NotificationList";
 import { useDisclosure } from "@mantine/hooks";
-import { IconBellRinging } from "@tabler/icons";
+import { IconBellRinging } from "@tabler/icons-react";
 import { useEffect, useState } from "react";
 import { MissingPodStructure } from "../Core/MissingPodStructure";
+import { SettingsButton } from "../Feed/SettingsButton";
+import { PageHeader } from "../Core/PageHeader";
+import { BlockSettings } from "./BlockSettings";
+
 
 async function handleDeleteNotification(notifUrl, updateNotifications) {
     const error = await deleteNotification(notifUrl);
@@ -33,9 +37,10 @@ export function Notifications(props) {
     const [notifications, setNotifications] = useState([]);
     const [exists, setExists] = useState(false);
     const [error, setError] = useState("");
+    const [viewSettings, setViewSettings] = useState(false);
 
     useEffect(() => {
-        doesNotificationsDirExist(props.podRootDir).then(async ([success, e]) => {
+        doesNotificationsDirExist(props.user.podRootDir).then(async ([success, e]) => {
             if (e) {
                 setError(e.title);
                 return;
@@ -59,27 +64,40 @@ export function Notifications(props) {
 
     return (
         <>
-            <Drawer size="40%" padding="md" opened={opened} onClose={close} title="Notifications">
+            <Drawer size="40%" padding="md" opened={opened} onClose={close}>
                 {error !== "" ?
                     <Center><Text>An error occured: {error}. Try again later.</Text></Center>
                 :
                     <>
                         {!exists?
                             <MissingPodStructure
-                                podRootDir={props.podRootDir}
+                                podRootDir={props.user.podRootDir}
                                 podStructureRequired="notifications directory"
                                 createFunction={createNotificationsDir}
                                 setExists={setExists}
                             />
                         :
-                            <NotificationList
-                                podRootDir={props.podRootDir}
-                                notifications={notifications}
-                                deleteNotification={(notifUrl) => 
-                                    handleDeleteNotification(notifUrl, () => 
-                                        updateNotifications(props.podRootDir, setNotifications, 
-                                            setAlert))}
-                            />
+                            <Stack p='md'>
+                                <PageHeader
+                                    back={() => setViewSettings(false)}
+                                    backDisabled={viewSettings === false}
+                                    title={viewSettings? 'Notification Settings' : 'Notifications'}
+                                    actionButton={<SettingsButton onClick={() => setViewSettings(true)}/>}
+                                    actionDisabled={viewSettings}
+                                />
+                                {!viewSettings?
+                                    <NotificationList
+                                        podRootDir={props.user.podRootDir}
+                                        notifications={notifications}
+                                        deleteNotification={(notifUrl) => 
+                                            handleDeleteNotification(notifUrl, () => 
+                                                updateNotifications(props.user.podRootDir, setNotifications, 
+                                                    setAlert))}
+                                    />
+                                :
+                                    <BlockSettings user={props.user} />
+                                }
+                            </Stack>
                         }
                     </>
                 }

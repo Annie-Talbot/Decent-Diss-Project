@@ -10,7 +10,7 @@ import { createPlainNotification } from "../Core/Notifications/PlainNotification
 
 async function handleCreatePost(user, post, connections, closePopup, updatePosts) {
     const agents = post.agentAccess.map((index) => connections[parseInt(index)])
-    post["agentAccess"] = agents;
+    post.agentAccess = agents;
     const [success, error] = await createPost(user.podRootDir, user.webId, post);
     if (!success) {
         createErrorNotification(error);

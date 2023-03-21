@@ -10,18 +10,18 @@ import { simplifyError } from "./Utils";
 * @param {string} agentID 
 * @returns error?
 */
-export async function setReadAccess(resourceUrl, agentID) {
-   const readAccess = {
-       read: true,
+export async function setReadAccess(resourceUrl, readAccess, agentID) {
+   const accessObj = {
+       read: readAccess,
        write: false,
        append: false
    }
    try {
     let access;
         if (agentID) {
-            access = await universalAccess.setAgentAccess(resourceUrl, agentID, readAccess, {fetch: fetch});
+            access = await universalAccess.setAgentAccess(resourceUrl, agentID, accessObj, {fetch: fetch});
         } else {
-            access = await universalAccess.setPublicAccess(resourceUrl, readAccess, {fetch: fetch});
+            access = await universalAccess.setPublicAccess(resourceUrl, accessObj, {fetch: fetch});
         }
         return access;
     } catch (e) {
@@ -41,10 +41,8 @@ export async function getAllAgentWebIDs(podRootDir, agentList) {
     for (let i = 0; i < agentList.length; i++) {
         agent = agentList[i];
         if (agent.type === ACCESS_AGENT_TYPE.Person) {
-            console.log("Encountered person agent. Added to list.");
             webIds.push(agent.webId)
         } else if (agent.type === ACCESS_AGENT_TYPE.Group) {
-            console.log("Encountered group agent.");
             let [people, errors] = await fetchPeopleFromList(podRootDir, agent.members);
             people.forEach((p) => webIds.push(p.webId));
         } else {
@@ -57,13 +55,13 @@ export async function getAllAgentWebIDs(podRootDir, agentList) {
 export async function setAllReadAccess(resourceUrls, agentList) {
     let errorList = [];
     agentList.forEach((id) => {
-        resourceUrls.forEach(async (res) => await setReadAccess(res, id));
+        resourceUrls.forEach(async (res) => await setReadAccess(res, true, id));
     })
     return errorList;
 }
 
 export async function setAllPublicReadAccess(resourceUrls) {
-    resourceUrls.forEach(async (res) => await setReadAccess(res));
+    resourceUrls.forEach(async (res) => await setReadAccess(res, true));
 }
 
 export async function setPublicAppendAccess(resourceUrl) {
@@ -85,7 +83,7 @@ export async function getAgentAccess(webId, resourceUrl) {
     }
 }
 
-export async function getAllAgentsWithAppendAccess(resourceUrl) {
+export async function getAllAgentsAppendAccess(resourceUrl, appendAccess) {
     let fetchedAccessList;
     try {
         fetchedAccessList = await universalAccess.getAgentAccessAll(
@@ -98,7 +96,7 @@ export async function getAllAgentsWithAppendAccess(resourceUrl) {
     let accessList= [];
     for (const [agent, agentAccess] of Object.entries(fetchedAccessList)) {
         if (agent !== "http://www.w3.org/ns/solid/acp#PublicAgent") {
-            if (agentAccess.append === true) {
+            if (agentAccess.append === appendAccess) {
                 accessList.push({webId: agent, nickname: ""});
             }
         }
@@ -117,8 +115,30 @@ export async function setAppendAccess(resourceUrl, agentWebId, appendAccess) {
         if (access === null) {
             return {title: "Could not set access", description: ""};
         }
-        return null;
     } catch(e) {
         return simplifyError(e, "Whilst attempting to set append access for agent " + agentWebId);
     }
+    return null;
+}
+
+export async function setReadAppendAccess(resourceUrl, agentWebId, read, append) {
+    try {
+        let access = await universalAccess.setAgentAccess(
+            resourceUrl, 
+            agentWebId, 
+            {
+                append: append,
+                read: read
+            },
+            {fetch: fetch});
+        if (access === null) {
+            return {title: "Could not set access", description: ""};
+        }
+    } catch(e) {
+        return simplifyError(e, "Whilst attempting to set append access for agent " + agentWebId);
+    }
+
+    let access = await universalAccess.getAgentAccess(resourceUrl, agentWebId, {fetch: fetch});
+    console.log(access);
+    return null;
 }

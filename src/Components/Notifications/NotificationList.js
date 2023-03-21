@@ -4,20 +4,19 @@ import { IconBeach } from "@tabler/icons";
 
 function EmptyNotifications() {
     return (
-        <Stack align="center" justify="center">
+        <Stack align="center" justify="center" style={{marginTop: 100, marginBottom: 20}}>
             <ThemeIcon 
             variant="light"
             size="xl">
                 <IconBeach />
             </ThemeIcon>
-            <Text size={"lg"}>No notifications</Text>
+            <Text size={"lg"}>No notifications yet...</Text>
         </Stack>
     );
 }
 
 
 export function NotificationList(props) {
-    console.log(props.notifications)
     return (
         <>
             {props.notifications.length > 0 ?

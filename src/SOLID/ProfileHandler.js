@@ -44,7 +44,7 @@ export async function createSampleProfile(podRootDir) {
             { fetch: fetch }
         );
         await delay(500);
-        await setReadAccess(podRootDir + PROFILE_DATASET, null);
+        await setReadAccess(podRootDir + PROFILE_DATASET, true, null);
         return null;
     } catch (error) {
         return simplifyError(error);
@@ -166,7 +166,7 @@ export async function updateProfile(podRootUrl, profile) {
             profile.profilePic, {slug: profile.profilePic.name, fetch: fetch});
         if (pictureFile != null) {
             profileThing = addUrl(profileThing, FOAF.depiction, getSourceUrl(pictureFile));
-            await setReadAccess(getSourceUrl(pictureFile));
+            await setReadAccess(getSourceUrl(pictureFile), true);
         } else {
             errors.push({
                 code: 0, 
@@ -181,7 +181,7 @@ export async function updateProfile(podRootUrl, profile) {
             profileDataset,
             { fetch: fetch }
         );
-        await setReadAccess(podRootUrl + PROFILE_DATASET);
+        await setReadAccess(podRootUrl + PROFILE_DATASET, true);
     } catch (e) {
         errors.push(simplifyError(e, "Whilst saving profile dataset."));
         success = false;

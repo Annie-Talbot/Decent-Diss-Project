@@ -6,8 +6,9 @@ import { createEmptyDataset, delay, deleteDataset, getChildUrlsList, NOTIFICATIO
     NOTIFICATIONS_THING, POSTS_DIR, POST_DETAILS, simplifyError, SOCIAL_ROOT } from "./Utils";
 import { fetch } from "@inrupt/solid-client-authn-browser";
 import { SOCIAL_SOLID } from "./SolidTerms";
-import { setPublicAppendAccess } from "./AccessHandler";
+import { getAllAgentsAppendAccess, setReadAppendAccess, setPublicAppendAccess } from "./AccessHandler";
 import { WebsocketNotification } from "@inrupt/solid-client-notifications";
+import { fetchPeople } from "./Connections/PeopleHandler";
 
 export const NOTIFICATIONS_TYPES = {
     ConnectionRequest: 0,
@@ -311,4 +312,30 @@ export async function sendLike(senderWebId, postUrl, recieverWebId) {
         return error;
     }
     return await createLikeNotification(senderWebId, postUrl, recieverPodRoot);
+}
+
+
+export async function fetchPeopleWithoutNotificationAppendAccess(podRootDir) {
+    let [accessList, error] = await getAllAgentsAppendAccess(podRootDir + NOTIFICATIONS_DIR, false);
+    if (error) {
+        return [[], error];
+    }
+    let [people, errors] = await fetchPeople(podRootDir);
+    for (let i = 0; i < accessList.length; i++) {
+        let person = people.find(p => p.webId === accessList[i].webId);
+        if (person) {
+            accessList[i] = person;
+        }
+    }
+
+    return [accessList, null]
+}
+
+
+export async function blockPerson(podRootDir, webId) {
+    return await setReadAppendAccess(podRootDir + NOTIFICATIONS_DIR, webId, true, false);
+}
+
+export async function revokeBlockPerson(podRootDir, webId) {
+    return await setReadAppendAccess(podRootDir + NOTIFICATIONS_DIR, webId, false, true);
 }

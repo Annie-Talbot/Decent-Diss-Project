@@ -77,9 +77,6 @@ class App extends React.Component {
         } else if (this.state.currPage === AppStates.Feed) {
             content.push(<FeedPage user={this.state.user} />);
         }
-        
-        console.log(this.state.user)
-        console.log(this.state.user.podRootDir)
         return (
             <AppShell
                 padding = "md"

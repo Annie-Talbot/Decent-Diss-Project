@@ -29,7 +29,7 @@ export async function createPostsDir(podRootDir) {
         return error;
     }
     await delay(500);
-    await setReadAccess(podRootDir + POSTS_DIR, null);
+    await setReadAccess(podRootDir + POSTS_DIR, true, null);
 }
 
 
@@ -105,8 +105,8 @@ async function getPost(postDir, postName) {
     if (error) {
         return [null, error]
     }
-    post["dir"] = postDir;
-    post["name"] = postName;
+    post.url = postDir;
+    post.name = postName;
     return [post, null];
 }
 

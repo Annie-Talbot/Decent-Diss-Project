@@ -1,7 +1,7 @@
 import { buildThing, createSolidDataset, createThing, getDatetime, getSolidDataset, 
     getThing, getUrl, getUrlAll, saveSolidDatasetInContainer, setThing } from "@inrupt/solid-client";
 import { createEmptyDataset, delay, deleteDataset, FEED_DIR, FEED_THING, getChildUrlsList, simplifyError } from "./Utils";
-import { getAllAgentsWithAppendAccess, setAppendAccess } from "./AccessHandler";
+import { getAllAgentsAppendAccess, setAppendAccess } from "./AccessHandler";
 import { fetch } from "@inrupt/solid-client-authn-browser";
 import { SOCIAL_SOLID } from "./SolidTerms";
 import { RDF } from "@inrupt/vocab-common-rdf";
@@ -217,7 +217,7 @@ export async function createPostAlerts(postUrl, podRootDir, webId, recipientList
 }
 
 export async function fetchPeopleWithFeedAppendAccess(podRootDir) {
-    let [accessList, error] = await getAllAgentsWithAppendAccess(podRootDir + FEED_DIR);
+    let [accessList, error] = await getAllAgentsAppendAccess(podRootDir + FEED_DIR, true);
     if (error) {
         return [[], error];
     }

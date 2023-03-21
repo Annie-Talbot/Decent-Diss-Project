@@ -1,7 +1,6 @@
 import { ActionIcon, Center, Grid, Group, Skeleton, Stack, Text } from "@mantine/core";
 import { IconTrash } from "@tabler/icons";
 import { useState, useEffect } from "react";
-import { fetchPeopleWithFeedAppendAccess } from "../../SOLID/FeedHandler";
 import { Person } from "../Connections/Person";
 
 
@@ -12,7 +11,7 @@ export function AccessList(props) {
     const [error, setError] = useState(null);
 
     useEffect(() => {
-        fetchPeopleWithFeedAppendAccess(props.podRootDir).then(([peoples, error]) => {
+        props.fetchFunction().then(([peoples, error]) => {
             if (error) {
                 setError(error.title);
                 setLoading(false);
@@ -31,11 +30,10 @@ export function AccessList(props) {
             :
                 <Stack style={{gap: "2px"}}>
                     {people.map((person, index) => (
-                        <Grid justify={"space-evenly"} align={"center"} grow>
+                        <Grid key={index} justify={"space-evenly"} align={"center"} grow>
                             <Grid.Col span={11}>
                                 <Person 
-                                    // viewPerson={() => props.viewPerson(person)}
-                                    key={index} 
+                                    key={index}
                                     person={person}
                                 />
                             </Grid.Col>

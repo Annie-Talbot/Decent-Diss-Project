@@ -5,6 +5,7 @@ import { IconArrowBack } from '@tabler/icons';
 import { createSampleProfile, doesProfileExist } from '../../SOLID/ProfileHandler';
 import { PageLoader } from '../Core/PageLoader';
 import { IconEdit } from '@tabler/icons-react';
+import { PageHeader } from '../Core/PageHeader';
 
 
 export function ProfilePage(props) {
@@ -19,37 +20,22 @@ export function ProfilePage(props) {
                     podRootDir={props.user.podRootDir}
                     podStructureRequired="profile"
                 >
-                    <Group position='apart' align='flex-end'
-                        style={{
-                            height: "24px", 
-                            marginBottom: "20px", 
-                            paddingRight: 20,
-                            paddingLeft: 20,
-                        }}
-                    >  
-                        <Group spacing='md'>
-                            <ActionIcon
-                                size='lg'
-                                disabled={!editing}
-                                onClick={() => setEditing(false)}
-                            >
-                                <IconArrowBack />
-                            </ActionIcon>
-                            <Title>Your Profile</Title>
-                        </Group>
-                        {!editing ?
+                    <PageHeader
+                        back={() => setEditing(false)}
+                        backDisabled={!editing}
+                        title={'Your Profile'}
+                        actionButton={
                             <ActionIcon
                                 size="lg"
-                                variant="filled"
+                                variant="light"
                                 color="sage"
                                 onClick={() => setEditing(true)}
                             >
                                 <IconEdit size={26}/>
                             </ActionIcon>
-                        :
-                            <div></div>
                         }
-                    </Group>
+                        actionDisabled={editing}
+                    />
                     <Profile 
                         userPod={props.user.podRootDir} 
                         editing={editing}

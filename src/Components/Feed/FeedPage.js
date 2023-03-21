@@ -7,6 +7,7 @@ import { IconArrowBack, IconSettings } from '@tabler/icons';
 import { PersonView } from '../Connections/PersonView';
 import { AppendSettings } from './AppendSettings';
 import { SettingsButton } from './SettingsButton';
+import { PageHeader } from '../Core/PageHeader';
 
 const FeedViewStates = {
     Feed: 0,
@@ -33,69 +34,52 @@ export class FeedPage extends React.Component {
         feedPage.setState(prevState => ({
             ...prevState,
             viewPerson: person,
-            view: FeedViewStates.Person
         }))
+        feedPage.forward(feedPage, FeedViewStates.Person);
     }
 
     viewSettings(feedPage) {
-        feedPage.setState(prevState => ({
-            ...prevState,
-            view: FeedViewStates.Settings
-        }))
+        feedPage.forward(feedPage, FeedViewStates.Settings);
     }
     
     back(feedPage) {
+        let backHistory = feedPage.state.backHistory;
+        let newState = backHistory.pop();
+        feedPage.setState(prevState => (
+            {...prevState, 
+                view: newState,
+                backHistory: backHistory
+        }))
+    }
+
+    forward(feedPage, newState) {
+        let backHistory = feedPage.state.backHistory;
+        backHistory.push(feedPage.state.view);
         feedPage.setState(prevState => ({
             ...prevState,
-            view: FeedViewStates.Feed
-        }))
+            view: newState,
+            backHistory: backHistory
+        }));
     }
 
     render() {
         let content;
         if (this.state.view === FeedViewStates.Feed) {
             content = (
-                <Stack>
-                    <Group position="apart" 
-                        style={{
-                            height: "24px", 
-                            marginBottom: "20px", 
-                            paddingRight: 20,
-                            paddingLeft: 20,
-                        }}
-                    >
-                        <Title>Feed</Title>
-                        <SettingsButton onClick={() => this.viewSettings(this)}/>
-                    </Group>
                     <ScrollArea h="85vh">
                         <FeedItemList
                             user={this.user}
                             viewPerson={(person) => this.viewPerson(this, person)}
                         />
                     </ScrollArea>
-                </Stack>
             );
         } else if (this.state.view === FeedViewStates.Person) {
             content = (
-                    <Stack justify="flex-start" spacing="xs">
-                        <Grid grow align="flex-end" justify="space-between" height={24}>
-                            <Grid.Col span={1}>
-                                <ActionIcon onClick={() => this.back(this)} >
-                                    <IconArrowBack />
-                                </ActionIcon>
-                            </Grid.Col>
-                            <Grid.Col span={8}>
-                                <Title align="right" order={4}>{this.state.viewPerson.webId}</Title>
-                            </Grid.Col>
-                        </Grid>
-                        <Divider h="md"/>
-                        <PersonView person={this.state.viewPerson} user={this.user}/>
-                    </Stack>
+                <PersonView person={this.state.viewPerson} user={this.user}/>
             )
         } else if (this.state.view === FeedViewStates.Settings) {
             content = (
                 <AppendSettings
-                    back={() => this.back(this)}
                     podRootDir={this.user.podRootDir}
                 />
             )
@@ -112,9 +96,18 @@ export class FeedPage extends React.Component {
                 podRootDir={this.user.podRootDir}
                 podStructureRequired="feed directory"
             >
-                
+
                 <Paper shadow="md" p="md">
-                    {content}
+                    <Stack>
+                        <PageHeader
+                            back={() => this.back(this)}
+                            backDisabled={this.state.backHistory.length === 0}
+                            title={this.state.view === FeedViewStates.Settings? 'Feed Settings': 'Feed'}
+                            actionButton={<SettingsButton onClick={() => this.viewSettings(this)}/>}
+                            actionDisabled={this.state.view !== FeedViewStates.Feed}
+                        />
+                        {content}
+                    </Stack>
                 </Paper>
             </PageLoader>
         );
