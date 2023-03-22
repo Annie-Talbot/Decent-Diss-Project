@@ -87,7 +87,7 @@ export function Notifications(props) {
                                 />
                                 {!viewSettings?
                                     <NotificationList
-                                        podRootDir={props.user.podRootDir}
+                                        user={props.user}
                                         notifications={notifications}
                                         deleteNotification={(notifUrl) => 
                                             handleDeleteNotification(notifUrl, () => 

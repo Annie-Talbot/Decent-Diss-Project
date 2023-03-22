@@ -15,7 +15,7 @@ export function ConnectionRequestNotification(props) {
                         opened={popup}
                         closePopup={() => setPopup(false)}
                         webId={props.notif.senderWebId}
-                        podRootDir={props.podRootDir}
+                        podRootDir={props.user}
                     />
                     <Group position="apart">
                         <Title order={5}>

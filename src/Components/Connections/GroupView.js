@@ -7,8 +7,8 @@ import { createErrorNotification } from "../Core/Notifications/ErrorNotification
 import { Members } from "./Members";
 import { PeopleSearcher } from "./../Feed/Searchers";
 
-async function handleAddMember(podRootDir, groupUrl, personUrl, updateGroup) {
-    const error = await addMember(podRootDir, groupUrl, personUrl);
+async function handleAddMember(podRootDir, group, person, updateGroup) {
+    const error = await addMember(podRootDir, group, person);
     if (error) {
         createErrorNotification(error);
         return;
@@ -59,8 +59,8 @@ function Group(props) {
                             <PeopleSearcher 
                                 podRootDir={props.podRootDir}
                                 icon={<IconPlus />}
-                                action={(person) => handleAddMember(props.podRootDir, group.url, 
-                                    person.url, props.updateGroup)}
+                                action={(person) => handleAddMember(props.podRootDir, group, 
+                                    person, props.updateGroup)}
                             />
                             <Members 
                                 members={group.members} 

@@ -26,7 +26,7 @@ export function NotificationList(props) {
                             key={index} 
                             notification={notif} 
                             delete={() => props.deleteNotification(notif.url)}
-                            podRootDir={props.podRootDir}
+                            user={props.user}
                         />
                     ))}
                 </Stack>

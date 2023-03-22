@@ -3,8 +3,9 @@ import { asUrl, buildThing, createThing, getSolidDataset, getStringNoLocale,
 import { CONNECTIONS_DIR, delay, makeId, createEmptyDataset, PEOPLE_DATASET, simplifyError } from '../Utils';
 import { fetch } from '@inrupt/solid-client-authn-browser';
 import { RDF, SCHEMA_INRUPT, VCARD } from '@inrupt/vocab-common-rdf';
-import { ACCESS_AGENT_TYPE } from '../AccessHandler';
+import { ACCESS_AGENT_TYPE, backtraceAccess } from '../AccessHandler';
 import { followPerson } from '../FeedHandler';
+import { POST_ACCESS_TYPES } from '../PostHandler';
 
 export async function doesPeopleDatasetExist(podRootDir) {
     try {
@@ -71,6 +72,10 @@ export async function createPerson(podRootDir, person) {
 
     // start following them
     await followPerson(podRootDir, person.webId);
+
+    // backtrace access so they can view private posts
+    await backtraceAccess(podRootDir, person.webId, 
+        (post) => post.accessType === POST_ACCESS_TYPES.Private);
     return null;
 }
 
@@ -192,6 +197,7 @@ export async function deletePerson(podRootDir, personUrl) {
         return {title: "Could not load person: " + personUrl, 
             description: "Thing does not exist."};
     }
+    let webId = getUrl(personThing, SCHEMA_INRUPT.identifier);
     // remove person thing
     dataset = removeThing(dataset, personThing);
     // save dataset
@@ -202,6 +208,11 @@ export async function deletePerson(podRootDir, personUrl) {
             {fetch: fetch});
     } catch(e) {
         return simplifyError(e, "An error occured whilst deleting Person.");
+    }
+
+    // stop following them
+    if(webId) {
+        await followPerson(podRootDir, webId);
     }
     return null;
 }

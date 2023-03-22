@@ -3,19 +3,34 @@ import { createPerson } from "../../SOLID/Connections/PeopleHandler";
 import { isValidWebID } from "../../SOLID/Utils";
 import { createErrorNotification } from "../Core/Notifications/ErrorNotification";
 import { useState } from "react";
+import { addLatestToFeed, followPerson } from "../../SOLID/FeedHandler";
+import { findSocialPodFromWebId } from "../../SOLID/NotificationHandler";
 
 
-async function handleCreatePerson(podRootDir, person, closePopup) {
+async function handleCreatePerson(user, person, closePopup) {
     if (!await isValidWebID(person.webId)) {
         createErrorNotification({title: "Invalid webID.", 
             description: "WebID is not a valid URL."});
         return;
     }
-    const error = await createPerson(podRootDir, person);
+    const error = await createPerson(user.podRootDir, person);
     if (error) {
         createErrorNotification(error);
         return;
     }
+    findSocialPodFromWebId(person.webId).then(async ([podRoot, error]) => {
+        if (error) {
+            return;
+        }
+        await addLatestToFeed({podRootDir: user.podRootDir}, 
+            {webId: person.webId, podRootDir: podRoot});
+        await addLatestToFeed({podRootDir: podRoot}, 
+            {webId: user.webId, podRootDir: user.podRootDir});
+
+    })
+    // fetch feed items from person,
+    // send feed items to person
+
     closePopup();
 }
 
@@ -48,7 +63,7 @@ export function CreatePersonFromConnReqForm(props) {
             <Group>
                 <Button
                     onClick={() => {
-                        handleCreatePerson(props.podRootDir, person, props.closePopup);
+                        handleCreatePerson(props.user, person, props.closePopup);
                     }}
                 >
                     Add

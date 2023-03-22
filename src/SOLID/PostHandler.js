@@ -80,7 +80,7 @@ async function getPostFromThing(postThing) {
         }
         postImg = URL.createObjectURL(image);
     }
-    
+    console.log(postDatetime);
     let post = {
         title: postTitle,
         text: postText,
@@ -180,7 +180,7 @@ export async function fetchPosts(podRootDir, getAccess) {
     let error;
     [postUrlList, error] = await getChildUrlsList(podRootDir + POSTS_DIR);
     if (error) {
-        return [[], [error]];
+        return [false, [], [error]];
     }
 
     // regex must be used to extract the name of a post's directory
@@ -199,7 +199,7 @@ export async function fetchPosts(podRootDir, getAccess) {
         }
         postList.push(post);
     }
-    return [postList, errorList];
+    return [true, postList, errorList];
 }
 
 /**

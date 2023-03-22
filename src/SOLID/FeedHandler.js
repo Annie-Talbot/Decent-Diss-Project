@@ -8,6 +8,7 @@ import { RDF } from "@inrupt/vocab-common-rdf";
 import { fetchPeople } from "./Connections/PeopleHandler";
 import { findSocialPodFromWebId } from "./NotificationHandler"
 import { fetchPeopleFromList } from "./Connections/PeopleHandler";
+import { fetchPosts } from "./PostHandler";
 
 
 export const FEED_ITEM_TYPES = {
@@ -242,4 +243,24 @@ export async function followGroup(podRootDir, group) {
     }
 
     return errors;
+}
+
+
+export async function addLatestToFeed(from, to) {
+    let [success, posts, errors] = await fetchPosts(from.podRootDir, false);
+    if (!success) {
+        return {success: false, error: errors[0]};
+    }
+    // get 3 latest posts
+    const latestPosts = posts.sort((p1, p2) => {
+            if (p1.date < p2.date) return -1;
+            else if (p2.date < p1.date) return 1;
+            else return 0;
+        }).slice(-3);
+    
+    // send to feed
+    await latestPosts.forEach(async (post) => 
+        await createPostAlert(to.podRootDir, {webId: from.webId, postUrl: post.url}));
+
+    return {success: true}
 }

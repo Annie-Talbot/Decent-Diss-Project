@@ -27,7 +27,7 @@ export function Post(props) {
                 </Grid.Col>
                 <Grid.Col span="content">
                     <Badge color="sage" variant="light">
-                        {props.post.datetime.toLocaleString()}
+                        {props.post.datetime && props.post.datetime.toLocaleString()}
                     </Badge>
                 </Grid.Col>
                 {props.authorised? 

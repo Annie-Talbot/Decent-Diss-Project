@@ -9,7 +9,7 @@ export function Notification(props) {
     if (notif.type === NOTIFICATIONS_TYPES.ConnectionRequest) {
         content = (
             <ConnectionRequestNotification
-                podRootDir={props.podRootDir}
+                user={props.user}
                 notif={notif}
                 delete={props.delete}
             />

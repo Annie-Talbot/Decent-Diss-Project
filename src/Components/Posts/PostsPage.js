@@ -35,12 +35,7 @@ export class PostsPage extends React.Component {
         this.state = {
             createPostOpened: false,
             postgridKey: 0,
-            post: {
-                title: "",
-                accessList: [],
-                accessType: POST_ACCESS_TYPES.Public.toString(),
-                accessGroups: []
-            },
+            post: {},
         }
     }
 
@@ -63,7 +58,6 @@ export class PostsPage extends React.Component {
                 title: "",
                 accessList: [],
                 accessType: POST_ACCESS_TYPES.Public.toString(),
-                accessGroups: []
             },
             createPostOpened: true,
         }));

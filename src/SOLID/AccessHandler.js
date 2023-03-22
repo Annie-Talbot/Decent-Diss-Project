@@ -1,6 +1,7 @@
 import { access, universalAccess } from "@inrupt/solid-client";
 import { fetch } from "@inrupt/solid-client-authn-browser";
 import { fetchPeopleFromList } from "./Connections/PeopleHandler";
+import { fetchPosts } from "./PostHandler";
 import { simplifyError } from "./Utils";
 
 /**
@@ -141,4 +142,18 @@ export async function setReadAppendAccess(resourceUrl, agentWebId, read, append)
     let access = await universalAccess.getAgentAccess(resourceUrl, agentWebId, {fetch: fetch});
     console.log(access);
     return null;
+}
+
+
+export async function backtraceAccess(podRootDir, webId, filter) {
+    let [success, posts, errors] = await fetchPosts(podRootDir, true);
+    if (!success) {
+        return {success: false, error: errors[0]}
+    }
+    await posts.forEach(async (post) => {
+        if (filter(post)) {
+            await setReadAccess(post.url, true, webId);
+        }
+    })
+    return {success: true, error: null};
 }

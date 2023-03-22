@@ -40,15 +40,18 @@ export function CreatePostForm(props) {
             setGroups(fetchedGroups);
             setGroupIndexes(fetchedGroups.map((c, i) => ({value: i.toString(), label: c.name})));
         }).then(() => {
-            props.post.accessGroups.forEach((group) => {
-                const index = groups.findIndex((g) => g.url === group)
-                if (index !== -1) {
-                    props.post.accessList.push(index.toString());
-                }
-            })
+            if (props.post.accessGroups) {
+                let accessList = [];
+                props.post.accessGroups.forEach((group) => {
+                    const index = groups.findIndex((g) => g.url === group)
+                    if (index !== -1) {
+                        accessList.push(index.toString());
+                    }
+                })
+                props.setPost({...props.post, accessGroups: null, accessList: accessList})
+            }
         })
     }, [props]);
-
     return (
         <Modal
             centered
@@ -57,7 +60,7 @@ export function CreatePostForm(props) {
             overlayBlur={3}
             opened={props.opened}
             title={"Create a new post"}
-            onClose={props.close}
+            onClose={() => {setActive(0); props.close();}}
         >
             <Container p='sm' style={{marginLeft: 30, marginRight: 30}}>
             <Stepper active={active} onStepClick={setActive} breakpoint="sm">

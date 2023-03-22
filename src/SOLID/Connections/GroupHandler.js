@@ -1,7 +1,8 @@
 import { addUrl, asUrl, buildThing, createThing, getSolidDataset, getStringNoLocale, getThing, getThingAll, getUrl, getUrlAll, removeThing, removeUrl, saveSolidDatasetAt, setThing } from "@inrupt/solid-client";
 import { fetch } from "@inrupt/solid-client-authn-browser";
 import { FOAF, RDF } from "@inrupt/vocab-common-rdf";
-import { ACCESS_AGENT_TYPE } from "../AccessHandler";
+import { ACCESS_AGENT_TYPE, backtraceAccess } from "../AccessHandler";
+import { POST_ACCESS_TYPES } from "../PostHandler";
 import { CONNECTIONS_DIR, PEOPLE_DATASET, createEmptyDataset, delay, GROUPS_DATASET, simplifyError } from "../Utils";
 import { fetchPeopleFromList } from "./PeopleHandler";
 
@@ -161,20 +162,20 @@ export async function fetchGroupDetailed(podRootDir, groupUrl) {
 }
 
 
-export async function addMember(podRootDir, groupUrl, personUrl) {
+export async function addMember(podRootDir, group, person) {
     // Fetch group dataset
     let [dataset, error] = await getGroupsDataset(podRootDir);
     if (error) {
         return error;
     }
 
-    let groupThing = getThing(dataset, groupUrl);
+    let groupThing = getThing(dataset, group.url);
     if (groupThing === null) {
         return {title: "Could not add member.", 
             description: "Failed to get group information."};
     }
 
-    groupThing = addUrl(groupThing, FOAF.member, personUrl);
+    groupThing = addUrl(groupThing, FOAF.member, person.url);
 
     dataset = setThing(dataset, groupThing);
 
@@ -188,7 +189,10 @@ export async function addMember(podRootDir, groupUrl, personUrl) {
         return simplifyError(error, "Could not save group with new member added.");
     }
 
-    await delay(500);
+    await backtraceAccess(podRootDir, person.webId, 
+        (post) => post.accessType === POST_ACCESS_TYPES.Specific &&
+            post.accessList.includes(group.url));
+    await delay(200);
     return null;
 }
 
