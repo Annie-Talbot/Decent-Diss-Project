@@ -1,5 +1,5 @@
 import { ActionIcon, MultiSelect, Center, Modal, Space, TextInput, Title, Radio, Stack, Group, Stepper, Container, ThemeIcon, Text } from "@mantine/core";
-import { IconArrowLeft, IconGift, IconRocket } from "@tabler/icons";
+import { IconArrowLeft, IconCheckbox, IconGift, IconRocket } from "@tabler/icons";
 import { IconArrowRight, IconRocketOff } from "@tabler/icons-react";
 import { useState, useEffect } from "react";
 import { fetchGroups } from "../../SOLID/Connections/GroupHandler";
@@ -10,14 +10,14 @@ import { PostAdditionsMenu } from "./PostInputs/PostAdditionsMenu";
 import { PostImageInput } from "./PostInputs/PostImageInput";
 import { PostTextInput } from "./PostInputs/PostTextInput";
 
-async function handleCreatePost(user, post, groups, finalise) {
+async function handleCreatePost(user, post, doAlerts, groups, finalise) {
     post.accessType = parseInt(post.accessType);
     if (post.accessType === POST_ACCESS_TYPES.Specific) {
-        const agents = post.specificAccess.map((index) => groups[parseInt(index)])
-        post.specificAccess = agents;
+        const agents = post.accessList.map((index) => groups[parseInt(index)])
+        post.accessList = agents;
     }
     
-    const [success, error] = await createPost(user.podRootDir, user.webId, post);
+    const [success, error] = await createPost(user.podRootDir, user.webId, post, doAlerts);
     if (!success) {
         createErrorNotification(error);
         return;
@@ -27,23 +27,25 @@ async function handleCreatePost(user, post, groups, finalise) {
 
 
 export function CreatePostForm(props) {
-    const [active, setActive] = useState(1);
+    const [active, setActive] = useState(0);
     const nextStep = () => setActive((current) => (current < 2 ? current + 1 : current));
     const prevStep = () => setActive((current) => (current > 0 ? current - 1 : current));
 
     const [groups, setGroups] = useState([]);
     const [groupIndexes, setGroupIndexes] = useState([]);
-    const [post, setPost] = useState({
-        title: "",
-        specificAccess: [],
-        accessType: POST_ACCESS_TYPES.Public.toString(),
-    });
 
     useEffect(() => {
         fetchGroups(props.user.podRootDir).then(([fetchedGroups, errors]) => {
             errors.forEach((e) => createErrorNotification(e));
             setGroups(fetchedGroups);
             setGroupIndexes(fetchedGroups.map((c, i) => ({value: i.toString(), label: c.name})));
+        }).then(() => {
+            props.post.accessGroups.forEach((group) => {
+                const index = groups.findIndex((g) => g.url === group)
+                if (index !== -1) {
+                    props.post.accessList.push(index.toString());
+                }
+            })
         })
     }, [props]);
 
@@ -55,7 +57,7 @@ export function CreatePostForm(props) {
             overlayBlur={3}
             opened={props.opened}
             title={"Create a new post"}
-            onClose={props.toggleOpened}
+            onClose={props.close}
         >
             <Container p='sm' style={{marginLeft: 30, marginRight: 30}}>
             <Stepper active={active} onStepClick={setActive} breakpoint="sm">
@@ -64,18 +66,18 @@ export function CreatePostForm(props) {
                         <Group position='apart'>
                             <Title order={3}>Post Designer</Title>
                             <PostAdditionsMenu
-                                post={post}
+                                post={props.post}
                                 add={(key, value) => {
-                                    let copy = {...post};
+                                    let copy = {...props.post};
                                     copy[key] = value;
-                                    setPost(copy);
+                                    props.setPost(copy);
                                 }}
                             />
                         </Group>
                         <TextInput
-                            value={post.title}
-                            onChange={(event) => setPost(
-                                {...post, 
+                            value={props.post.title}
+                            onChange={(event) => props.setPost(
+                                {...props.post, 
                                 title: event.currentTarget.value})
                             }
                             placeholder="My new post"
@@ -84,21 +86,21 @@ export function CreatePostForm(props) {
                             withAsterisk
                         />
                         <PostTextInput 
-                            value={post.text} 
-                            onChange={(event) => setPost(
-                                {...post, 
+                            value={props.post.text} 
+                            onChange={(event) => props.setPost(
+                                {...props.post, 
                                 text: event.currentTarget.value})
                             }
-                            delete={() => setPost({...post, text: null})}
+                            delete={() => props.setPost({...props.post, text: null})}
                         />
                         <PostImageInput
-                            value={post.image}
+                            value={props.post.image}
                             onChange={(event) => {
-                                setPost(
-                                {...post, 
+                                props.setPost(
+                                {...props.post, 
                                     image: event}
                             ); }}
-                            delete={() => setPost({...post, image: null})}
+                            delete={() => props.setPost({...props.post, image: null})}
                         />
                     </Stack>
                 </Stepper.Step>
@@ -108,9 +110,9 @@ export function CreatePostForm(props) {
                             <Title order={3}>Privacy Control</Title>
                         </Group>
                         <Radio.Group
-                            value={post.accessType}
-                            onChange={(event) => {setPost({
-                                ...post,
+                            value={props.post.accessType}
+                            onChange={(event) => {props.setPost({
+                                ...props.post,
                                 accessType: event,
                             })}}
                             name="accessType"
@@ -122,15 +124,15 @@ export function CreatePostForm(props) {
                             <Radio value={POST_ACCESS_TYPES.Private.toString()} label="Private" />
                             {groups.length > 0 && <Radio value={POST_ACCESS_TYPES.Specific.toString()} label="Specific" />}
                         </Radio.Group>
-                        {post.accessType == POST_ACCESS_TYPES.Specific &&
+                        {props.post.accessType == POST_ACCESS_TYPES.Specific &&
                             <MultiSelect
                                 data={groupIndexes}
                                 label="Group Selector"
                                 placeholder="Pick which groups you would like to view this post"
-                                value={post.specificAccess}
-                                onChange={(event) => setPost(
-                                    {...post, 
-                                        specificAccess: event}
+                                value={props.post.accessList}
+                                onChange={(event) => props.setPost(
+                                    {...props.post, 
+                                        accessList: event}
                                 )}
                             />
                         }
@@ -138,31 +140,68 @@ export function CreatePostForm(props) {
                 </Stepper.Step>
                 <Stepper.Completed>
                 <Stack align="center" justify="center" style={{height: "100%", marginTop: 24, marginBottom: 24}}>
-                    <Title order={4}>Post completed.</Title>
+                    <Title order={4}>Design completed.</Title>
                     <Space h='md' />
-                    <ActionIcon 
-                    variant="light"
-                    color='sage'
-                    radius='xl'
-                    size={100}
-                    onClick={() => {
-                        handleCreatePost(
-                            props.user,
-                            post, 
-                            groups,
-                            () => {
-                                props.toggleOpened();
-                                createPlainNotification(
-                                    {title: "Success!", 
-                                    description: "Successfully created post."});
-                                props.updatePosts();
-                            });
-                        
-                    }}
-                    >
-                        <IconRocket size={60} />
-                    </ActionIcon>
-                    <Title order={3}>Send?</Title>
+                    <Group position="apart" spacing='xl'>
+                        {props.post.url &&
+                            <>
+                            <Stack align='center'  >
+                                <ActionIcon 
+                                    variant="light"
+                                    color='sage'
+                                    radius='xl'
+                                    size={100}
+                                    onClick={() => {
+                                        handleCreatePost(
+                                            props.user,
+                                            props.post, 
+                                            false,
+                                            groups,
+                                            () => {
+                                                props.close();
+                                                createPlainNotification(
+                                                    {title: "Success!", 
+                                                    description: "Successfully created post."});
+                                                props.updatePosts();
+                                            });
+                                        
+                                    }}
+                                    >
+                                        <IconCheckbox size={60} />
+                                    </ActionIcon>
+                                    <Title order={3}>Save</Title>
+                            </Stack>
+                            <Text>or</Text>
+                            </>
+                        }
+                        <Stack align='center'  >
+                            <ActionIcon 
+                            variant="light"
+                            color='sage'
+                            radius='xl'
+                            size={100}
+                            onClick={() => {
+                                handleCreatePost(
+                                    props.user,
+                                    props.post, 
+                                    true,
+                                    groups,
+                                    () => {
+                                        props.close();
+                                        createPlainNotification(
+                                            {title: "Success!", 
+                                            description: "Successfully created post."});
+                                        props.updatePosts();
+                                    });
+                                
+                            }}
+                            >
+                                <IconRocket size={60} />
+                            </ActionIcon>
+                            <Title order={3}>{props.post.url? 'Re-post?' : 'Post?'}</Title>
+                        </Stack>
+                    </Group>
+                    
                 </Stack>
                 </Stepper.Completed>
             </Stepper>

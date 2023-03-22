@@ -27,7 +27,7 @@ export function Post(props) {
                 </Grid.Col>
                 <Grid.Col span="content">
                     <Badge color="sage" variant="light">
-                        {props.post.datetime}
+                        {props.post.datetime.toLocaleString()}
                     </Badge>
                 </Grid.Col>
                 {props.authorised? 
@@ -40,7 +40,12 @@ export function Post(props) {
                             </Menu.Target>
 
                             <Menu.Dropdown>
-                                <Menu.Item icon={<IconEdit size={14} />}>Edit</Menu.Item>
+                                <Menu.Item
+                                    onClick={props.editPost}
+                                    icon={<IconEdit size={14} />}
+                                >
+                                    Edit
+                                </Menu.Item>
                                 <Menu.Item 
                                     onClick={props.deletePost}
                                     color="red" 

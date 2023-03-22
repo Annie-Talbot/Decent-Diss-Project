@@ -1,11 +1,11 @@
 import { addStringNoLocale, addUrl, buildThing, createContainerInContainer, createSolidDataset, 
     createThing, getDatetime, getSolidDataset, getSourceUrl, 
-    getStringNoLocale, getThing, getUrl, saveFileInContainer, 
+    getStringNoLocale, getThing, getUrl, getUrlAll, saveFileInContainer, 
     saveSolidDatasetAt, saveSolidDatasetInContainer, setThing } from "@inrupt/solid-client";
 import { fetch } from '@inrupt/solid-client-authn-browser'
 import { RDF, SCHEMA_INRUPT } from "@inrupt/vocab-common-rdf";
 import { GetPostDatasetUrl, POST_DETAILS, getChildUrlsList, deleteDirectory,
-    simplifyError, makeId, createEmptyDataset, getImage, POSTS_DIR, delay, POST_ACCESS_THING, POST_ACCESS_DATASET, POST_DATASET, POST_THING } from "./Utils";
+    simplifyError, makeId, createEmptyDataset, getImage, POSTS_DIR, delay, POST_ACCESS_THING, POST_ACCESS_DATASET, POST_DATASET, POST_THING, deleteDataset } from "./Utils";
 import { setAllPublicReadAccess, setAllReadAccess, setReadAccess } from './AccessHandler'
 import { createPostAlerts } from "./FeedHandler";
 import { SOCIAL_SOLID } from "./SolidTerms";
@@ -15,6 +15,16 @@ export const POST_ACCESS_TYPES = {
     Public: 0, // all users can see
     Private: 1, // all people in your connections can see
     Specific: 2 // only people in the groups specified can see
+}
+function convertAccessUrlToType(url) {
+    if (url === SOCIAL_SOLID.PublicAccess) return POST_ACCESS_TYPES.Public
+    else if (url === SOCIAL_SOLID.PrivateAccess) return POST_ACCESS_TYPES.Private
+    else return POST_ACCESS_TYPES.Specific
+}
+function convertAccessTypeToUrl(type) {
+    if (type === POST_ACCESS_TYPES.Public) return SOCIAL_SOLID.PublicAccess
+    else if (type === POST_ACCESS_TYPES.Private) return SOCIAL_SOLID.PrivateAccess
+    else return SOCIAL_SOLID.SpecificAccess
 }
 
 
@@ -74,7 +84,7 @@ async function getPostFromThing(postThing) {
     let post = {
         title: postTitle,
         text: postText,
-        datetime: postDatetime.toLocaleString(),
+        datetime: postDatetime,
         image: postImg,
     };
     return [post, null];
@@ -87,7 +97,7 @@ async function getPostFromThing(postThing) {
  * @param {string} postUrl The URL where the post dataset is.
  * @returns {dict} A dictionary will post information in.
  */
-async function getPost(postDir) {
+async function getPost(postDir, getAccess) {
     const errContext = "Encountered whilst attempting to get post " +
                             "data for " + postDir;
     const postDatasetUrl = postDir + POST_DATASET
@@ -118,6 +128,40 @@ async function getPost(postDir) {
         return [null, error]
     }
     post.url = postDir;
+
+    if (getAccess) {
+        let accessDataset;
+        try {
+            accessDataset = await getSolidDataset(
+                postDir + POST_ACCESS_DATASET, 
+                { fetch: fetch }  // fetch function from authenticated session
+            );
+        } catch (error) {
+            return [null, simplifyError(error, "Encountered whilst fetching " +
+                                                "access data for " + postDatasetUrl)];
+        }
+
+        const accessThing = getThing(
+            accessDataset, 
+            postDir + POST_ACCESS_DATASET + POST_ACCESS_THING,
+            {fetch: fetch}
+        )
+        let accessType = getUrl(accessThing, RDF.type);
+        if (!accessType) {
+            // This is a required property so return an error
+            return [null, {title: "Invalid post at " + postDir, description: "No access type."}]
+        }
+        accessType = convertAccessUrlToType(accessType);
+        post.accessType = accessType;
+        post.accessGroups = [];
+        if (accessType === POST_ACCESS_TYPES.Specific) {
+            let groups = getUrlAll(accessThing, SOCIAL_SOLID.AccessList);
+            if (!groups) {
+                groups = []
+            }
+            post.accessGroups = groups;
+        }
+    }
     return [post, null];
 }
 
@@ -130,7 +174,7 @@ async function getPost(postDir) {
  * @returns {[dict]} A list of dictionaries, each one container 
  * a seperate post's information.
  */
-export async function fetchPosts(podRootDir) {
+export async function fetchPosts(podRootDir, getAccess) {
     let postList = [];
     let postUrlList = [];
     let error;
@@ -148,7 +192,7 @@ export async function fetchPosts(podRootDir) {
     let post;
     let errorList = [];
     for (const i in postUrlList) {
-        [post, error] = await getPost(postUrlList[i]);
+        [post, error] = await getPost(postUrlList[i], getAccess);
         if (error) {
             errorList.push(error);
             continue;
@@ -176,10 +220,17 @@ async function createPostDataset(postDirUrl, post) {
     // Create post dataset
     const postDatasetUrl = postDirUrl + POST_DATASET;
     let urls = [postDatasetUrl];
+
+    let date = new Date(Date.now());
+    if (post.url) {
+        // If editing use previous date
+        date = post.datetime
+    }
+
     let postDataset = createSolidDataset();
     let postThing  = buildThing(createThing({ name: "this" }))
         .addStringNoLocale(SOCIAL_SOLID.PostTitle, post.title)
-        .addDatetime(SOCIAL_SOLID.DatetimeCreated, new Date(Date.now()))
+        .addDatetime(SOCIAL_SOLID.DatetimeCreated, date)
         .build();
 
     // Create image first because we need the url it is saved at.
@@ -223,17 +274,13 @@ async function createPostDataset(postDirUrl, post) {
 }
 
 async function createPostAccessDataset(postDirUrl, post) {
-    let accessType;
-    if (post.accessType === POST_ACCESS_TYPES.Public) accessType = SOCIAL_SOLID.PublicAccess
-    else if (post.accessType === POST_ACCESS_TYPES.Private) accessType = SOCIAL_SOLID.PrivateAccess
-    else accessType = SOCIAL_SOLID.SpecificAccess
-
+    let accessType = convertAccessTypeToUrl(post.accessType);
     let accessDataset = createSolidDataset();
     let accessThing  = buildThing(createThing({ name: "this" }))
         .addUrl(RDF.type, accessType)
         .build();
     if (post.accessType === POST_ACCESS_TYPES.Specific) {
-        post.specificAcccess.forEach(group => {
+        post.accessList.forEach(group => {
             accessThing = addUrl(accessThing,
                 SOCIAL_SOLID.AccessList,
                 group.url);
@@ -254,22 +301,42 @@ async function createPostAccessDataset(postDirUrl, post) {
     return [true, null];
 }
 
-export async function createPost(podRootDir, webId, post) {
+export async function createPost(podRootDir, webId, post, doAlerts) {
     console.log(post)
     // Create post directory
-    let postDir;
+    let postDirUrl;
     let error;
-    try {
-        postDir = await createContainerInContainer(
-            podRootDir + POSTS_DIR,
-            {fetch: fetch}
-        )
-    } catch (e) {
-        error = simplifyError(e, "Ecountered whilst creating a new post directory.");
-        return [false, error]
+    if (post.url) {
+        // If editing a post, dont create a new directory
+        postDirUrl = post.url;
+    } else {
+        // If creating a new post, create a new directory
+        try {
+            const postDir = await createContainerInContainer(
+                podRootDir + POSTS_DIR,
+                {fetch: fetch}
+            )
+            postDirUrl = getSourceUrl(postDir);
+        } catch (e) {
+            error = simplifyError(e, "Ecountered whilst creating a new post directory.");
+            return [false, error]
+        }
     }
-    const postDirUrl = getSourceUrl(postDir);
     console.log(postDirUrl);
+
+    if (post.url) {
+        // If editing a post, remove the old datasets
+        error = await deleteDataset(postDirUrl + POST_DATASET)[1];
+        if (error) {
+            return [false, {title: "Failed to edit post.", 
+            description: "Could not remove previous details."}]
+        }
+        error = await deleteDataset(postDirUrl + POST_ACCESS_DATASET)[1];
+        if (error) {
+            return [false, {title: "Failed to edit post.", 
+            description: "Could not remove previous details."}]
+        }
+    }
 
     // create post dataset
     let success, postUrls;
@@ -289,8 +356,8 @@ export async function createPost(podRootDir, webId, post) {
     let accessList = [];
     if (post.accessType === POST_ACCESS_TYPES.Specific) {
         // fill recipient list with all member of groups
-        for (let i = 0; i < post.specificAcccess.length; i++) {
-            let group = post.specificAcccess[i];
+        for (let i = 0; i < post.accessList.length; i++) {
+            let group = post.accessList[i];
             let people = (await fetchPeopleFromList(podRootDir, group.members))[0];
             people.forEach(person => accessList.push(person));
         }
@@ -309,7 +376,9 @@ export async function createPost(podRootDir, webId, post) {
     }
 
     // Create post alerts for feed
-    await createPostAlerts(postDirUrl, podRootDir, webId, accessList);
+    if (doAlerts) {
+        await createPostAlerts(postDirUrl, podRootDir, webId, accessList);
+    }
     return [true, null];
 }
 
