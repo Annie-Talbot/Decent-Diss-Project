@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
-import { ActionIcon, Text, Center, Group, Paper, Title, Divider} from '@mantine/core';
+import { ActionIcon, Paper} from '@mantine/core';
 import { Profile } from './Profile';
-import { IconArrowBack } from '@tabler/icons';
 import { createSampleProfile, doesProfileExist } from '../../SOLID/ProfileHandler';
 import { PageLoader } from '../Core/PageLoader';
 import { IconEdit } from '@tabler/icons-react';
@@ -12,8 +11,7 @@ export function ProfilePage(props) {
     const [editing, setEditing] = useState(false);
 
         return (
-            <Center>
-            <Paper p="sm" shadow="xs" style={{minWidth: 800}}>
+            <Paper p="sm" shadow="xs">
                 <PageLoader
                     checkFunction={doesProfileExist}
                     createFunction={createSampleProfile}
@@ -42,6 +40,5 @@ export function ProfilePage(props) {
                     />
                 </PageLoader>
             </Paper>
-            </Center>
         );
     }

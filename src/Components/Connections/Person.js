@@ -27,8 +27,8 @@ export function Person(props) {
         });
     }
     return (
-        <Grid justify="flex-start" align="center" grow>
-            <Grid.Col span={11}>
+        <Grid justify="space-between" align="center" grow>
+            <Grid.Col span={10}>
                 <UnstyledButton
                     sx={style}
                     onClick={props.viewPerson}

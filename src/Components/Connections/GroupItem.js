@@ -4,8 +4,8 @@ import { IconChevronRight, IconDotsVertical, IconTrash } from "@tabler/icons-rea
 export function GroupItem(props) {
     const group = props.group;
     return (
-        <Grid justify="flex-start" align="center" grow>
-            <Grid.Col span={11}>
+        <Grid justify="space-between" align="center" grow>
+            <Grid.Col span={10}>
                 <UnstyledButton
                     sx={(theme) => ({
                         display: 'block',

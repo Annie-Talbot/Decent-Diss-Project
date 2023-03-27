@@ -77,6 +77,7 @@ function LoginPage(props) {
                                             placeholder="http://login.inrupt.com/"
                                             label="Solid Identity Provider"
                                             size="md"
+                                            description="If you signed up using the button below, use the Inrupt button to log in"
                                             withAsterisk
                                             value={solidProvider}
                                             onChange={(e) => setSolidProvider(e.currentTarget.value)}

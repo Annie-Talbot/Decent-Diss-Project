@@ -1,4 +1,5 @@
-import { Button, Group, Modal, Space, TextInput } from "@mantine/core";
+import { ActionIcon, Button, Group, Modal, Space, TextInput } from "@mantine/core";
+import { IconSquareRoundedPlusFilled } from "@tabler/icons-react";
 import { useState } from "react";
 import { createPerson } from "../../SOLID/Connections/PeopleHandler";
 import { createConnectionRequest, findSocialPodFromWebId } from "../../SOLID/NotificationHandler";
@@ -87,23 +88,17 @@ export function CreatePersonForm(props) {
                 description="The name to give to this user."
             />
             <Space h="md"/>
-            <Group>
-                <Button
+            <Group position='center'>
+                <ActionIcon
+                    size='lg'
+                    c='sage'
                     onClick={() => {
                         handleCreatePerson(props.user, 
                             person, props.toggleOpened, props.updatePeople, true);
                     }}
                 >
-                    Add and Send Connection Request
-                </Button>
-                <Button
-                    onClick={() => {
-                        handleCreatePerson(props.user, 
-                            person, props.toggleOpened, props.updatePeople, false);
-                    }}
-                >
-                    Just Add
-                </Button>
+                    <IconSquareRoundedPlusFilled />
+                </ActionIcon>
             </Group>
             
         </Modal>
