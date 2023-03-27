@@ -74,8 +74,8 @@ export function PostGrid(props) {
                 <SimpleGrid 
                     cols={3}
                     breakpoints={[
-                        { maxWidth: 1600, cols: 2, spacing: 'sm' },
-                        { maxWidth: 1200, cols: 1, spacing: 'sm' },
+                        { maxWidth: 1400, cols: 2, spacing: 'sm' },
+                        { maxWidth: 1000, cols: 1, spacing: 'sm' },
                 ]}>
                     {postComponents}
                 </SimpleGrid>

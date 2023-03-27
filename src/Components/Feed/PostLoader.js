@@ -21,6 +21,7 @@ function inViewChange(entries, deletePostAlert) {
 }
 
 async function handleSendLike(senderWebId, post, author) {
+    console.log(post);
     let error = await sendLike(senderWebId, post.url, author.webId);
     if (error) {
         createErrorNotification(error);
@@ -38,9 +39,9 @@ export function PostLoader(props) {
     let observer;
 
     useEffect(() => {
-        fetchPost(props.feedItem.postContainer).then(([fetchedPost, error]) => {
-            if (error) setError(error.title);
-            if (fetchedPost) setPost(fetchedPost);
+        fetchPost(props.feedItem.postContainer, false).then((result) => {
+            if (!result.success) setError(result.error.title);
+            else setPost(result.post);
         }).then(async () => {
             setPerson(await findPerson(props.user.podRootDir, props.feedItem.senderWebId));
             setLoading(false);

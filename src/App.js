@@ -24,7 +24,8 @@ class App extends React.Component {
         this.state = {
             currPage: AppStates.LogIn,
             loggedIn: false,
-            user: {}
+            user: {},
+            navOpened: false
         }
     }
 
@@ -82,11 +83,17 @@ class App extends React.Component {
                 padding = "md"
                 navbar = {
                     <SideBar
+                        opened={this.state.navOpened}
                         redirect={(state) => this.redirect(this, state)}
                     />
                 }
                 header={
-                    <AppHeader 
+                    <AppHeader
+                            navOpened={this.state.navOpened}
+                            setNavOpened={() => this.setState(prevState => ({
+                                ...prevState,
+                                navOpened: !this.state.navOpened
+                            }))}
                             user={this.state.user}
                             logout={() => this.setState(prevState => ({
                                 ...prevState,

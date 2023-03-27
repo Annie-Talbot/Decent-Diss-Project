@@ -1,6 +1,7 @@
 import { Paper, Stack, Text } from "@mantine/core";
 import { NOTIFICATIONS_TYPES } from "../../SOLID/NotificationHandler";
 import { ConnectionRequestNotification } from "./ConnReqNotification";
+import { LikeNotification } from "./LikeNotification";
 
 export function Notification(props) {
     console.log(props.notification);
@@ -9,6 +10,14 @@ export function Notification(props) {
     if (notif.type === NOTIFICATIONS_TYPES.ConnectionRequest) {
         content = (
             <ConnectionRequestNotification
+                user={props.user}
+                notif={notif}
+                delete={props.delete}
+            />
+        );
+    } else if (notif.type === NOTIFICATIONS_TYPES.Like){
+        content = (
+            <LikeNotification
                 user={props.user}
                 notif={notif}
                 delete={props.delete}

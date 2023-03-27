@@ -101,17 +101,11 @@ async function getPost(postDir, getAccess) {
     const errContext = "Encountered whilst attempting to get post " +
                             "data for " + postDir;
     const postDatasetUrl = postDir + POST_DATASET
-    let postDataset;
-    try {
-        postDataset = await getSolidDataset(
-            postDatasetUrl, 
-            { fetch: fetch }  // fetch function from authenticated session
-        );
-    } catch (error) {
-        return [null, simplifyError(error, "Encountered whilst fetching " +
-                                            "post data for " + postDatasetUrl)];
+    let result = await getPostDataset(postDir);
+    if (!result.success) {
+        return [null, result.error];
     }
-
+    const postDataset = result.dataset
     // Post information is found in the #details Thing at the dataset:
     // details Thing URL: https://provider/podname/social/posts/postname/postname#details
     const postThing = getThing(postDataset, postDatasetUrl + POST_THING, { fetch: fetch });
@@ -382,7 +376,8 @@ export async function createPost(podRootDir, webId, post, doAlerts) {
     return [true, null];
 }
 
-export async function fetchPost(postUrl) {
+
+async function getPostDataset(postUrl) {
     let postDataset;
     try {
         postDataset = await getSolidDataset(
@@ -393,25 +388,25 @@ export async function fetchPost(postUrl) {
         let error = simplifyError(e, "Whilst fetching post data.");
         if (error.code === 404) {
             // Not found
-            return {title: "Post URL does not exist", 
-                description: "Cannot load post."};
+            return {success: false, error: {title: "Post URL does not exist", 
+                description: "Cannot load post."}};
         }
         if (error.code === 403) {
             // Unauthorised
-            return {title: "No access to this post", 
-                description: "Cannot load post."};
+            return {success: false, error: {title: "No access to this post", 
+                description: "Cannot load post."}};
         }
-        return {title: "Cannot fetch post", 
-            description: error.description};
+        return {success: false, error: {title: "Cannot fetch post", 
+            description: error.description}};
     }
 
-    const postThing = getThing(postDataset, postUrl + POST_DATASET + POST_THING, { fetch: fetch });
-    if (!postThing) {
-        return [null, {
-            title: "Post has no #details Thing",
-            description: "Cannot load post.",
-        }]
-    }
-    return getPostFromThing(postThing);
+    return {success: true, dataset: postDataset};
+}
 
+export async function fetchPost(postUrl, getAccess) {
+    let [post, error] = await getPost(postUrl, getAccess);
+    if (error) {
+        return {success: false, error: error};
+    }
+    return {success: true, post: post}
 }

@@ -2,13 +2,13 @@ import { showNotification } from "@mantine/notifications";
 import { IconAlertCircle } from "@tabler/icons";
 
 
-export function createErrorNotification({code, title, description}) {
-    if (code) {
-        if (code !== -1) title = code + ": " + title;
+export function createErrorNotification(error) {
+    if (error.code) {
+        if (error.code !== -1) error.title = error.code + ": " + error.title;
     }
     showNotification({
-        title: title,
-        message: description,
+        title: error.title,
+        message: error.description,
         color: 'red',
         icon: <IconAlertCircle />,
         });

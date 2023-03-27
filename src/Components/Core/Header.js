@@ -1,6 +1,6 @@
 import React from "react";
 import { LogoutButton } from '../Login/Logout';
-import { Group, Center, Space, Grid, Header } from '@mantine/core';
+import { Group, Center, Space, Grid, Header, MediaQuery, Burger } from '@mantine/core';
 import { Logo } from "./Constants/Logo";
 import { Notifications } from "../Notifications/Notifications";
 import { ShareButton } from "./ShareButton";
@@ -15,7 +15,18 @@ export function AppHeader(props) {
     return (
         <Header height={60} p="xs">
             <Group position="apart" align="flex-end">
+                <Group>
+                <MediaQuery largerThan="sm" styles={{ display: 'none' }}>
+                    <Burger
+                        opened={props.navOpened}
+                        onClick={props.setNavOpened}
+                        size="sm"
+                        color='gray'
+                        mr="xl"
+                    />
+                </MediaQuery>
                 <Logo />
+                </Group>
                 <Group spacing='2px'>
                     <ShareButton webId={props.user.webId}/>
                     <Space w="md"/>

@@ -1,11 +1,21 @@
 import { Card, Text, Image, Badge, Menu, ActionIcon, Stack, Grid, Title, Group } from '@mantine/core';
+import { useHover } from '@mantine/hooks';
 import { IconEdit, IconDotsVertical, IconTrash, IconHandLittleFinger, IconHeart } from '@tabler/icons';
+import { IconHeartFilled } from '@tabler/icons-react';
 import {Person} from '../Connections/Person';
 
 export function Post(props) {
+    const { hovered, ref } = useHover();
+
     return (
-        <Card shadow="sm" p="lg" radius="md" withBorder style={{"maxWidth": 600}}>
-            <Card.Section style={{"height": 55}} withBorder>
+        <Card 
+            shadow="sm" 
+            radius="md"
+            p={12}
+            withBorder 
+            style={{maxWidth: 600, minWidth: 350, minHeight: 200, paddingBottom: 6}}
+        >
+            <Card.Section style={{"height": 60}} withBorder>
                 <Person person={props.author} viewPerson={props.viewPerson} />
             </Card.Section>
             {props.post.image? 
@@ -18,20 +28,35 @@ export function Post(props) {
                         />
                 </Card.Section>
             :<></>}
-            
-            <Grid mt="md" mb="xs">
-                <Grid.Col span="auto">
-                    <Title order={3}>
-                        {props.post.title}
-                    </Title>
-                </Grid.Col>
-                <Grid.Col span="content">
-                    <Badge color="sage" variant="light">
-                        {props.post.datetime && props.post.datetime.toLocaleString()}
-                    </Badge>
-                </Grid.Col>
-                {props.authorised? 
+            <Stack justify='space-between' >
+                <Grid mt="md" mb="xs">
+                    <Grid.Col span="auto">
+                        <Title order={3}>
+                            {props.post.title}
+                        </Title>
+                    </Grid.Col>
                     <Grid.Col span="content">
+                        <Badge color="sage" variant="light">
+                            {props.post.datetime && props.post.datetime.toLocaleString()}
+                        </Badge>
+                    </Grid.Col>
+                </Grid>
+                {props.post.text? <Text size="md">{props.post.text}</Text>: <></>}
+                {!props.authorised ?
+                    props.sendLike && 
+                    <Group position='center' align='center' p="sm" style={{paddingBottom: 0, height: 50}}>
+                        <ActionIcon 
+                            ref={ref}
+                            color="pink" 
+                            size="lg" 
+                            title='Send like'
+                            onClick={props.sendLike}
+                        >
+                            {hovered? <IconHeartFilled/> : <IconHeart/>}
+                        </ActionIcon>
+                    </Group>
+                :
+                    <Group position='right' align='flex-end' p="sm" style={{paddingBottom: 0, height: 50}}>
                         <Menu shadow="md" width={100} withinPortal>
                             <Menu.Target>
                                 <ActionIcon color="sage" size="lg" variant="default">
@@ -54,26 +79,9 @@ export function Post(props) {
                                 </Menu.Item>
                             </Menu.Dropdown>
                         </Menu>
-                    </Grid.Col> 
-                : 
-                    <></>
-                }
-            </Grid>
-            {props.post.text? <Text size="md">{props.post.text}</Text>: <></>}
-            {!props.authorised &&
-                <Card.Section style={{"height": 50}} >
-                    <Group position='center' align='center' p="sm">
-                        <ActionIcon 
-                            color="pink" 
-                            size="lg" 
-                            title='Send like'
-                            onClick={props.sendLike}
-                        >
-                            <IconHeart/>
-                        </ActionIcon>
                     </Group>
-                </Card.Section>
-            }
+                }
+            </Stack>
         </Card>
     );
 }

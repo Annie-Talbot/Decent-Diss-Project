@@ -49,18 +49,18 @@ export function Notifications(props) {
                 return;
             }
             setExists(true);
-            let [notifs, errors] = await fetchNotifications(props.podRootDir);
+            let [notifs, errors] = await fetchNotifications(props.user.podRootDir);
             errors.forEach(e => {
                 createErrorNotification(e);
             });
             setAlert(notifs.length);
             setNotifications(notifs);
             // Set up socket
-            e = await createNotificationSocket(props.podRootDir, () => updateNotifications(props.podRootDir, 
+            e = await createNotificationSocket(props.user.podRootDir, () => updateNotifications(props.user.podRootDir, 
                     setNotifications, setAlert));
             if (e) createErrorNotification(e);
         })
-    }, [props.podRootDir]);
+    }, [props.user]);
 
     return (
         <>
@@ -110,7 +110,7 @@ export function Notifications(props) {
                 label={alert} 
                 withBorder 
                 size={22} 
-                color="rouge.4"
+                color="pink.6"
             >
                 <ActionIcon color="sage" onClick={open} size="xl" >
                     <IconBellRinging />

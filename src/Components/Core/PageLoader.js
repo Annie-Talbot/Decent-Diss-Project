@@ -12,22 +12,24 @@ export function PageLoader(props) {
     const [podStructureExists, setPodStructureExists] = useState(false);
 
     useEffect(() => {
-        props.checkFunction(props.podRootDir).then(([success, error]) => {
-            if (!success) {
-                if (error) {
-                    createErrorNotification(error);
-                    setPodError(true);
+        if (props.podRootDir) {
+            props.checkFunction(props.podRootDir).then(([success, error]) => {
+                if (!success) {
+                    if (error) {
+                        createErrorNotification(error);
+                        setPodError(true);
+                        setLoading(false);
+                        return;
+                    }
+                    // Unsuccessfull and no error, continue leaving state.profileExists as false
                     setLoading(false);
                     return;
                 }
-                // Unsuccessfull and no error, continue leaving state.profileExists as false
+                // Successfull at finding profile
+                setPodStructureExists(true);
                 setLoading(false);
-                return;
-            }
-            // Successfull at finding profile
-            setPodStructureExists(true);
-            setLoading(false);
-        });
+            });
+        }
     }, [props]);
 
     let content;

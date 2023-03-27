@@ -12,6 +12,7 @@ import { fetchPeople } from "./Connections/PeopleHandler";
 
 export const NOTIFICATIONS_TYPES = {
     ConnectionRequest: 0,
+    Like: 1,
 }
 
 
@@ -93,19 +94,22 @@ export async function createConnectionRequest(senderDetails, recieverPodRoot) {
     return await sendNotification(notifDataset, recieverPodRoot);
 }
 
-
-
-function getConnectionRequestNotification(notifThing) {
-    // Sender web id
-    const webId = getUrl(notifThing, SOCIAL_SOLID.SenderWebId, { fetch: fetch });
-    if (webId == null) {
+function getLikeNotification(notifThing) {
+    const post = getUrl(notifThing, SOCIAL_SOLID.PostContainer, { fetch: fetch });
+    if (post == null) {
         return [null, {
             code: 0,
             title: "Failed to load notification",
-            description: "Connection request has no web id."
-        }]
+            description: "Like has no post linked."
+        }];
     }
+    return [{
+        type: NOTIFICATIONS_TYPES.Like,
+        post: post
+    }, null]
+}
 
+function getConnectionRequestNotification(notifThing) {
     // Sender Pod root directory
     const pod = getUrl(notifThing, SOCIAL_SOLID.SenderPodRoot, { fetch: fetch });
     if (pod == null) {
@@ -130,7 +134,6 @@ function getConnectionRequestNotification(notifThing) {
     
     return [{
         type: NOTIFICATIONS_TYPES.ConnectionRequest,
-        senderWebId: webId,
         senderPodRootDir: pod,
         message: msg
     }, null]
@@ -176,10 +179,21 @@ async function getNotification(notifUrl) {
     // Date of creation
     const dateCreated = getDatetime(notifThing, SOCIAL_SOLID.DatetimeCreated, {fetch: fetch});
 
+    // Sender web id
+    const webId = getUrl(notifThing, SOCIAL_SOLID.SenderWebId, { fetch: fetch });
+    if (webId == null) {
+        return [null, null]
+    }
+
     let notif;
     const notifType = getUrl(notifThing, RDF.type, { fetch: fetch });
     if (notifType === SOCIAL_SOLID.ConnReq) {
         [notif, error] = getConnectionRequestNotification(notifThing);
+        if (error) {
+            return [null, error];
+        }
+    } else if (notifType === SOCIAL_SOLID.Like) {
+        [notif, error] = getLikeNotification(notifThing);
         if (error) {
             return [null, error];
         }
@@ -193,7 +207,8 @@ async function getNotification(notifUrl) {
     notif = {
         ...notif,
         url: notifUrl,
-        datetime: dateCreated
+        datetime: dateCreated,
+        senderWebId: webId
     }
     return [notif, null];
 }
@@ -235,6 +250,7 @@ export async function deleteNotification(notifUrl) {
 
 function connectSocket(socket, updateFunction) {
     socket.on("message", updateFunction);
+    
     socket.on("close", function(e) {
       console.log('Socket is closed. Reconnect will be attempted in 1 second.', e.reason);
       setTimeout(function() {
@@ -246,9 +262,12 @@ function connectSocket(socket, updateFunction) {
       console.error('Socket encountered error: ', err.message, 'Closing socket');
       socket.disconnect();
     });
+
+    socket.connect();
   }
 
 export async function createNotificationSocket(podRootDir, changeHandler) {
+    console.log("creating");
     var socket;
     try {
         socket = new WebsocketNotification(
@@ -289,9 +308,6 @@ async function sendNotification(notifDataset, recieverPodRoot) {
 
 
 export async function createLikeNotification(senderWebId, postUrl, recieverPodRoot) {
-    console.log(senderWebId);
-    console.log(postUrl);
-    // //senderDetails = {webId, msg, socialPod}
     let notifDataset = createSolidDataset();
     let notifThing = buildThing(createThing({name: "this"}))
         .addUrl(RDF.type, SOCIAL_SOLID.Like)

@@ -1,4 +1,4 @@
-import { Button, Group, Text, Space } from "@mantine/core";
+import { Button, Group, Text, Space, MediaQuery } from "@mantine/core";
 import { IconCopy } from "@tabler/icons-react";
 import { createPlainNotification } from "./Notifications/PlainNotification";
 
@@ -13,8 +13,10 @@ export function ShareButton(props) {
             createPlainNotification({title: "Copied to clipboard!", description: msg});
         }}>
         <Group>
-            <Text>Invite friends </Text>
-                <IconCopy/>
+            <MediaQuery smallerThan='sm' styles={{display: 'none'}}>
+                <Text>Invite friends </Text>
+            </MediaQuery>
+            <IconCopy/>
         </Group>
         </Button>
         
