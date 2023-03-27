@@ -65,7 +65,7 @@ export function PersonView(props) {
                         {postsExist ?
                             <PostGrid
                                 author={props.person}
-                                user={props.user}
+                                user={{podRootDir: podRoot, webId: props.person.webId}}
                                 authorised={false}
                                 emptyComponent={(<Center><Text> No posts to see...</Text></Center>)}
                             />

@@ -1,1 +1,0 @@
-(self.webpackChunkapp=self.webpackChunkapp||[]).push([[670],{7670:function(){}}]);
