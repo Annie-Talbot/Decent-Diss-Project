@@ -1,21 +1,24 @@
-import { Center, Group, Modal, Skeleton, Stack, Text, Title, Button, ThemeIcon } from "@mantine/core";
+import { Center, Group, Modal, Skeleton, Stack, Text, Title, Button, ThemeIcon, ActionIcon, Space } from "@mantine/core";
 import React, { useEffect, useState } from "react";
 import { createSocialDirectory, findUsersSocialPod } from "../../SOLID/SocialDirHandler";
 import { createErrorNotification } from "../Core/Notifications/ErrorNotification";
-import { IconExclamationCircle } from "@tabler/icons-react";
+import { IconExclamationCircle, IconSquareRoundedPlusFilled } from "@tabler/icons-react";
+
+async function addSocialDirectory(podRootDir, setPod) {
+    console.log(podRootDir);
+    const result = await createSocialDirectory(podRootDir)
+    if (!result.success) {
+        createErrorNotification(result.error);
+        return;
+    }
+    setPod();
+}
 
 
 function PodButton(props) {
     return (
         <Button
-            onClick={async () => {
-                const result = await createSocialDirectory(props.pod)
-                if (!result.success) {
-                    createErrorNotification(result.error);
-                    return;
-                }
-                props.setPod();
-            }}
+            onClick={() => addSocialDirectory(props.pod, props.setPod)}
         >
             {props.pod}
         </Button>
@@ -49,7 +52,6 @@ export function SocialDirectorySelector(props) {
     const podOptions = pods.map((podRootDir) => (
         <PodButton key={podRootDir} pod={podRootDir} setPod={() => props.setPod(podRootDir)} />
     ));
-
     return (
         <Modal
             opened={props.opened}
@@ -72,17 +74,33 @@ export function SocialDirectorySelector(props) {
                             <Text>Refresh and try again, or contact support.</Text>
                         </Stack>
                     :
-                        <Stack align='center'>
+                        <Stack align='center' spacing='xs'>
                             <ThemeIcon 
                                 variant="light"
                                 size="xl">
                                 <IconExclamationCircle/>
                             </ThemeIcon>
-                            <Title order={4}>No social information found in any of your PODs</Title>
-                            <Text>Create a folder in which POD?</Text>
-                            <Group>
-                                {podOptions}
-                            </Group>
+                            <Title order={4}>No social folder found in any of your PODs</Title>
+                            <Space h={8}/>
+                            {pods.length > 1?
+                                <>
+                                <Text>Create one in which POD?</Text>
+                                <Group>
+                                    {pods}
+                                </Group>
+                                </>
+                            :
+                                <>
+                                <Text>Create one?</Text>
+                                <ActionIcon
+                                    size={64}
+                                    color='sage'
+                                    onClick={() => addSocialDirectory(pods[0], () => props.setPod(pods[0]))}
+                                >
+                                    <IconSquareRoundedPlusFilled size={48}/>
+                                </ActionIcon>
+                                </>
+                            }
                         </Stack>
                     }
                 </Center>

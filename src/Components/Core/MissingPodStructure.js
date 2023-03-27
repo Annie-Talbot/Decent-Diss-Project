@@ -1,5 +1,5 @@
 import { Center, Stack, Title, Button, ActionIcon, HoverCard, Badge, Group, ThemeIcon, Space, Text } from "@mantine/core";
-import { IconInfoCircle, IconSquareRoundedPlusFilled } from "@tabler/icons-react";
+import { IconExclamationCircle, IconInfoCircle, IconSquareRoundedPlusFilled } from "@tabler/icons-react";
 import { createErrorNotification } from "./Notifications/ErrorNotification";
 
 
@@ -7,6 +7,13 @@ export function MissingPodStructure(props) {
     return (
         <Center style={{marginTop: 44, marginBottom: 44}}>
             <Stack align={'center'}>
+                <ThemeIcon
+                    size='xl'
+                    color='red'
+                    variant="light"
+                    >
+                        <IconExclamationCircle/>
+                </ThemeIcon>
                 <Group align='flex-start' p={0} spacing={4} >
                     <Title order={3} >
                         No {props.podStructureRequired} found in your POD

@@ -36,7 +36,6 @@ export function CreatePostForm(props) {
 
     useEffect(() => {
         fetchGroups(props.user.podRootDir).then(([fetchedGroups, errors]) => {
-            errors.forEach((e) => createErrorNotification(e));
             setGroups(fetchedGroups);
             setGroupIndexes(fetchedGroups.map((c, i) => ({value: i.toString(), label: c.name})));
         }).then(() => {
@@ -161,6 +160,7 @@ export function CreatePostForm(props) {
                                             false,
                                             groups,
                                             () => {
+                                                setActive(0);
                                                 props.close();
                                                 createPlainNotification(
                                                     {title: "Success!", 
@@ -190,6 +190,7 @@ export function CreatePostForm(props) {
                                     true,
                                     groups,
                                     () => {
+                                        setActive(0);
                                         props.close();
                                         createPlainNotification(
                                             {title: "Success!", 

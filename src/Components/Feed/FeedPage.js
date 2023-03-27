@@ -90,14 +90,15 @@ export class FeedPage extends React.Component {
             });
         }
         return (
-            <PageLoader 
-                checkFunction={doesFeedDirExist}
-                createFunction={createFeedDir}
-                podRootDir={this.user.podRootDir}
-                podStructureRequired="feed directory"
-            >
+            <Paper shadow="md" p="md" withBorder>
+                <PageLoader 
+                    checkFunction={doesFeedDirExist}
+                    createFunction={createFeedDir}
+                    podRootDir={this.user.podRootDir}
+                    podStructureRequired="feed directory"
+                >
 
-                <Paper shadow="md" p="md">
+                
                     <Stack>
                         <PageHeader
                             back={() => this.back(this)}
@@ -108,8 +109,9 @@ export class FeedPage extends React.Component {
                         />
                         {content}
                     </Stack>
-                </Paper>
-            </PageLoader>
+                
+                </PageLoader>
+            </Paper>
         );
     }
 }
