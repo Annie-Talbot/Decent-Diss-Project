@@ -14,9 +14,6 @@ import { IconSquareRoundedPlusFilled } from "@tabler/icons-react";
 
 
 async function handleCreatePerson(user, person, closePopup, deleteNotification) {
-    console.log("create")
-    console.log(user);
-    console.log(person)
     if (!await isValidWebID(person.webId)) {
         createErrorNotification({title: "Invalid webID.", 
             description: "WebID is not a valid URL."});

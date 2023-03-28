@@ -5,7 +5,6 @@ import { createErrorNotification } from "../Core/Notifications/ErrorNotification
 import { IconExclamationCircle, IconSquareRoundedPlusFilled } from "@tabler/icons-react";
 
 async function addSocialDirectory(podRootDir, setPod) {
-    console.log(podRootDir);
     const result = await createSocialDirectory(podRootDir)
     if (!result.success) {
         createErrorNotification(result.error);

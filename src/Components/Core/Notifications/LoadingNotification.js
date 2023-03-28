@@ -14,7 +14,7 @@ export async function createLoadingNotification(id, title, message, asyncFunctio
     })
 
     let result = await asyncFunction();
-    setTimeout(onFinish, 1000);
+    setTimeout(onFinish, 500);
     if (!result.success) {
         updateNotification({
             id: id,

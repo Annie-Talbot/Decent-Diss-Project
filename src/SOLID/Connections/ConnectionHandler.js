@@ -24,9 +24,10 @@ export async function doesConnectionsDirExist(podRootDir) {
 export async function createConnectionsDir(podRootDir) {
     const error = await createEmptyDataset(podRootDir + CONNECTIONS_DIR)[1];
     if (error) {
-        return error;
+        return {success: false, error: error};
     }
     await delay(500)
+    return {success: true};
 }
 
 export async function fetchAllConnections(podRootDir) {

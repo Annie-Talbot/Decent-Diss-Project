@@ -1,7 +1,7 @@
 import { addStringNoLocale, addUrl, buildThing, createContainerInContainer, createSolidDataset, 
     createThing, getDatetime, getSolidDataset, getSourceUrl, 
     getStringNoLocale, getThing, getUrl, getUrlAll, saveFileInContainer, 
-    saveSolidDatasetAt, setThing, universalAccess } from "@inrupt/solid-client";
+    saveSolidDatasetAt, setThing } from "@inrupt/solid-client";
 import { fetch } from '@inrupt/solid-client-authn-browser'
 import { RDF, SCHEMA_INRUPT } from "@inrupt/vocab-common-rdf";
 import { getChildUrlsList, deleteDirectory,
@@ -48,10 +48,11 @@ export async function doesPostsDirExist(podRootDir) {
 export async function createPostsDir(podRootDir) {
     const error = await createEmptyDataset(podRootDir + POSTS_DIR)[1];
     if (error) {
-        return error;
+        return {success: false, error: error};
     }
     await delay(500);
     await setReadAccess(podRootDir + POSTS_DIR, true, null);
+    return {success: true}
 }
 
 
@@ -78,9 +79,8 @@ async function getPostFromThing(postThing) {
         if (error) {
             return [null, error]
         }
-        postImg = URL.createObjectURL(image);
+        postImg = image;
     }
-    console.log(postDatetime);
     let post = {
         title: postTitle,
         text: postText,
@@ -98,7 +98,6 @@ async function getPostFromThing(postThing) {
  * @returns {dict} A dictionary will post information in.
  */
 async function getPost(postDir, getAccess) {
-    // console.log(await universalAccess.getAgentAccessAll(postDir, {fetch: fetch}));
     const errContext = "Encountered whilst attempting to get post " +
                             "data for " + postDir;
     const postDatasetUrl = postDir + POST_DATASET
@@ -221,7 +220,6 @@ async function createPostDataset(postDirUrl, post) {
         .addStringNoLocale(SOCIAL_SOLID.PostTitle, post.title)
         .addDatetime(SOCIAL_SOLID.DatetimeCreated, date)
         .build();
-
     // Create image first because we need the url it is saved at.
     if (post.image) {
         let imgFile;
@@ -229,9 +227,11 @@ async function createPostDataset(postDirUrl, post) {
             imgFile = await saveFileInContainer(
             postDirUrl,
             post.image,
-            { slug: post.image.name, 
+            { 
+                slug: post.image.name, 
                 contentType: post.image.type, 
-                fetch: fetch }
+                fetch: fetch 
+            }
             );
         } catch (error) {
             return [false, [], simplifyError(error, "Encountered whilst trying to save image file.")]
@@ -239,14 +239,12 @@ async function createPostDataset(postDirUrl, post) {
         postThing = addUrl(postThing, SCHEMA_INRUPT.image, getSourceUrl(imgFile))
         urls.push(getSourceUrl(imgFile));
     }
-
     if (post.text) {
         postThing = addStringNoLocale(
             postThing, 
             SCHEMA_INRUPT.text, 
             post.text);
     }
-
     postDataset = setThing(postDataset, postThing);
     try {
         await saveSolidDatasetAt(
@@ -311,7 +309,8 @@ export async function createPost(podRootDir, webId, post, doAlerts) {
     }
 
     if (post.url) {
-        // If editing a post, remove the old datasets
+        // If editing a post, fetch image, then remove the old datasets
+
         result = await deleteDataset(postDirUrl + POST_DATASET);
         if (!result.success) {
             return {success: false, error: {title: "Failed to edit post.", 

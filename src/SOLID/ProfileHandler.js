@@ -45,9 +45,9 @@ export async function createSampleProfile(podRootDir) {
         );
         await delay(500);
         await setReadAccess(podRootDir + PROFILE_DATASET, true, null);
-        return null;
+        return {success: true};
     } catch (error) {
-        return simplifyError(error);
+        return {success: false, error: simplifyError(error)};
     }
     
 }

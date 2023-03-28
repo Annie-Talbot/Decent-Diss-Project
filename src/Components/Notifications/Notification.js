@@ -4,7 +4,6 @@ import { ConnectionRequestNotification } from "./ConnReqNotification";
 import { LikeNotification } from "./LikeNotification";
 
 export function Notification(props) {
-    console.log(props.notification);
     const notif = props.notification;
     let content;
     if (notif.type === NOTIFICATIONS_TYPES.ConnectionRequest) {

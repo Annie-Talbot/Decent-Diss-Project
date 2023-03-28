@@ -9,7 +9,6 @@ import { sendLike } from "../../SOLID/NotificationHandler";
 import { createLoadingNotification } from "../Core/Notifications/LoadingNotification";
 
 async function handleSendLike(senderWebId, post, author) {
-    console.log(post);
     let error = await sendLike(senderWebId, post.url, author.webId);
     if (error) {
         createErrorNotification(error);
@@ -29,7 +28,6 @@ export function PostGrid(props) {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        console.log("post grid fetch")
         fetchPosts(props.user.podRootDir, props.authorised).then(([success, posts, errors]) => {
             if (!success) {
                 createErrorNotification(errors[0]);

@@ -21,7 +21,6 @@ function inViewChange(entries, deletePostAlert) {
 }
 
 async function handleSendLike(senderWebId, post, author) {
-    console.log(post);
     let error = await sendLike(senderWebId, post.url, author.webId);
     if (error) {
         createErrorNotification(error);

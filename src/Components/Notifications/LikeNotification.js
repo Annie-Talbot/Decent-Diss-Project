@@ -38,7 +38,6 @@ export function LikeNotification(props) {
             }
         });
     }, [])
-    console.log(person);
     return (
             <Group 
                 position="apart" 

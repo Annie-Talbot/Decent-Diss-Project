@@ -34,9 +34,10 @@ export async function doesFeedDirExist(podRootDir) {
 export async function createFeedDir(podRootDir) {
     const error = await createEmptyDataset(podRootDir + FEED_DIR)[1];
     if (error) {
-        return error;
+        return {success: false, error: error};
     }
     await delay(500);
+    return {success: true};
 }
 
 
@@ -215,7 +216,6 @@ export async function fetchPeopleWithFeedAppendAccess(podRootDir) {
     for (let i = 0; i < accessList.length; i++) {
         let person = people.find(p => p.webId === accessList[i].webId);
         if (person) {
-            console.log("Adjusted person");
             accessList[i] = person;
         }
     }

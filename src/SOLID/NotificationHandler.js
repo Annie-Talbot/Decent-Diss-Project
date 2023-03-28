@@ -68,10 +68,11 @@ export async function doesNotificationsDirExist(podRootDir) {
 export async function createNotificationsDir(podRootDir) {
     const error = await createEmptyDataset(podRootDir + NOTIFICATIONS_DIR)[1];
     if (error) {
-        return error;
+        return {success: false, error: error};
     }
     await delay(500);
     await setPublicAppendAccess(podRootDir + NOTIFICATIONS_DIR);
+    return {success: true};
 }
 
 
@@ -263,7 +264,6 @@ function connectSocket(socket, updateFunction) {
   }
 
 export async function createNotificationSocket(podRootDir, changeHandler) {
-    console.log("creating");
     var socket;
     try {
         socket = new WebsocketNotification(

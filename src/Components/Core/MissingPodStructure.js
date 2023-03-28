@@ -1,11 +1,16 @@
-import { Center, Stack, Title, Button, ActionIcon, HoverCard, Badge, Group, ThemeIcon, Space, Text } from "@mantine/core";
+import { Center, Stack, Title, Button, ActionIcon, HoverCard, Badge, Group, ThemeIcon, Space, Text, LoadingOverlay } from "@mantine/core";
 import { IconExclamationCircle, IconInfoCircle, IconSquareRoundedPlusFilled } from "@tabler/icons-react";
+import { useState } from "react";
 import { createErrorNotification } from "./Notifications/ErrorNotification";
+import { createLoadingNotification } from "./Notifications/LoadingNotification";
 
 
 export function MissingPodStructure(props) {
+    const [loading, setLoading] = useState(false);
+    
     return (
         <Center style={{marginTop: 44, marginBottom: 44}}>
+            <LoadingOverlay visible={loading} />
             <Stack align={'center'}>
                 <ThemeIcon
                     size='xl'
@@ -45,12 +50,12 @@ export function MissingPodStructure(props) {
                     size={80}
                     color='sage'
                     onClick={async() => {
-                        const error = await props.createFunction(props.podRootDir);
-                        if (error) {
-                            createErrorNotification(error);
-                            return;
-                        }
-                        props.setExists(true);
+                        createLoadingNotification("create-pod-thing", "Creating...", "",
+                            () => props.createFunction(props.podRootDir), () => {
+                                props.setExists(true);
+                                setLoading(false);
+                            })
+                        setLoading(true);
                     }}
                 >
                     <IconSquareRoundedPlusFilled size={57} />

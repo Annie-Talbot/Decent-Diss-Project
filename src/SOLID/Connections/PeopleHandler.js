@@ -26,10 +26,10 @@ export async function doesPeopleDatasetExist(podRootDir) {
 export async function createPeopleDataset(podRootDir) {
     const error = await createEmptyDataset(podRootDir + CONNECTIONS_DIR + PEOPLE_DATASET)[1];
     if (error) {
-        return error;
+        return {success: false, error: error};
     }
     await delay(500)
-    return null;
+    return {success: true};
 }
 
 async function getPeopleDataset(podRootDir) {

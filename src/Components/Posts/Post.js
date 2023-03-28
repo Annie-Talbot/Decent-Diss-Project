@@ -1,5 +1,3 @@
-import { universalAccess } from '@inrupt/solid-client';
-import { fetch } from '@inrupt/solid-client-authn-browser';
 import { Card, Text, Image, Badge, Menu, ActionIcon, Stack, Grid, Title, Group, AspectRatio } from '@mantine/core';
 import { useHover } from '@mantine/hooks';
 import { IconEdit, IconDotsVertical, IconTrash, IconHandLittleFinger, IconHeart } from '@tabler/icons';
@@ -22,7 +20,7 @@ export function Post(props) {
                 <AspectRatio ratio={9 / 8} mx="auto" p='md'>
                     <Image
                             radius="sm"
-                            src={props.post.image}
+                            src={URL.createObjectURL(props.post.image)}
                         />
                 </AspectRatio>
             :<></>}

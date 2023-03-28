@@ -25,10 +25,10 @@ export async function doesGroupsDatasetExist(podRootDir) {
 export async function createGroupsDataset(podRootDir) {
     const error = await createEmptyDataset(podRootDir + CONNECTIONS_DIR + GROUPS_DATASET)[1];
     if (error) {
-        return error;
+        return {success: false, error: error};
     }
     await delay(500)
-    return null;
+    return {success: true};
 }
 
 
