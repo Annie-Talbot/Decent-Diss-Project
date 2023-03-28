@@ -91,16 +91,16 @@ export async function deleteDataset(url) {
           url, 
           { fetch: fetch }
         );
-        return [true, null];
+        return {success: true};
     } catch (error) {
-        return [false, simplifyError(error, 
-            "Encountered whilst attempting to delete the dataset at " + url)
-        ]
+        return {success: false, error: simplifyError(error, 
+            "Encountered whilst attempting to delete the dataset at " + url)}
     }
 }
 
 export async function deleteDirectory(dirUrl) {
     let success;
+    let result;
     let isFile = false;
     let isCtnr = false;
     let [childUrls, error] = await getChildUrlsList(dirUrl);
@@ -127,17 +127,17 @@ export async function deleteDirectory(dirUrl) {
         if (isFile) {
             [success, error] = await deleteRawFile(childUrls[i]);
             if (!success) {
-                return [false, error]
+                return {success: false, error: error};
             }
         } else if (isCtnr) {
-            [success, error] = await deleteDirectory(childUrls[i]);
-            if (!success) {
-                return [false, error]
+            result = await deleteDirectory(childUrls[i]);
+            if (!result.success) {
+                return result;
             }
         } else {
-            [success, error] = await deleteDataset(childUrls[i]);
-            if (!success) {
-                return [false, error]
+            result = await deleteDataset(childUrls[i]);
+            if (!result.success) {
+                return result;
             }
         }
         isFile = false;
@@ -146,15 +146,14 @@ export async function deleteDirectory(dirUrl) {
 
     [childUrls, error] = await getChildUrlsList(dirUrl);
     if (error) {
-        return [false, error];
+        return {success: false, error: error};
     }
     if (childUrls.length > 0) {
-        return [false, {
-            code: -1,
+        return {success: false, error: {
             title: "Unknown error",
             description: "Could not delete a file within " +
                         "the directory, so could not remove this directory",
-        }]
+        }};
     }
     return await deleteDataset(dirUrl);
 }

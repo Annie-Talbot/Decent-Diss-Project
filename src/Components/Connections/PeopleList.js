@@ -6,17 +6,13 @@ import { useState, useEffect } from "react";
 import { PageLoader } from "../Core/PageLoader";
 import { IconBeach, IconCircleChevronsRight } from "@tabler/icons-react";
 import { createPlainNotification } from "../Core/Notifications/PlainNotification"
+import { createLoadingNotification } from "../Core/Notifications/LoadingNotification";
 
 
 
 async function handleDeletePerson(podRootDir, person, update) {
-    let error = await deletePerson(podRootDir, person.url);
-    if (error) {
-        createErrorNotification(error);
-        return;
-    }
-    createPlainNotification({title: "Successfully deleted"});
-    update();
+    createLoadingNotification("delete-person", "Deleting person...", "",
+        () => deletePerson(podRootDir, person.url), update);
 }
 
 

@@ -186,5 +186,5 @@ export async function updateProfile(podRootUrl, profile) {
         errors.push(simplifyError(e, "Whilst saving profile dataset."));
         success = false;
     }
-    return [success, errors];
+    return {success: success, error: errors[0]};
 }

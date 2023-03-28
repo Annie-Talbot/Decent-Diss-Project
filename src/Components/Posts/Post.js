@@ -1,4 +1,6 @@
-import { Card, Text, Image, Badge, Menu, ActionIcon, Stack, Grid, Title, Group } from '@mantine/core';
+import { universalAccess } from '@inrupt/solid-client';
+import { fetch } from '@inrupt/solid-client-authn-browser';
+import { Card, Text, Image, Badge, Menu, ActionIcon, Stack, Grid, Title, Group, AspectRatio } from '@mantine/core';
 import { useHover } from '@mantine/hooks';
 import { IconEdit, IconDotsVertical, IconTrash, IconHandLittleFinger, IconHeart } from '@tabler/icons';
 import { IconHeartFilled } from '@tabler/icons-react';
@@ -15,18 +17,14 @@ export function Post(props) {
             withBorder 
             style={{maxWidth: 600, minWidth: 350, minHeight: 200, paddingBottom: 6}}
         >
-            <Card.Section style={{"height": 60}} withBorder>
-                <Person person={props.author} viewPerson={props.viewPerson} />
-            </Card.Section>
+            <Person person={props.author} viewPerson={props.viewPerson} />
             {props.post.image? 
-                <Card.Section style={{"height": 300}} withBorder >
+                <AspectRatio ratio={9 / 8} mx="auto" p='md'>
                     <Image
-                            radius="md"
-                            fit="contain"
-                            height={300}
+                            radius="sm"
                             src={props.post.image}
                         />
-                </Card.Section>
+                </AspectRatio>
             :<></>}
             <Stack justify='space-between' >
                 <Grid mt="md" mb="xs">

@@ -193,9 +193,9 @@ export async function createPostAlerts(postUrl, podRootDir, webId, recipientList
     let recipientPodRoots = [];
     // Get pod roots for only specific contacts
     for (let i = 0; i < recipientList.length; i ++) {
-        let [podRoot, error] = await findSocialPodFromWebId(recipientList[i].webId);
-        if (podRoot) {
-            recipientPodRoots.push(podRoot);
+        let result = await findSocialPodFromWebId(recipientList[i].webId);
+        if (result.pod) {
+            recipientPodRoots.push(result.pod);
         }
     }
     recipientPodRoots.forEach(async (podRoot) => {
@@ -234,15 +234,14 @@ export async function revokeFollowPerson(podRootDir, webId) {
 export async function followGroup(podRootDir, group) {
     let [people, errors] = await fetchPeopleFromList(podRootDir, group.members);
     if (people.length === 0) {
-        return [{title: "Group has no people.", description: "No one has been followed."}];
+        return {success: false, error: 
+            {title: "Group has no people.", 
+            description: "No one has been followed."}};
     }
-    errors = [];
     for (let i = 0; i < people.length; i++) {
-        let e = await followPerson(podRootDir, people[i].webId);
-        if (e) errors.push(e);
+        await followPerson(podRootDir, people[i].webId);
     }
-
-    return errors;
+    return {success: true};
 }
 
 

@@ -1,8 +1,8 @@
-import { access, universalAccess } from "@inrupt/solid-client";
+import { access, getContainedResourceUrlAll, universalAccess } from "@inrupt/solid-client";
 import { fetch } from "@inrupt/solid-client-authn-browser";
 import { fetchPeopleFromList } from "./Connections/PeopleHandler";
 import { fetchPosts } from "./PostHandler";
-import { simplifyError } from "./Utils";
+import { getChildUrlsList, simplifyError } from "./Utils";
 
 /**
 * Sets the access of a resource to read-only. If agentID is null, 
@@ -114,12 +114,13 @@ export async function setAppendAccess(resourceUrl, agentWebId, appendAccess) {
             {append: appendAccess},
             {fetch: fetch});
         if (access === null) {
-            return {title: "Could not set access", description: ""};
+            return {success: false, error: {title: "Could not set access", description: ""}};
         }
     } catch(e) {
-        return simplifyError(e, "Whilst attempting to set append access for agent " + agentWebId);
+        return {success: false, error: 
+            simplifyError(e, "Whilst attempting to set append access for agent " + agentWebId)};
     }
-    return null;
+    return {success: true};
 }
 
 export async function setReadAppendAccess(resourceUrl, agentWebId, read, append) {
@@ -138,9 +139,6 @@ export async function setReadAppendAccess(resourceUrl, agentWebId, read, append)
     } catch(e) {
         return simplifyError(e, "Whilst attempting to set append access for agent " + agentWebId);
     }
-
-    let access = await universalAccess.getAgentAccess(resourceUrl, agentWebId, {fetch: fetch});
-    console.log(access);
     return null;
 }
 
@@ -152,7 +150,10 @@ export async function backtraceAccess(podRootDir, webId, filter) {
     }
     await posts.forEach(async (post) => {
         if (filter(post)) {
-            await setReadAccess(post.url, true, webId);
+            // need to do for all resources contained within the post.
+            let postUrls = (await getChildUrlsList(post.url))[0];
+            postUrls.push(post.url);
+            await setAllReadAccess(postUrls, [webId])
         }
     })
     return {success: true, error: null};

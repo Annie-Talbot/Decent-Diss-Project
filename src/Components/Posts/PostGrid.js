@@ -6,6 +6,7 @@ import { useState, useEffect } from "react";
 import { POSTS_DIR } from "../../SOLID/Utils";
 import { createPlainNotification } from "../Core/Notifications/PlainNotification";
 import { sendLike } from "../../SOLID/NotificationHandler";
+import { createLoadingNotification } from "../Core/Notifications/LoadingNotification";
 
 async function handleSendLike(senderWebId, post, author) {
     console.log(post);
@@ -18,22 +19,9 @@ async function handleSendLike(senderWebId, post, author) {
 }
 
 
-async function handleDeletePost(post, posts, setPostList) {
-    const [success, error] = await deletePost(post.url);
-    if (!success) {
-        createErrorNotification(error);
-        return;
-    }
-    createPlainNotification({title: "Success", description: "Successfully deleted post!"});
-    let list = [...posts];
-    let i;
-    for (i = 0; i < list.length; i++) {
-        if (list[i].name === post.name) {
-            break;
-        }
-    }
-    list.splice(i, 1);
-    setPostList(list);
+async function handleDeletePost(post, updateList) {
+    createLoadingNotification("deleting-post", "Deleting post...", "", 
+        () => deletePost(post.url), updateList);
 }
 
 export function PostGrid(props) {
@@ -41,6 +29,7 @@ export function PostGrid(props) {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
+        console.log("post grid fetch")
         fetchPosts(props.user.podRootDir, props.authorised).then(([success, posts, errors]) => {
             if (!success) {
                 createErrorNotification(errors[0]);
@@ -61,7 +50,7 @@ export function PostGrid(props) {
                     key={index}
                     authorised={props.authorised}
                     post={post}
-                    deletePost={() => handleDeletePost(post, postList, setPostList)}
+                    deletePost={() => handleDeletePost(post, props.updatePosts)}
                     sendLike={() => handleSendLike(props.user.webId, post, props.author)}
                     editPost={() => props.editPost(post)}
                 />

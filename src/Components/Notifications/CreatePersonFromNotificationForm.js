@@ -1,36 +1,45 @@
-import { Button, Group, Modal, Space, TextInput } from "@mantine/core";
+import { ActionIcon, Button, Group, Modal, Space, TextInput } from "@mantine/core";
 import { createPerson } from "../../SOLID/Connections/PeopleHandler";
 import { isValidWebID } from "../../SOLID/Utils";
 import { createErrorNotification } from "../Core/Notifications/ErrorNotification";
 import { useState } from "react";
 import { addLatestToFeed, followPerson } from "../../SOLID/FeedHandler";
 import { findSocialPodFromWebId } from "../../SOLID/NotificationHandler";
+import { createLoadingNotification } from "../Core/Notifications/LoadingNotification";
+import { backtraceAccess } from "../../SOLID/AccessHandler";
+import { IconSquareRoundedPlusFilled } from "@tabler/icons-react";
 
 
-async function handleCreatePerson(user, person, closePopup) {
+
+
+
+async function handleCreatePerson(user, person, closePopup, deleteNotification) {
+    console.log("create")
+    console.log(user);
+    console.log(person)
     if (!await isValidWebID(person.webId)) {
         createErrorNotification({title: "Invalid webID.", 
             description: "WebID is not a valid URL."});
         return;
     }
-    const error = await createPerson(user.podRootDir, person);
-    if (error) {
-        createErrorNotification(error);
-        return;
-    }
-    findSocialPodFromWebId(person.webId).then(async ([podRoot, error]) => {
-        if (error) {
-            return;
-        }
-        await addLatestToFeed({podRootDir: user.podRootDir}, 
-            {webId: person.webId, podRootDir: podRoot});
-        await addLatestToFeed({podRootDir: podRoot}, 
-            {webId: user.webId, podRootDir: user.podRootDir});
-
-    })
-    // fetch feed items from person,
-    // send feed items to person
-
+    createLoadingNotification("add-person", "Adding person...", "",
+        async () => {
+            let result = await createPerson(user.podRootDir, person);
+            if (!result.success) {
+                return result;
+            }
+            await findSocialPodFromWebId(person.webId).then(async (result) => {
+                if (!result.success) {
+                    return result;
+                }
+                await addLatestToFeed({webId: user.webId, podRootDir: user.podRootDir}, 
+                    {webId: person.webId, podRootDir: result.pod});
+                await addLatestToFeed({webId: person.webId, podRootDir: result.pod}, 
+                    {webId: user.webId, podRootDir: user.podRootDir});
+            })
+            return {success: true};
+        }, deleteNotification
+    );
     closePopup();
 }
 
@@ -60,14 +69,19 @@ export function CreatePersonFromConnReqForm(props) {
                 description="The name to give to this user."
             />
             <Space h="md"/>
-            <Group>
-                <Button
+            <Group position='center' >
+                <ActionIcon
+                    size='xl'
+                    color='sage'
                     onClick={() => {
-                        handleCreatePerson(props.user, person, props.closePopup);
+                        handleCreatePerson(props.user, person, () => {
+                            props.closePopup();
+                            setPerson(prev => ({...prev, nickname: ""}));
+                        }, props.delete);
                     }}
                 >
-                    Add
-                </Button>
+                    <IconSquareRoundedPlusFilled size={48} />
+                </ActionIcon>
             </Group>
             
         </Modal>

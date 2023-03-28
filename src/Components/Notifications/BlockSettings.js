@@ -8,6 +8,7 @@ import { followGroup, followPerson, revokeFollowPerson } from "../../SOLID/FeedH
 import { createPlainNotification } from "../Core/Notifications/PlainNotification";
 import { isValidWebID } from "../../SOLID/Utils";
 import { blockPerson, fetchPeopleWithoutNotificationAppendAccess, revokeBlockPerson } from "../../SOLID/NotificationHandler";
+import { createLoadingNotification } from "../Core/Notifications/LoadingNotification";
 
 function TextInputAction(props) {
     const [input, setInput] = useState("");
@@ -32,13 +33,8 @@ function TextInputAction(props) {
 }
 
 async function handleBlockPerson(podRootDir, person, updateList) {
-    let error = await blockPerson(podRootDir, person.webId);
-    if (error) {
-        createErrorNotification(error);
-        return;
-    }
-    createPlainNotification({title: "Successfully blocked.", description: ""});
-    updateList();
+    createLoadingNotification("block-person", "Blocking person...", "",
+        () => blockPerson(podRootDir, person.webId), updateList);
 }
 
 async function handleBlockWebId(podRootDir, webId, updateList) {
@@ -50,13 +46,8 @@ async function handleBlockWebId(podRootDir, webId, updateList) {
 }
 
 async function handleRevokeBlock(podRootDir, webId, updateList) {
-    let error = await revokeBlockPerson(podRootDir, webId);
-    if (error) {
-        createErrorNotification(error);
-        return;
-    }
-    createPlainNotification({title: "Successfully revoked access.", description: ""});
-    updateList();
+    createLoadingNotification("revoke-block-person", "Revoking person block...", "",
+        () => revokeBlockPerson(podRootDir, webId), updateList);
 }
 
 

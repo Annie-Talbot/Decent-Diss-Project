@@ -4,7 +4,9 @@ import { IconAlertCircle } from "@tabler/icons";
 
 export function createErrorNotification(error) {
     if (error.code) {
-        if (error.code !== -1) error.title = error.code + ": " + error.title;
+        if (error.code !== -1) {
+            error.title = error.code + ": " + error.title;
+        }
     }
     showNotification({
         title: error.title,

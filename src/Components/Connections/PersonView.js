@@ -15,20 +15,20 @@ export function PersonView(props) {
     const [postsExist, setPostsExist] = useState(false);
     
     useEffect(() => {
-        findSocialPodFromWebId(props.person.webId).then(async ([pod, e]) => {
-            if (e) {
+        findSocialPodFromWebId(props.person.webId).then(async (result) => {
+            if (!result.success) {
                 setError("Unable to fetch this person's data from their pod.")
                 return;
             }
-            if (pod === null) {
+            if (!result.pod) {
                 setError("This user has no valid social pod.")
                 return;
             }
-            setPodRoot(pod);
-            if ((await doesProfileExist(pod))[0]) {
+            setPodRoot(result.pod);
+            if ((await doesProfileExist(result.pod))[0]) {
                 setProfileExists(true);
             }
-            if ((await doesPostsDirExist(pod))[0]) {
+            if ((await doesPostsDirExist(result.pod))[0]) {
                 setPostsExist(true);
             }
             setLoading(false);

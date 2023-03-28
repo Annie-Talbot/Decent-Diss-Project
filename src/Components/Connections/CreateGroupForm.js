@@ -3,15 +3,11 @@ import { IconCirclePlus } from "@tabler/icons-react";
 import { useState } from "react";
 import { createGroup } from "../../SOLID/Connections/GroupHandler";
 import { createErrorNotification } from "../Core/Notifications/ErrorNotification";
+import { createLoadingNotification } from "../Core/Notifications/LoadingNotification";
 
 async function handleCreateGroup(podRootDir, group, close, update) {
-    const error = await createGroup(podRootDir, group);
-    if (error) {
-        createErrorNotification(error);
-        return;
-    }
-    update();
-    close();
+    createLoadingNotification("create-group", "Creating group...", "",
+        () => createGroup(podRootDir, group), () => {update();close();})
 }
 
 

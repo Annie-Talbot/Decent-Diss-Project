@@ -9,17 +9,14 @@ import { Birthday } from "./Birthday";
 import { createErrorNotification } from "../Core/Notifications/ErrorNotification";
 import { createPlainNotification } from "../Core/Notifications/PlainNotification";
 import { IconSquareRoundedCheckFilled } from "@tabler/icons-react";
+import { createLoadingNotification } from "../Core/Notifications/LoadingNotification";
 
 
 
-async function saveProfileChanges(podRootUrl, newProfile) {
-    const [success, errors] = await updateProfile(podRootUrl, newProfile);
-    errors.forEach(error => {
-        createErrorNotification(error);
-    });
-    if (success) {
-        createPlainNotification({title: "Success!", description: "Profile updated."})
-    }
+async function saveProfileChanges(podRootDir, newProfile, update, close) {
+    createLoadingNotification("save-profile", "Saving profile...", "",
+        () => updateProfile(podRootDir, newProfile), update)
+    close();
 }
 
 export function Profile(props)  {
@@ -114,7 +111,7 @@ export function Profile(props)  {
                             <ActionIcon
                                 size="xl"
                                 color="sage"
-                                onClick={() => saveProfileChanges(props.userPod, profile)}
+                                onClick={() => saveProfileChanges(props.userPod, profile, props.update, props.stopEditing)}
                             >
                                 <IconSquareRoundedCheckFilled size={57}/>
                             </ActionIcon>

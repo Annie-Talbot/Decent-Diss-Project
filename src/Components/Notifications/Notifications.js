@@ -10,16 +10,12 @@ import { MissingPodStructure } from "../Core/MissingPodStructure";
 import { SettingsButton } from "../Feed/SettingsButton";
 import { PageHeader } from "../Core/PageHeader";
 import { BlockSettings } from "./BlockSettings";
+import { createLoadingNotification } from "../Core/Notifications/LoadingNotification";
 
 
 async function handleDeleteNotification(notifUrl, updateNotifications) {
-    const error = await deleteNotification(notifUrl);
-    if (error) {
-        createErrorNotification(error);
-        return;
-    }
-    createPlainNotification({title: "Success", description: "Successfully deleted notification!"});
-    updateNotifications();
+    createLoadingNotification("delete-notification", "Deleting notification...", "",
+        () => deleteNotification(notifUrl), updateNotifications);
 }
 
 async function updateNotifications(podRootDir, setNotifications, setAlert) {
@@ -64,7 +60,7 @@ export function Notifications(props) {
 
     return (
         <>
-            <Drawer size="40%" padding="md" opened={opened} onClose={close}>
+            <Drawer size='xl' padding="md" opened={opened} onClose={close}>
                 {error !== "" ?
                     <Center><Text>An error occured: {error}. Try again later.</Text></Center>
                 :

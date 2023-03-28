@@ -6,23 +6,16 @@ import { addMember, fetchGroupDetailed, removeMember } from "../../SOLID/Connect
 import { createErrorNotification } from "../Core/Notifications/ErrorNotification";
 import { Members } from "./Members";
 import { PeopleSearcher } from "./../Feed/Searchers";
+import { createLoadingNotification } from "../Core/Notifications/LoadingNotification";
 
 async function handleAddMember(podRootDir, group, person, updateGroup) {
-    const error = await addMember(podRootDir, group, person);
-    if (error) {
-        createErrorNotification(error);
-        return;
-    }
-    updateGroup();
+    createLoadingNotification("add-member", "Adding member...", "",
+        () => addMember(podRootDir, group, person), updateGroup)
 }
 
 async function handleRemoveMember(podRootDir, groupUrl, personUrl, updateGroup) {
-    const error = await removeMember(podRootDir, groupUrl, personUrl);
-    if (error) {
-        createErrorNotification(error);
-        return;
-    }
-    updateGroup();
+    createLoadingNotification("remove-member", "Remove member...", "",
+        () => removeMember(podRootDir, groupUrl, personUrl), updateGroup)
 }
 
 

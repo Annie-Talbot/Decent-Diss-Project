@@ -1,28 +1,28 @@
-import { ActionIcon, MultiSelect, Center, Modal, Space, TextInput, Title, Radio, Stack, Group, Stepper, Container, ThemeIcon, Text } from "@mantine/core";
+import { ActionIcon, MultiSelect, Center, Modal, Space, TextInput, Title, Radio, Stack, Group, Stepper, Container, ThemeIcon, Text, LoadingOverlay } from "@mantine/core";
 import { IconArrowLeft, IconCheckbox, IconGift, IconRocket } from "@tabler/icons";
 import { IconArrowRight, IconRocketOff } from "@tabler/icons-react";
 import { useState, useEffect } from "react";
 import { fetchGroups } from "../../SOLID/Connections/GroupHandler";
 import { createPost, POST_ACCESS_TYPES } from "../../SOLID/PostHandler";
 import { createErrorNotification } from "../Core/Notifications/ErrorNotification";
+import { createLoadingNotification } from "../Core/Notifications/LoadingNotification";
 import { createPlainNotification } from "../Core/Notifications/PlainNotification";
 import { PostAdditionsMenu } from "./PostInputs/PostAdditionsMenu";
 import { PostImageInput } from "./PostInputs/PostImageInput";
 import { PostTextInput } from "./PostInputs/PostTextInput";
 
-async function handleCreatePost(user, post, doAlerts, groups, finalise) {
+async function handleCreatePost(user, post, doAlerts, groups, reset, updateList) {
     post.accessType = parseInt(post.accessType);
     if (post.accessType === POST_ACCESS_TYPES.Specific) {
         const agents = post.accessList.map((index) => groups[parseInt(index)])
         post.accessList = agents;
     }
     
-    const [success, error] = await createPost(user.podRootDir, user.webId, post, doAlerts);
-    if (!success) {
-        createErrorNotification(error);
-        return;
-    }
-    finalise();
+
+    createLoadingNotification("create-post", "Creating post...", "",
+        () => createPost(user.podRootDir, user.webId, post, doAlerts),
+        updateList);
+    reset();
 }
 
 
@@ -33,6 +33,7 @@ export function CreatePostForm(props) {
 
     const [groups, setGroups] = useState([]);
     const [groupIndexes, setGroupIndexes] = useState([]);
+    const [saving, setSaving] = useState(false);
 
     useEffect(() => {
         fetchGroups(props.user.podRootDir).then(([fetchedGroups, errors]) => {
@@ -61,6 +62,7 @@ export function CreatePostForm(props) {
             title={"Create a new post"}
             onClose={() => {setActive(0); props.close();}}
         >
+            <LoadingOverlay visible={saving}/>
             <Container p='sm' style={{marginLeft: 30, marginRight: 30}}>
             <Stepper active={active} onStepClick={setActive} breakpoint="sm">
                 <Stepper.Step label="Design Post" description="Create your post">
@@ -153,7 +155,7 @@ export function CreatePostForm(props) {
                                     color='sage'
                                     radius='xl'
                                     size={100}
-                                    onClick={() => {
+                                    onClick={() =>
                                         handleCreatePost(
                                             props.user,
                                             props.post, 
@@ -161,14 +163,13 @@ export function CreatePostForm(props) {
                                             groups,
                                             () => {
                                                 setActive(0);
+                                                setSaving(true);
+                                            },
+                                            () => {
                                                 props.close();
-                                                createPlainNotification(
-                                                    {title: "Success!", 
-                                                    description: "Successfully created post."});
-                                                props.updatePosts();
-                                            });
-                                        
-                                    }}
+                                                setSaving(false);
+                                            })
+                                        }
                                     >
                                         <IconCheckbox size={60} />
                                     </ActionIcon>
@@ -183,7 +184,7 @@ export function CreatePostForm(props) {
                             color='sage'
                             radius='xl'
                             size={100}
-                            onClick={() => {
+                            onClick={() => 
                                 handleCreatePost(
                                     props.user,
                                     props.post, 
@@ -191,14 +192,13 @@ export function CreatePostForm(props) {
                                     groups,
                                     () => {
                                         setActive(0);
+                                        setSaving(true);
+                                    },
+                                    () => {
                                         props.close();
-                                        createPlainNotification(
-                                            {title: "Success!", 
-                                            description: "Successfully created post."});
-                                        props.updatePosts();
-                                    });
-                                
-                            }}
+                                        setSaving(false);
+                                    })
+                                }
                             >
                                 <IconRocket size={60} />
                             </ActionIcon>

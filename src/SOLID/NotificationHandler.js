@@ -25,9 +25,9 @@ export async function findSocialPodFromWebId(webId) {
         const error = simplifyError(e, "Whilst attempting to validate WebID: " + webId);
         if (error.code === 404) {
             error.title = "WebID has no associated pods.";
-            return [null, error];
+            return {success: false, error};
         }
-        return [null, error];
+        return {success: false, error};
     }
     // Find the pod with the social directory
     let socialPod;
@@ -43,11 +43,10 @@ export async function findSocialPodFromWebId(webId) {
         }
     }
     if (socialPod == null) {
-        return [null, {title: "Failed to find social information.",
-            description: "Could not find a pod with a social directory belonging to " + webId}];
+        return {success: true};
     }
     // No issues
-    return [socialPod, null];
+    return {success: true, pod: socialPod};
 }
 
 export async function doesNotificationsDirExist(podRootDir) {
@@ -76,14 +75,13 @@ export async function createNotificationsDir(podRootDir) {
 }
 
 
-export async function createConnectionRequest(senderDetails, recieverPodRoot) {
+export async function createConnectionRequest(sender, reciever) {
     //senderDetails = {webId, msg, socialPod}
     let notifDataset = createSolidDataset();
     let notifThing = buildThing(createThing({name: "this"}))
         .addUrl(RDF.type, SOCIAL_SOLID.ConnReq)
-        .addUrl(SOCIAL_SOLID.SenderWebId, senderDetails.webId)
-        .addStringNoLocale(SOCIAL_SOLID.NotifMessage, senderDetails.msg)
-        .addUrl(SOCIAL_SOLID.SenderPodRoot, senderDetails.socialPod)
+        .addUrl(SOCIAL_SOLID.SenderWebId, sender.webId)
+        .addUrl(SOCIAL_SOLID.SenderPodRoot, sender.podRootDir)
         .addUrl(SOCIAL_SOLID.SupportedApplications, SOCIAL_SOLID.Decent)
         .addBoolean(SOCIAL_SOLID.HasBeenRead, false)
         .addDatetime(SOCIAL_SOLID.DatetimeCreated, new Date(Date.now()))
@@ -91,7 +89,7 @@ export async function createConnectionRequest(senderDetails, recieverPodRoot) {
     
     notifDataset = setThing(notifDataset, notifThing);
 
-    return await sendNotification(notifDataset, recieverPodRoot);
+    return await sendNotification(notifDataset, reciever.podRootDir);
 }
 
 function getLikeNotification(notifThing) {
@@ -242,9 +240,7 @@ export async function fetchNotifications(podRootDir) {
 
 
 export async function deleteNotification(notifUrl) {
-    let error = await deleteDataset(notifUrl)[1];
-    await delay(500);
-    return error;
+    return await deleteDataset(notifUrl); 
 }
 
 
@@ -292,18 +288,18 @@ async function sendNotification(notifDataset, recieverPodRoot) {
         let error = simplifyError(e, "Whilst creating connection request notification.");
         if (error.code === 404) {
             // Not found
-            return {title: "User has no notifications directory", 
-                description: "Cannot send a notification to them."};
+            return {success: false, error: {title: "User has no notifications directory", 
+                description: "Cannot send a notification to them."}};
         }
         if (error.code === 403) {
             // Unauthorised
-            return {title: "No access to this user's notifications directory", 
-                description: "You may have been blocked."};
+            return  {success: false, error: {title: "No access to this user's notifications directory", 
+                description: "You may have been blocked."}};
         }
-        return {title: "Cannot add to notifications directory", 
-            description: error.description};
+        return  {success: false, error: {title: "Cannot add to notifications directory", 
+            description: error.description}};
     }
-    return null;
+    return {success: true};
 }
 
 
@@ -323,11 +319,11 @@ export async function createLikeNotification(senderWebId, postUrl, recieverPodRo
 }
 
 export async function sendLike(senderWebId, postUrl, recieverWebId) {
-    let [recieverPodRoot, error] = await findSocialPodFromWebId(recieverWebId);
-    if (error) {
-        return error;
+    let result = await findSocialPodFromWebId(recieverWebId);
+    if (!result.success) {
+        return result.error;
     }
-    return await createLikeNotification(senderWebId, postUrl, recieverPodRoot);
+    return await createLikeNotification(senderWebId, postUrl, result.pod);
 }
 
 
@@ -349,9 +345,17 @@ export async function fetchPeopleWithoutNotificationAppendAccess(podRootDir) {
 
 
 export async function blockPerson(podRootDir, webId) {
-    return await setReadAppendAccess(podRootDir + NOTIFICATIONS_DIR, webId, true, false);
+    let error = await setReadAppendAccess(podRootDir + NOTIFICATIONS_DIR, webId, true, false);
+    if (error) {
+        return {success: false, error: {title: "Could not change access."}};
+    }
+    return {success: true};
 }
 
 export async function revokeBlockPerson(podRootDir, webId) {
-    return await setReadAppendAccess(podRootDir + NOTIFICATIONS_DIR, webId, false, true);
+    let error = await setReadAppendAccess(podRootDir + NOTIFICATIONS_DIR, webId, false, true);
+    if (error) {
+        return {success: false, error: {title: "Could not change access."}};
+    }
+    return {success: true};
 }

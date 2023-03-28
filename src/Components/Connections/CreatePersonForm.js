@@ -1,51 +1,38 @@
-import { ActionIcon, Button, Group, Modal, Space, TextInput } from "@mantine/core";
+import { ActionIcon, Group, LoadingOverlay, Modal, Space, TextInput } from "@mantine/core";
 import { IconSquareRoundedPlusFilled } from "@tabler/icons-react";
 import { useState } from "react";
+import { backtraceAccess } from "../../SOLID/AccessHandler";
 import { createPerson } from "../../SOLID/Connections/PeopleHandler";
 import { createConnectionRequest, findSocialPodFromWebId } from "../../SOLID/NotificationHandler";
 import { isValidWebID } from "../../SOLID/Utils";
-import { createErrorNotification } from "../Core/Notifications/ErrorNotification";
+import { createLoadingNotification } from "../Core/Notifications/LoadingNotification";
+import { createPlainNotification } from "../Core/Notifications/PlainNotification";
 
-async function handleCreateAPerson(podRootDir, person) {
-    const error = await createPerson(podRootDir, person);
-    if (error) {
-        createErrorNotification(error);
-        return false;
-    }
-    return true;
+async function handleCreatePerson(user, person, update, close) {
+    createLoadingNotification("create-person", "Sending connection request and creating person...", "",
+        () => sendConnReqAndCreatePerson(user, person), update);
+    close();
 }
 
-async function sendConnectionRequest(webId, podRootDir, person) {
-    // Check we can send a notification first.
-    let [personPod, error] = await findSocialPodFromWebId(person.webId);
-    if (error) {
-        createErrorNotification(error);
-        return false;
-    }
-    error = await createConnectionRequest({webId: webId, socialPod: podRootDir, msg: "Hello."}, personPod);
-    if (error) {
-        createErrorNotification(error);
-        return false;
-    }
-    return true;
-}
-
-async function handleCreatePerson(user, person, closePopup, updatePeople, sendConnReq) {
+async function sendConnReqAndCreatePerson(user, person) {
     if (!await isValidWebID(person.webId)) {
-        createErrorNotification({title: "Invalid webID.", 
-            description: "WebID is not a valid URL."});
-        return;
+        return {success: false, error: {title: "Invalid WebID."}};
     }
-    let success = true;
-    if (sendConnReq) {
-        success = await sendConnectionRequest(user.webId, user.podRootDir, person);
+    let result = await findSocialPodFromWebId(person.webId);
+    if (!result.success) {
+        return result;
     }
-    if (success) {
-        if (await handleCreateAPerson(user.podRootDir, person)) {
-            closePopup();
-            updatePeople();
-        }
+
+    result = await createConnectionRequest(user, {webId: person.webId, podRootDir: result.pod});
+    if (!result.success) {
+        return result;
     }
+    createPlainNotification({title: "Sent connection request!"});
+    result = await createPerson(user.podRootDir, person);
+    if (!result.success) {
+        return result;
+    }
+    return {success: true};
 }
 
 
@@ -54,6 +41,7 @@ export function CreatePersonForm(props) {
         webId: "",
         nickname: "",
     });
+
     return (
         <Modal
             centered
@@ -90,14 +78,17 @@ export function CreatePersonForm(props) {
             <Space h="md"/>
             <Group position='center'>
                 <ActionIcon
-                    size='lg'
+                    size='xl'
                     c='sage'
-                    onClick={() => {
+                    onClick={() =>
                         handleCreatePerson(props.user, 
-                            person, props.toggleOpened, props.updatePeople, true);
-                    }}
+                            person, props.updatePeople, () => {
+                                props.toggleOpened();
+                                setPerson({webId: "", nickname: ""});
+                            })
+                    }
                 >
-                    <IconSquareRoundedPlusFilled />
+                    <IconSquareRoundedPlusFilled size={48}/>
                 </ActionIcon>
             </Group>
             

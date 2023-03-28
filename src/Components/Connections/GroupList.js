@@ -7,15 +7,11 @@ import { IconCircleChevronsRight } from "@tabler/icons";
 import { GroupItem } from "./GroupItem";
 import { createPlainNotification } from "../Core/Notifications/PlainNotification";
 import { IconBeach } from "@tabler/icons-react";
+import { createLoadingNotification } from "../Core/Notifications/LoadingNotification";
 
-async function handleDeleteGroup(podRootDir, group, update){
-    let error = await deleteGroup(podRootDir, group.url);
-    if (error) {
-        createErrorNotification(error);
-        return;
-    }
-    createPlainNotification({title: "Successfully deleted"});
-    update();
+async function handleDeleteGroup(podRootDir, group, update) {
+    createLoadingNotification("delete-group", "Deleting group...", "",
+        () => deleteGroup(podRootDir, group.url), update);
 }
 
 function EmptyGroups() {

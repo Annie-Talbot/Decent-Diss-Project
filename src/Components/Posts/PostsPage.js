@@ -112,16 +112,15 @@ export class PostsPage extends React.Component {
                             }
                             actionDisabled={false}
                         />
-                        <ScrollArea offsetScrollbars style={{gridRow: "1", gridColumn: "1"}}>
-                            <PostGrid
-                                author={{webId: this.user.webId, nickname: "Myself"}}
-                                key={this.state.postgridKey}
-                                authorised={true}
-                                user={this.user}
-                                emptyComponent={<EmptyPosts/>}
-                                editPost={(post) => this.editPost(this, post)}
-                                />             
-                        </ScrollArea>
+                        <PostGrid
+                            author={{webId: this.user.webId, nickname: "Myself"}}
+                            key={this.state.postgridKey}
+                            authorised={true}
+                            user={this.user}
+                            emptyComponent={<EmptyPosts/>}
+                            editPost={(post) => this.editPost(this, post)}
+                            updatePosts={() => this.updatePosts(this)}
+                            />             
                     </Stack>
                 </PageLoader>
             </Paper>

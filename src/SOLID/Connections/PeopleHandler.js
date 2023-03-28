@@ -4,7 +4,7 @@ import { CONNECTIONS_DIR, delay, makeId, createEmptyDataset, PEOPLE_DATASET, sim
 import { fetch } from '@inrupt/solid-client-authn-browser';
 import { RDF, SCHEMA_INRUPT, VCARD } from '@inrupt/vocab-common-rdf';
 import { ACCESS_AGENT_TYPE, backtraceAccess } from '../AccessHandler';
-import { followPerson } from '../FeedHandler';
+import { followPerson, revokeFollowPerson } from '../FeedHandler';
 import { POST_ACCESS_TYPES } from '../PostHandler';
 
 export async function doesPeopleDatasetExist(podRootDir) {
@@ -50,7 +50,7 @@ export async function createPerson(podRootDir, person) {
     // Fetch people dataset
     let [dataset, error] = await getPeopleDataset(podRootDir);
     if (error) {
-        return error;
+        return {success: false, error: error};
     }
 
     // Create Person thing
@@ -66,8 +66,8 @@ export async function createPerson(podRootDir, person) {
         await saveSolidDatasetAt(podRootDir + CONNECTIONS_DIR + PEOPLE_DATASET, dataset, {fetch: fetch});
     } catch (e) {
         let error = simplifyError(e, "Encountered whilst attempting to create a person.");
-        error.title = "Could no save the person";
-        return error;
+        error.title = "Could not save the person";
+        return {success: false, error: error};
     }
 
     // start following them
@@ -76,7 +76,7 @@ export async function createPerson(podRootDir, person) {
     // backtrace access so they can view private posts
     await backtraceAccess(podRootDir, person.webId, 
         (post) => post.accessType === POST_ACCESS_TYPES.Private);
-    return null;
+    return {success: true};
 }
 
 
@@ -178,7 +178,7 @@ export async function findPerson(podRootDir, webId) {
     }
     
     let person = people.find(p => p.webId === webId);
-    if (person === null) {
+    if (!person) {
         return {
             webId: webId,
             nickname: "",
@@ -191,11 +191,11 @@ export async function findPerson(podRootDir, webId) {
 export async function deletePerson(podRootDir, personUrl) {
     // Get person thing
     let [dataset, error] = await getPeopleDataset(podRootDir);
-    if (error) return error;
+    if (error) return {success: false, error: error};
     let personThing = getThing(dataset, personUrl);
     if (personThing === null) {
-        return {title: "Could not load person: " + personUrl, 
-            description: "Thing does not exist."};
+        return {success: false, error: {title: "Could not load person: " + personUrl, 
+            description: "Thing does not exist."}};
     }
     let webId = getUrl(personThing, SCHEMA_INRUPT.identifier);
     // remove person thing
@@ -207,12 +207,12 @@ export async function deletePerson(podRootDir, personUrl) {
             dataset,
             {fetch: fetch});
     } catch(e) {
-        return simplifyError(e, "An error occured whilst deleting Person.");
+        return {success: false, error: simplifyError(e, "An error occured whilst deleting Person.")};
     }
 
     // stop following them
-    if(webId) {
-        await followPerson(podRootDir, webId);
+    if (webId) {
+        await revokeFollowPerson(podRootDir, webId);
     }
-    return null;
+    return {success: true};
 }

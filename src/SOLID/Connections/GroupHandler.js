@@ -48,7 +48,7 @@ async function getGroupsDataset(podRootDir) {
 export async function createGroup(podRootDir, group) {
     let [dataset, error] = await getGroupsDataset(podRootDir);
     if (error) {
-        return error;
+        return {success: false, error: error};
     }
     let groupThing = buildThing(createThing())
         .addStringNoLocale(FOAF.name, group.name)
@@ -59,9 +59,9 @@ export async function createGroup(podRootDir, group) {
     try{
         await saveSolidDatasetAt(podRootDir + CONNECTIONS_DIR + GROUPS_DATASET, dataset, {fetch:fetch});
     } catch (error) {
-        return simplifyError(error, "Whilst saving the group.");
+        return {success: false, error: simplifyError(error, "Whilst saving the group.")};
     }
-    return null;
+    return {success: true};
 }
 
 
@@ -166,13 +166,13 @@ export async function addMember(podRootDir, group, person) {
     // Fetch group dataset
     let [dataset, error] = await getGroupsDataset(podRootDir);
     if (error) {
-        return error;
+        return {success: false, error: error};
     }
 
     let groupThing = getThing(dataset, group.url);
     if (groupThing === null) {
-        return {title: "Could not add member.", 
-            description: "Failed to get group information."};
+        return {success: false, error: {title: "Could not add member.", 
+            description: "Failed to get group information."}};
     }
 
     groupThing = addUrl(groupThing, FOAF.member, person.url);
@@ -186,14 +186,14 @@ export async function addMember(podRootDir, group, person) {
             {fetch: fetch}
         )
     } catch (error) {
-        return simplifyError(error, "Could not save group with new member added.");
+        return {success: false, error: simplifyError(error, "Could not save group with new member added.")};
     }
 
     await backtraceAccess(podRootDir, person.webId, 
         (post) => post.accessType === POST_ACCESS_TYPES.Specific &&
             post.accessList.includes(group.url));
     await delay(200);
-    return null;
+    return {success: true};
 }
 
 
@@ -201,12 +201,12 @@ export async function removeMember(podRootDir, groupUrl, personUrl) {
     // Fetch group dataset
     let [dataset, error] = await getGroupsDataset(podRootDir);
     if (error) {
-        return error;
+        return {success: false, error: error};
     }
     let groupThing = getThing(dataset, groupUrl);
     if (groupThing === null) {
-        return {title: "Could not remove member.", 
-            description: "Failed to get group information."};
+        return {success: false, error: {title: "Could not remove member.", 
+            description: "Failed to get group information."}};
     }
     groupThing = removeUrl(groupThing, FOAF.member, personUrl);
     dataset = setThing(dataset, groupThing);
@@ -217,10 +217,11 @@ export async function removeMember(podRootDir, groupUrl, personUrl) {
             {fetch: fetch}
         )
     } catch (error) {
-        return simplifyError(error, "Could not save group with new member added.");
+        return {success: false, error: 
+            simplifyError(error, "Could not save group with new member added.")};
     }
     await delay(500);
-    return null;
+    return {success: false};
 }
 
 
@@ -230,8 +231,8 @@ export async function deleteGroup(podRootDir, groupUrl) {
     if (error) return error;
     let groupThing = getThing(dataset, groupUrl);
     if (groupThing === null) {
-        return {title: "Could not load group: " + groupThing, 
-            description: "Thing does not exist."};
+        return {success: false, error: {title: "Could not load group: " + groupThing, 
+            description: "Thing does not exist."}};
     }
     // remove person thing
     dataset = removeThing(dataset, groupThing);
@@ -242,7 +243,7 @@ export async function deleteGroup(podRootDir, groupUrl) {
             dataset,
             {fetch: fetch});
     } catch(e) {
-        return simplifyError(e, "An error occured whilst deleting Group.");
+        return {success: false, error: simplifyError(e, "An error occured whilst deleting Group.")};
     }
-    return null;
+    return {success: true};
 }

@@ -4,6 +4,7 @@ import { AccessList } from "./AccessList"
 import { useState } from "react";
 import { PeopleSearcher, GroupSearcher } from "./Searchers";
 import { createErrorNotification } from "../Core/Notifications/ErrorNotification";
+import { createLoadingNotification } from "../Core/Notifications/LoadingNotification";
 import { fetchPeopleWithFeedAppendAccess, followGroup, followPerson, revokeFollowPerson } from "../../SOLID/FeedHandler";
 import { createPlainNotification } from "../Core/Notifications/PlainNotification";
 import { isValidWebID } from "../../SOLID/Utils";
@@ -30,23 +31,14 @@ function TextInputAction(props) {
     );
 }
 
-
-
-
 async function handleFollowPerson(podRootDir, person, updateList) {
-    let error = await followPerson(podRootDir, person.webId);
-    if (error) {
-        createErrorNotification(error);
-        return;
-    }
-    createPlainNotification({title: "Successfully added!", description: ""});
-    updateList();
+    createLoadingNotification("follow-person", "Following person...", "",
+        () => followPerson(podRootDir, person.webId), updateList);
 }
 
 async function handleFollowGroup(podRootDir, group, updateList) {
-    let errors = await followGroup(podRootDir, group);
-    errors.forEach((error) => createErrorNotification(error));
-    updateList();
+    createLoadingNotification("follow-group", "Following group...", "",
+        () => followGroup(podRootDir, group), updateList);
 }
 
 async function handleFollowWebId(podRootDir, webId, updateList) {
@@ -54,23 +46,13 @@ async function handleFollowWebId(podRootDir, webId, updateList) {
         createErrorNotification({title: "Invalid WebID", description: "Could not follow."})
         return;
     }
-    let error = await followPerson(podRootDir, webId);
-    if (error) {
-        createErrorNotification(error);
-        return;
-    }
-    createPlainNotification({title: "Successfully added!", description: ""});
-    updateList();
+    createLoadingNotification("follow-person", "Following person...", "",
+        () => followPerson(podRootDir, webId), updateList);
 }
 
 async function handleRevokeFollow(podRootDir, webId, updateList) {
-    let error = await revokeFollowPerson(podRootDir, webId);
-    if (error) {
-        createErrorNotification(error);
-        return;
-    }
-    createPlainNotification({title: "Successfully revoked access.", description: ""});
-    updateList();
+    createLoadingNotification("follow-person", "Following person...", "",
+        () => revokeFollowPerson(podRootDir, webId), updateList)
 }
 
 
