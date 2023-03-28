@@ -23,7 +23,7 @@ export function PostAdditionsMenu(props) {
             <Menu.Dropdown>
                 {props.post.text == null && 
                     <Menu.Item onClick={()=> props.add("text", "")}>
-                        Some Text
+                        Description
                     </Menu.Item>
                 }
                 {props.post.image == null && 

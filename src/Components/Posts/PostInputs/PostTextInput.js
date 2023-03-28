@@ -11,7 +11,7 @@ export function PostTextInput(props) {
                     value={props.value}
                     onChange={props.onChange}
                     placeholder="Wow this new decentralised social media is really cool!"
-                    label="Add Some Text"
+                    label="Add a Description"
                     description="The text to be included in the body of your post."
                 />
                 <ActionIcon
