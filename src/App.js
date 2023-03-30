@@ -1,5 +1,4 @@
 import React from 'react';
-import './css/App.css';
 import LoginPage from './Components/Login/LoginPage';
 import SideBar from './Components/Core/Sidebar'
 import { AppShell } from '@mantine/core';

@@ -7,6 +7,7 @@ import { deleteFeedItem } from "../../SOLID/FeedHandler";
 import { createErrorNotification } from "../Core/Notifications/ErrorNotification";
 import { createPlainNotification } from "../Core/Notifications/PlainNotification";
 import { sendLike } from "../../SOLID/NotificationHandler";
+import { createLoadingNotification } from "../Core/Notifications/LoadingNotification";
 
 function handleDeletePostAlert(feedItemUrl) {
     deleteFeedItem(feedItemUrl);
@@ -21,12 +22,8 @@ function inViewChange(entries, deletePostAlert) {
 }
 
 async function handleSendLike(senderWebId, post, author) {
-    let error = await sendLike(senderWebId, post.url, author.webId);
-    if (error) {
-        createErrorNotification(error);
-        return;
-    }
-    createPlainNotification({title: "Sent like!"})
+    createLoadingNotification("sending-like-" + post.url, "Sending like...", "", 
+        () => sendLike(senderWebId, post.url, author.webId), () => {});
 }
 
 export function PostLoader(props) {
@@ -78,7 +75,7 @@ export function PostLoader(props) {
                     post={post}
                     authorised={false}
                     viewPerson={() => props.viewPerson(person)}
-                    sendLike={() => handleSendLike(props.user.webId, post, person)}
+                    sendLike={() => handleSendLike(props.feedItem.senderWebId, post, person)}
                 />
             </div>
                 

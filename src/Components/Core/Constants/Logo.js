@@ -1,5 +1,4 @@
 import { Image, Text } from "@mantine/core"
-import logo from './../../../assets/logo_w_text.png'
 
 /**
  * Returns a react Image component with the company logo enclosed.
@@ -12,7 +11,7 @@ export function Logo() {
                 fit="contain"
                 height="100%"
                 width="130px"
-                src={logo}
+                src={'/Decent/logo_w_text.png'}
                 withPlaceholder
                 placeholder={<Text align="center">Decent logo image</Text>}
             />

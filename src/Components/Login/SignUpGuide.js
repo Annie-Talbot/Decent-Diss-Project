@@ -3,7 +3,6 @@ import { ActionIcon, ThemeIcon, Stack, Container, Group, List,
 import { IconArrowLeft, IconArrowRight, IconCircleCheck, 
     IconQuestionMark, IconArrowBack } from "@tabler/icons";
 import { useState } from "react";
-import logo from './../../assets/Logo.png'
 import agree from './../../assets/Sign_up_agree.png'
 import signup from './../../assets/sign_up_button.png'
 import credentials from './../../assets/sign_up_details.png'
@@ -26,7 +25,7 @@ export function SignUpGuide(props) {
                     </Grid.Col>
                     <Grid.Col span={8}>
                         <Group position='center'>
-                            <Image width={80} height={120} fit='contain' src={logo}/>
+                            <Image width={80} height={120} fit='contain' src={'/Decent/Logo.png'}/>
                             <Title align="center" order={2}>Sign Up Guide</Title>
                         </Group>
                     </Grid.Col>

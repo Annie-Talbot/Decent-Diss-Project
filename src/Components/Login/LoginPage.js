@@ -3,8 +3,6 @@ import { Paper, Title, Text, Stack, Divider, Button, Group,
     TextInput, LoadingOverlay, Image, Grid, SimpleGrid, Center } from '@mantine/core';
 import { loginHandler, getSession } from '../../SOLID/LoginHandler';
 import { SignUpGuide } from './SignUpGuide';
-import logo from '../../assets/Logo.png'
-
 
 
 const PageStates = {
@@ -65,7 +63,7 @@ function LoginPage(props) {
                 >
                     <Stack align='center' style={{minWidth: 440, maxWidth: 600}}>
                         <Title>Welcome to Decent!</Title>
-                        <Image maw={120} mx="auto" src={logo}/>
+                        <Image maw={120} mx="auto" src={'/Decent/Logo.png'}/>
                     </Stack>
                     <Paper p='sm' shadow='sm' withBorder style={{minWidth: 440, maxWidth: 600}}>
                         <Stack align="center" justify='space-evenly' spacing="sm">

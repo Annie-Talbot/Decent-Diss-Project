@@ -28,10 +28,10 @@ export class ConnectionsPage extends React.Component {
             peoplelistKey: 0,
             createGroupOpened: false,
             groupslistKey: 0,
-            backButton: []
+            backButton: [],
+            viewPersonObject: null,
+            viewGroupObject: null,
         };
-        this.viewPersonObject = null;
-        this.viewGroupObject = null;
     }
 
     toggleCreateGroupPopup(connectionsPage) {
@@ -64,7 +64,6 @@ export class ConnectionsPage extends React.Component {
         }));
     }
 
-
     updatePeople(connectionsPage) {
         connectionsPage.setState(prevState => ({
             ...prevState,
@@ -73,24 +72,24 @@ export class ConnectionsPage extends React.Component {
     }
 
     viewGroup(connectionsPage, group, backwardsState) {
-        connectionsPage.viewGroupObject = group;
         let backHistory = connectionsPage.state.backButton
         backHistory.push(backwardsState)
         connectionsPage.setState(prevState => ({
             ...prevState,
             currView: ViewStates.GroupView,
-            backButton: backHistory
+            backButton: backHistory,
+            viewGroupObject: group,
         }));
     }
 
     viewPerson(connectionsPage, person, backwardsState) {
-        connectionsPage.viewPersonObject = person;
         let backHistory = connectionsPage.state.backButton
         backHistory.push(backwardsState)
         connectionsPage.setState(prevState => ({
             ...prevState,
             currView: ViewStates.PersonView,
-            backButton: backHistory
+            backButton: backHistory,
+            viewPersonObject: person,
         }));
     }
 
@@ -180,7 +179,7 @@ export class ConnectionsPage extends React.Component {
                         backDisabled={this.state.backButton.length === 0}
                         title='Person View'
                     />
-                    <PersonView person={this.viewPersonObject} user={this.user}/>
+                    <PersonView person={this.state.viewPersonObject} user={this.user}/>
                 </Stack>
             ));
         } else if (this.state.currView === ViewStates.GroupView) {
@@ -192,7 +191,7 @@ export class ConnectionsPage extends React.Component {
                         title='Group View'
                     />
                     <GroupView 
-                        groupUrl={this.viewGroupObject.url}
+                        groupUrl={this.state.viewGroupObject.url}
                         user={this.user}
                         viewPerson={(person) => this.viewPerson(this, person, ViewStates.GroupView)}
                     />

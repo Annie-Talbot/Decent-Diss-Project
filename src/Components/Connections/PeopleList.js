@@ -62,7 +62,9 @@ function People(props) {
                         />
                     </Grid.Col>
                     <Grid.Col span={1}>
-                        <ActionIcon color="sage" size="xl" onClick={() => props.viewPerson(people[searchPerson])}>
+                        <ActionIcon color="sage" size="xl" 
+                            onClick={() => {if (searchPerson) props.viewPerson(people[searchPerson]);}}
+                        >
                             <IconCircleChevronsRight size={34}/>
                         </ActionIcon>
                     </Grid.Col>

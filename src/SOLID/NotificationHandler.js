@@ -321,7 +321,7 @@ export async function createLikeNotification(senderWebId, postUrl, recieverPodRo
 export async function sendLike(senderWebId, postUrl, recieverWebId) {
     let result = await findSocialPodFromWebId(recieverWebId);
     if (!result.success) {
-        return result.error;
+        return result;
     }
     return await createLikeNotification(senderWebId, postUrl, result.pod);
 }

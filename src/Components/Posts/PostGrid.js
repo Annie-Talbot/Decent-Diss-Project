@@ -9,14 +9,9 @@ import { sendLike } from "../../SOLID/NotificationHandler";
 import { createLoadingNotification } from "../Core/Notifications/LoadingNotification";
 
 async function handleSendLike(senderWebId, post, author) {
-    let error = await sendLike(senderWebId, post.url, author.webId);
-    if (error) {
-        createErrorNotification(error);
-        return;
-    }
-    createPlainNotification({title: "Sent like!"})
+    createLoadingNotification("liking-post-" + post.url, "Sending like...", "", 
+        () => sendLike(senderWebId, post.url, author.webId), () => {});
 }
-
 
 async function handleDeletePost(post, updateList) {
     createLoadingNotification("deleting-post", "Deleting post...", "", 

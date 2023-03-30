@@ -1,7 +1,7 @@
-import { ActionIcon, Button, Center, Group, Modal, Space, TextInput } from "@mantine/core";
-import { IconCirclePlus } from "@tabler/icons-react";
-import { useState } from "react";
-import { createGroup } from "../../SOLID/Connections/GroupHandler";
+import { ActionIcon, Button, Center, Group, Modal, Space, Stack, Text, TextInput, ThemeIcon } from "@mantine/core";
+import { IconCirclePlus, IconExclamationCircle } from "@tabler/icons-react";
+import { useEffect, useState } from "react";
+import { createGroup, doesGroupsDatasetExist } from "../../SOLID/Connections/GroupHandler";
 import { createErrorNotification } from "../Core/Notifications/ErrorNotification";
 import { createLoadingNotification } from "../Core/Notifications/LoadingNotification";
 
@@ -15,6 +15,17 @@ export function CreateGroupForm(props) {
     const [group, setGroup] = useState({
         name: ""
     });
+    const [error, setError] = useState(null);
+
+
+    useEffect(() => {
+        doesGroupsDatasetExist(props.user.podRootDir).then((result) => {
+            if (!result[0]) {
+                setError("No groups folder in your POD.");
+            }
+        })
+    }, [props]);
+
     return (
         <Modal
             centered
@@ -25,7 +36,18 @@ export function CreateGroupForm(props) {
             title={"Create a new group"}
             onClose={props.close}
         >
-            <Space />
+            {error? 
+            <Stack align="center" justify="center" style={{height: "100%", marginTop: 64, marginBottom: 64}}>
+                <ThemeIcon
+                color='red' 
+                variant="light"
+                size="xl">
+                    <IconExclamationCircle />
+                </ThemeIcon>
+                <Text align="center" size={"lg"}>{error}</Text>
+            </Stack>
+            :
+            <Stack>
             <TextInput
                 value={group.name}
                 onChange={(event) => setGroup(
@@ -37,7 +59,7 @@ export function CreateGroupForm(props) {
                 description="The name to give to this group"
                 withAsterisk
             />
-            <Space h="md" />
+            <Space h="sm" />
             <Center>
                 <ActionIcon
                     size="xl"
@@ -50,7 +72,8 @@ export function CreateGroupForm(props) {
                     <IconCirclePlus size={36} />
                 </ActionIcon>
             </Center>
-            
+            </Stack>
+            }
         </Modal>
     );
 }

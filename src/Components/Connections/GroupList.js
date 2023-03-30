@@ -61,10 +61,13 @@ function Groups(props) {
                         />
                     </Grid.Col>
                     <Grid.Col span={1}>
-                        <ActionIcon color="sage" size="xl" >
+                        <ActionIcon 
+                            color="sage" 
+                            size="xl" 
+                            onClick={() => {if (searchGroup) props.viewGroup(groups[searchGroup])}}
+                        >
                             <IconCircleChevronsRight 
-                                size={34} 
-                                onClick={() => props.viewGroup(groups[searchGroup])}
+                                size={34}
                             />
                         </ActionIcon>
                     </Grid.Col>
