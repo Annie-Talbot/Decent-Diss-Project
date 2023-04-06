@@ -1,8 +1,7 @@
-import { ActionIcon, Button, Center, Group, Modal, Space, Stack, Text, TextInput, ThemeIcon } from "@mantine/core";
-import { IconCirclePlus, IconExclamationCircle } from "@tabler/icons-react";
+import { ActionIcon, Center, Modal, Space, Stack, Text, TextInput, ThemeIcon } from "@mantine/core";
+import { IconExclamationCircle, IconSquareRoundedPlusFilled } from "@tabler/icons-react";
 import { useEffect, useState } from "react";
 import { createGroup, doesGroupsDatasetExist } from "../../SOLID/Connections/GroupHandler";
-import { createErrorNotification } from "../Core/Notifications/ErrorNotification";
 import { createLoadingNotification } from "../Core/Notifications/LoadingNotification";
 
 async function handleCreateGroup(podRootDir, group, close, update) {
@@ -64,12 +63,11 @@ export function CreateGroupForm(props) {
                 <ActionIcon
                     size="xl"
                     color="sage"
-                    variant="filled"
                     onClick={() => {
                         handleCreateGroup(props.user.podRootDir, group, props.close, props.updateGroups);
                     }}
                 >
-                    <IconCirclePlus size={36} />
+                    <IconSquareRoundedPlusFilled size={48} />
                 </ActionIcon>
             </Center>
             </Stack>

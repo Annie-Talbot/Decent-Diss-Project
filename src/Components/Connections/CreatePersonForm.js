@@ -1,7 +1,6 @@
-import { ActionIcon, Group, LoadingOverlay, Modal, Space, Stack, Text, TextInput, ThemeIcon } from "@mantine/core";
+import { ActionIcon, Group, Modal, Space, Stack, Text, TextInput, ThemeIcon } from "@mantine/core";
 import { IconExclamationCircle, IconSquareRoundedPlusFilled } from "@tabler/icons-react";
 import { useEffect, useState } from "react";
-import { backtraceAccess } from "../../SOLID/AccessHandler";
 import { createPerson, doesPeopleDatasetExist } from "../../SOLID/Connections/PeopleHandler";
 import { createConnectionRequest, findSocialPodFromWebId } from "../../SOLID/NotificationHandler";
 import { isValidWebID } from "../../SOLID/Utils";
@@ -85,7 +84,7 @@ export function CreatePersonForm(props) {
                     description="The webID of this user"
                     withAsterisk
                 />
-]                <TextInput
+                <TextInput
                     value={person.nickname}
                     onChange={(event) => setPerson(
                         {...person, 

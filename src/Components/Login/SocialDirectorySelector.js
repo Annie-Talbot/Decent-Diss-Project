@@ -1,4 +1,4 @@
-import { Center, Group, Modal, Skeleton, Stack, Text, Title, Button, ThemeIcon, ActionIcon, Space } from "@mantine/core";
+import { Center, Group, Modal, Stack, Text, Title, Button, ThemeIcon, ActionIcon, Space, LoadingOverlay } from "@mantine/core";
 import React, { useEffect, useState } from "react";
 import { createSocialDirectory, findUsersSocialPod } from "../../SOLID/SocialDirHandler";
 import { createErrorNotification } from "../Core/Notifications/ErrorNotification";
@@ -57,8 +57,9 @@ export function SocialDirectorySelector(props) {
             title="Finding your social information..."
             size='auto'
             onClose={()=>{}}
+            withCloseButton={false}
         >
-            <Skeleton visible={loading}>
+            <LoadingOverlay visible={loading} />
                 <Center p='md'>
                     {error? 
                         <Stack align="center" justify="center" style={{height: "100%"}}>
@@ -85,7 +86,7 @@ export function SocialDirectorySelector(props) {
                                 <>
                                 <Text>Create one in which POD?</Text>
                                 <Group>
-                                    {pods}
+                                    {podOptions}
                                 </Group>
                                 </>
                             :
@@ -94,7 +95,10 @@ export function SocialDirectorySelector(props) {
                                 <ActionIcon
                                     size={64}
                                     color='sage'
-                                    onClick={() => addSocialDirectory(pods[0], () => props.setPod(pods[0]))}
+                                    onClick={() => {
+                                        setLoading(true);
+                                        addSocialDirectory(pods[0], () => props.setPod(pods[0]));
+                                    }}
                                 >
                                     <IconSquareRoundedPlusFilled size={48}/>
                                 </ActionIcon>
@@ -103,7 +107,6 @@ export function SocialDirectorySelector(props) {
                         </Stack>
                     }
                 </Center>
-            </Skeleton>
         </Modal>
     );
 }

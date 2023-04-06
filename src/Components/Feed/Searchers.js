@@ -15,8 +15,6 @@ function Searcher(props) {
             if (errors) {
                 errors.forEach((error) => createErrorNotification(error));
             }
-            // Filter using members list and filter prop somehow...
-
             setListItems(fetchedList);
             setLoading(false);
         })
@@ -38,7 +36,7 @@ function Searcher(props) {
                     />
                 </Grid.Col>
                 <Grid.Col span={2}>
-                    <ActionIcon color="sage" size="xl" onClick={() => props.action(listItems[searchItem])}>
+                    <ActionIcon color="sage" size="xl" onClick={() => {if (searchItem) props.action(listItems[searchItem])}}>
                         {props.icon}
                     </ActionIcon>
                 </Grid.Col>

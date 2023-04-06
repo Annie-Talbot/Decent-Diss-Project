@@ -2,6 +2,13 @@ import { fetch } from '@inrupt/solid-client-authn-browser'
 import { getSolidDataset, getPodUrlAll } from '@inrupt/solid-client';
 import { createEmptyDataset, simplifyError, SOCIAL_ROOT } from './Utils';
 import { setReadAccess } from './AccessHandler'
+import { createNotificationsDir } from './NotificationHandler';
+import { createFeedDir } from './FeedHandler';
+import { createPostsDir } from './PostHandler';
+import { createSampleProfile } from './ProfileHandler';
+import { createConnectionsDir } from './Connections/ConnectionHandler';
+import { createPeopleDataset } from './Connections/PeopleHandler';
+import { createGroupsDataset } from './Connections/GroupHandler';
 
 /**
  * Creates a valid social directory in a user's pod.
@@ -16,6 +23,13 @@ export async function createSocialDirectory(podRootDir) {
     } catch (e) {
         return {success: false, error: simplifyError(e)};
     }
+    await createNotificationsDir(podRootDir);
+    await createFeedDir(podRootDir);
+    await createPostsDir(podRootDir);
+    await createSampleProfile(podRootDir);
+    await createConnectionsDir(podRootDir);
+    await createPeopleDataset(podRootDir);
+    await createGroupsDataset(podRootDir);
     return {success: true};
 }
 
