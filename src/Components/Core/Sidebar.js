@@ -1,7 +1,8 @@
 import React from 'react';
-import { Navbar, ThemeIcon, UnstyledButton, Group, Text } from '@mantine/core';
+import { Navbar, ThemeIcon, UnstyledButton, Group, Text, Button, Stack } from '@mantine/core';
 import { IconUser, IconHome, IconAffiliate, IconFlipFlops } from '@tabler/icons';
 import { AppStates } from './Constants/AppStates';
+import { IconFolder } from '@tabler/icons-react';
 
 /**
  * The information to be displayed in the side bar incl. the state they should set the app to.
@@ -71,20 +72,42 @@ function SideBarItem(props) {
     );
 }
 
+function ViewDataButton(props) {
+    return (
+        <Button
+            color='pink'
+            leftIcon={<IconFolder/>}
+            onClick={() => window.open('https://penny.vincenttunru.com/', "viewdata")}
+            variant='light'
+            size='lg'
+        >
+            View your data
+        </Button>
+    );
+}
+
 /**
  * An extention of the Mantine Navbar Component to allow for an additional prop.
  */
 function SideBar(props) {
     return (
         <Navbar p="xs" hiddenBreakpoint="sm" hidden={!props.opened} width={{ sm: 200, lg: 300 }}>
-            {data.map((item) => (
-                <Navbar.Section key={"navsection-" + item.label} mt="md">
-                    <SideBarItem 
-                        item={item} 
-                        redirect={props.redirect}
-                    />
-                </Navbar.Section>
-            ))}
+            <Navbar.Section grow>
+                <Stack>
+                {data.map((item) => (
+                        <SideBarItem 
+                            key={"sidebaritem-" + item.label}
+                            item={item} 
+                            redirect={props.redirect}
+                        />
+                ))}
+                </Stack>
+            </Navbar.Section>
+            <Navbar.Section>
+                <Group position='center' style={{marginBottom: 24}}>
+                    <ViewDataButton />
+                </Group>
+            </Navbar.Section>
         </Navbar>
     );
 }
