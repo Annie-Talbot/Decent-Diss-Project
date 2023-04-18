@@ -72,7 +72,7 @@ class App extends React.Component {
             content.push(<PostsPage user={this.state.user}/>);
         } else if (this.state.currPage === AppStates.Profile) {
             content.push(<ProfilePage user={this.state.user}/>);
-        } else if (this.state.currPage === AppStates.Connections) {
+        } else if (this.state.currPage === AppStates.Contacts) {
             content.push(<ConnectionsPage user={this.state.user}/>);
         } else if (this.state.currPage === AppStates.Feed) {
             content.push(<FeedPage user={this.state.user} />);

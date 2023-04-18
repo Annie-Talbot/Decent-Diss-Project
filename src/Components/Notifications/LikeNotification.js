@@ -26,7 +26,7 @@ import { fetchPost } from "../../SOLID/PostHandler";
 export function LikeNotification(props) {
     const [person, setPerson] = useState({webId: props.notif.senderWebId, nickname: "Unknown user"});
     const [opened, { open, close }] = useDisclosure(false);
-    const [post, setPost] = useState({});
+    const [post, setPost] = useState({}); 
 
     useEffect(() => {
         findPerson(props.user.podRootDir, props.notif.senderWebId).then((fetchedPerson) => {

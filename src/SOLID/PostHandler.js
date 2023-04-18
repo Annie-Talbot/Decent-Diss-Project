@@ -14,17 +14,17 @@ import { fetchPeople, fetchPeopleFromList } from "./Connections/PeopleHandler";
 export const POST_ACCESS_TYPES = {
     Public: 0, // all users can see
     Private: 1, // all people in your connections can see
-    Specific: 2 // only people in the groups specified can see
+    Groups: 2 // only people in the groups specified can see
 }
 function convertAccessUrlToType(url) {
     if (url === SOCIAL_SOLID.PublicAccess) return POST_ACCESS_TYPES.Public
     else if (url === SOCIAL_SOLID.PrivateAccess) return POST_ACCESS_TYPES.Private
-    else return POST_ACCESS_TYPES.Specific
+    else return POST_ACCESS_TYPES.Groups
 }
 function convertAccessTypeToUrl(type) {
     if (type === POST_ACCESS_TYPES.Public) return SOCIAL_SOLID.PublicAccess
     else if (type === POST_ACCESS_TYPES.Private) return SOCIAL_SOLID.PrivateAccess
-    else return SOCIAL_SOLID.SpecificAccess
+    else return SOCIAL_SOLID.GroupsAccess
 }
 
 
@@ -148,7 +148,7 @@ async function getPost(postDir, getAccess) {
         accessType = convertAccessUrlToType(accessType);
         post.accessType = accessType;
         post.accessGroups = [];
-        if (accessType === POST_ACCESS_TYPES.Specific) {
+        if (accessType === POST_ACCESS_TYPES.Groups) {
             let groups = getUrlAll(accessThing, SOCIAL_SOLID.AccessList);
             if (!groups) {
                 groups = []
@@ -264,7 +264,7 @@ async function createPostAccessDataset(postDirUrl, post) {
     let accessThing  = buildThing(createThing({ name: "this" }))
         .addUrl(RDF.type, accessType)
         .build();
-    if (post.accessType === POST_ACCESS_TYPES.Specific) {
+    if (post.accessType === POST_ACCESS_TYPES.Groups) {
         post.accessList.forEach(group => {
             accessThing = addUrl(accessThing,
                 SOCIAL_SOLID.AccessList,
@@ -337,7 +337,7 @@ export async function createPost(podRootDir, webId, post, doAlerts) {
     // create access list
     postUrls.push(postDirUrl);
     let accessList = [];
-    if (post.accessType === POST_ACCESS_TYPES.Specific) {
+    if (post.accessType === POST_ACCESS_TYPES.Groups) {
         // fill recipient list with all member of groups
         for (let i = 0; i < post.accessList.length; i++) {
             let group = post.accessList[i];

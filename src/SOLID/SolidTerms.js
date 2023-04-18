@@ -15,6 +15,6 @@ export const SOCIAL_SOLID = {
     PostTitle: "https://www.solid_social_terms.co.uk/terms#post_title",
     PublicAccess: "https://www.solid_social_terms.co.uk/terms#public_access",
     PrivateAccess: "https://www.solid_social_terms.co.uk/terms#private_access",
-    SpecificAccess: "https://www.solid_social_terms.co.uk/terms#specific_access",
+    GroupsAccess: "https://www.solid_social_terms.co.uk/terms#specific_access",
     AccessList: "https://www.solid_social_terms.co.uk/terms#access_list",
 }

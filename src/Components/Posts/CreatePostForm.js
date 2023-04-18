@@ -13,7 +13,7 @@ import { PostTextInput } from "./PostInputs/PostTextInput";
 
 async function handleCreatePost(user, post, doAlerts, groups, reset, updateList) {
     post.accessType = parseInt(post.accessType);
-    if (post.accessType === POST_ACCESS_TYPES.Specific) {
+    if (post.accessType === POST_ACCESS_TYPES.Groups) {
         const agents = post.accessList.map((index) => groups[parseInt(index)])
         post.accessList = agents;
     }
@@ -126,9 +126,9 @@ export function CreatePostForm(props) {
                         >
                             <Radio value={POST_ACCESS_TYPES.Public.toString()} label="Public" />
                             <Radio value={POST_ACCESS_TYPES.Private.toString()} label="Private" />
-                            {groups.length > 0 && <Radio value={POST_ACCESS_TYPES.Specific.toString()} label="Specific" />}
+                            {groups.length > 0 && <Radio value={POST_ACCESS_TYPES.Groups.toString()} label="Groups" />}
                         </Radio.Group>
-                        {props.post.accessType == POST_ACCESS_TYPES.Specific &&
+                        {props.post.accessType == POST_ACCESS_TYPES.Groups &&
                             <MultiSelect
                                 data={groupIndexes}
                                 label="Group Selector"

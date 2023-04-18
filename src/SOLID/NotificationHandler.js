@@ -118,7 +118,6 @@ function getConnectionRequestNotification(notifThing) {
             description: "Connection request has no sender pod url."
         }];
     }
-
     // Message
     let msg;
     try{

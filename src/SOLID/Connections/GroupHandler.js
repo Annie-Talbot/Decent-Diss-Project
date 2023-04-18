@@ -190,7 +190,7 @@ export async function addMember(podRootDir, group, person) {
     }
 
     await backtraceAccess(podRootDir, person.webId, 
-        (post) => post.accessType === POST_ACCESS_TYPES.Specific &&
+        (post) => post.accessType === POST_ACCESS_TYPES.Groups &&
             post.accessList.includes(group.url));
     await delay(200);
     return {success: true};

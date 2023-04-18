@@ -29,8 +29,8 @@ const data = [
     { 
         icon: <IconAffiliate size={16} />, 
         color: 'violet', 
-        label: 'Connections',
-        state: AppStates.Connections 
+        label: 'Contacts',
+        state: AppStates.Contacts 
     },
 ];
 
