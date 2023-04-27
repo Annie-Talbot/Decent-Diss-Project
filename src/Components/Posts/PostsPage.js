@@ -113,7 +113,7 @@ export class PostsPage extends React.Component {
                             actionDisabled={false}
                         />
                         <PostGrid
-                            author={{webId: this.user.webId, nickname: "Myself"}}
+                            author={{webId: this.user.webId, nickname: "Myself", podRootDir: this.user.podRootDir}}
                             key={this.state.postgridKey}
                             authorised={true}
                             user={this.user}
