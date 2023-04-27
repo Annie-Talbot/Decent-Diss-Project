@@ -3,7 +3,7 @@ import { Profile } from "../Profile/Profile";
 import React from "react";
 import { useState, useEffect } from "react";
 import { PostGrid } from "../Posts/PostGrid";
-import { findSocialPodFromWebId, sendLike } from "../../SOLID/NotificationHandler";
+import { findSocialPodFromWebId } from "../../SOLID/NotificationHandler";
 import { doesProfileExist } from "../../SOLID/ProfileHandler";
 import { doesPostsDirExist } from "../../SOLID/PostHandler";
 

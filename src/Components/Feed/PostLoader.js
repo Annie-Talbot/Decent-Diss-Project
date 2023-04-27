@@ -75,7 +75,7 @@ export function PostLoader(props) {
                     post={post}
                     authorised={false}
                     viewPerson={() => props.viewPerson(person)}
-                    sendLike={() => handleSendLike(props.feedItem.senderWebId, post, person)}
+                    sendLike={() => handleSendLike(props.user.webId, post, person)}
                 />
             </div>
                 

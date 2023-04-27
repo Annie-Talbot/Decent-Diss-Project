@@ -344,7 +344,7 @@ export async function createPost(podRootDir, webId, post, doAlerts) {
             let people = (await fetchPeopleFromList(podRootDir, group.members))[0];
             people.forEach(person => accessList.push(person));
         }
-    } else if (post.accessType === POST_ACCESS_TYPES.Private) {
+    } else {
         // fill recipient list with all people we know
         let people = (await fetchPeople(podRootDir))[0];
         people.forEach(person => accessList.push(person));
